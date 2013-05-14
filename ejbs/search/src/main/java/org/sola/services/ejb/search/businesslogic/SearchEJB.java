@@ -806,5 +806,32 @@ public class SearchEJB extends AbstractEJB implements SearchEJBLocal {
             value = (byte[]) ((HashMap)result.get(0)).get("extent");
         }
         return value;
-    }    
+    }
+
+    @Override
+    public List<CadastreObjectSearchResult> searchCadastreObjects(CadastreObjectSearchParams searchParams) {
+        if(searchParams==null)
+            return null;
+        
+        if (searchParams.getNameFirstPart() == null) {
+            searchParams.setNameFirstPart("");
+        }
+        if (searchParams.getNameLastPart() == null) {
+            searchParams.setNameLastPart("");
+        }
+        if (searchParams.getLandUseCode() == null) {
+            searchParams.setLandUseCode("");
+        }
+        if (searchParams.getAddress() == null) {
+            searchParams.setAddress("");
+        }
+        
+        Map params = new HashMap<String, Object>();
+        params.put(CommonSqlProvider.PARAM_QUERY, CadastreObjectSearchResult.QUERY_SEARCH);
+        params.put(CadastreObjectSearchResult.PARAM_NAME_FIRST_PART, searchParams.getNameFirstPart());
+        params.put(CadastreObjectSearchResult.PARAM_NAME_LAST_PART, searchParams.getNameLastPart());
+        params.put(CadastreObjectSearchResult.PARAM_LAND_USE_CODE, searchParams.getLandUseCode());
+        params.put(CadastreObjectSearchResult.PARAM_ADDRESS, searchParams.getAddress());
+        return getRepository().getEntityList(CadastreObjectSearchResult.class, params);
+    }
 }

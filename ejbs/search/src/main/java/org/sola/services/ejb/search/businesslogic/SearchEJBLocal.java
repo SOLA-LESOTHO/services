@@ -185,4 +185,9 @@ public interface SearchEJBLocal extends AbstractEJBLocal {
      * See {@linkplain SearchEJB#getExtentOfPublicDisplayMap(String)}.
      */
     byte[] getExtentOfPublicDisplayMap(String nameLastPart);
+    
+    /**
+     * See {@linkplain SearchEJB#searchCadastreObjects(org.sola.services.ejb.search.repository.entities.CadastreObjectSearchParams)}.
+     */
+    List<CadastreObjectSearchResult> searchCadastreObjects(CadastreObjectSearchParams params);
 }

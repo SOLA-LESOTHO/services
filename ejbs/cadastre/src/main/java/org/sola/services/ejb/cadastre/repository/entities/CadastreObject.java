@@ -29,6 +29,7 @@
  */
 package org.sola.services.ejb.cadastre.repository.entities;
 
+import java.math.BigDecimal;
 import java.util.Date;
 import java.util.List;
 import javax.persistence.Column;
@@ -125,6 +126,16 @@ public class CadastreObject extends AbstractVersionedEntity {
     private List<SpatialValueArea> spatialValueAreaList;
     @Column(name = "land_use_code")
     private String landUseCode;
+    @Column(name="survey_date")
+    private Date surveyDate;
+    @Column(name="surveyor")
+    private String surveyor;
+    @Column(name="remarks")
+    private String remarks;
+    @Column(name="valuation_amount")
+    private BigDecimal valuationAmount;
+    @Column(name="survey_fee")
+    private BigDecimal surveyFee;
     @ExternalEJB(ejbLocalClass = AddressEJBLocal.class, loadMethod = "getAddresses", saveMethod="saveAddress")
     @ChildEntityList(parentIdField = "cadastreObjectId", childIdField = "addressId",
     manyToManyClass = AddressForCadastreObject.class)
@@ -224,6 +235,46 @@ public class CadastreObject extends AbstractVersionedEntity {
 
     public void setTypeCode(String typeCode) {
         this.typeCode = typeCode;
+    }
+
+    public BigDecimal getValuationAmount() {
+        return valuationAmount;
+    }
+
+    public void setValuationAmount(BigDecimal valuationAmount) {
+        this.valuationAmount = valuationAmount;
+    }
+
+    public String getRemarks() {
+        return remarks;
+    }
+
+    public void setRemarks(String remarks) {
+        this.remarks = remarks;
+    }
+
+    public Date getSurveyDate() {
+        return surveyDate;
+    }
+
+    public void setSurveyDate(Date surveyDate) {
+        this.surveyDate = surveyDate;
+    }
+
+    public String getSurveyor() {
+        return surveyor;
+    }
+
+    public void setSurveyor(String surveyor) {
+        this.surveyor = surveyor;
+    }
+
+    public BigDecimal getSurveyFee() {
+        return surveyFee;
+    }
+
+    public void setSurveyFee(BigDecimal surveyFee) {
+        this.surveyFee = surveyFee;
     }
 
     public List<SpatialValueArea> getSpatialValueAreaList() {

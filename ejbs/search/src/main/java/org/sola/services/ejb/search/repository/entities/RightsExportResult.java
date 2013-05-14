@@ -34,7 +34,8 @@ public class RightsExportResult extends AbstractReadOnlyEntity {
             + "   ON b.id = r.ba_unit_id) LEFT JOIN administrative.ba_unit_contains_spatial_unit baco ON b.id = baco.ba_unit_id "
             + "   WHERE (r.type_code = #{" + PARAM_RIGHT_TYPE + "} OR #{" + PARAM_RIGHT_TYPE + "} = '') "
             + "   AND b.status_code != 'pending' AND (r.status_code = 'current' OR r.status_code = 'historic') "
-            + "   AND r.status_change_date BETWEEN #{" + PARAM_DATE_FROM + "} AND #{" + PARAM_DATE_TO + "}";
+            + "   AND r.status_change_date BETWEEN #{" + PARAM_DATE_FROM + "} AND #{" + PARAM_DATE_TO + "} "
+            + "   ORDER BY r.status_change_date";
     
     @Column(name = "ba_unit_id")
     private String baUnitId;
