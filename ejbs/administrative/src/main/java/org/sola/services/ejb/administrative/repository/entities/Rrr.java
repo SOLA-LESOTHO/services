@@ -93,6 +93,10 @@ public class Rrr extends AbstractVersionedEntity {
     private Integer mortgageRanking;
     @Column(name = "mortgage_type_code")
     private String mortgageTypeCode;
+    @Column(name="registration_number")
+    private String registrationNumber;
+    @Column(name="status_change_date", updatable=false, insertable=false)
+    private Date statusChangeDate;
     // Child entity fields
     @ChildEntity(insertBeforeParent = false, parentIdField = "rrrId")
     private BaUnitNotation notation;
@@ -320,6 +324,22 @@ public class Rrr extends AbstractVersionedEntity {
             }
         }
         return locked;
+    }
+
+    public String getRegistrationNumber() {
+        return registrationNumber;
+    }
+
+    public void setRegistrationNumber(String registrationNumber) {
+        this.registrationNumber = registrationNumber;
+    }
+
+    public Date getStatusChangeDate() {
+        return statusChangeDate;
+    }
+
+    public void setStatusChangeDate(Date statusChangeDate) {
+        this.statusChangeDate = statusChangeDate;
     }
 
     @Override

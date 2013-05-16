@@ -28,11 +28,11 @@
 package org.sola.services.ejb.administrative.repository.entities;
 
 import java.math.BigDecimal;
-import java.util.ArrayList;
 import java.util.List;
 import javax.persistence.Column;
 import javax.persistence.Id;
 import javax.persistence.Table;
+import org.sola.common.StringUtility;
 import org.sola.services.common.LocalInfo;
 import org.sola.services.common.repository.*;
 import org.sola.services.common.repository.entities.AbstractVersionedEntity;
@@ -40,8 +40,6 @@ import org.sola.services.ejb.cadastre.businesslogic.CadastreEJBLocal;
 import org.sola.services.ejb.cadastre.repository.entities.CadastreObject;
 import org.sola.services.ejb.source.businesslogic.SourceEJBLocal;
 import org.sola.services.ejb.source.repository.entities.Source;
-import org.sola.services.ejb.system.br.Result;
-import org.sola.services.ejb.system.businesslogic.SystemEJBLocal;
 import org.sola.services.ejb.transaction.businesslogic.TransactionEJBLocal;
 import org.sola.services.ejb.transaction.repository.entities.Transaction;
 import org.sola.services.ejb.transaction.repository.entities.TransactionStatusType;
@@ -101,11 +99,11 @@ public class BaUnit extends AbstractVersionedEntity {
     @ChildEntityList(parentIdField = "baUnitId", childIdField = "sourceId",
     manyToManyClass = SourceDescribesBaUnit.class)
     private List<Source> sourceList;
-    @ExternalEJB(ejbLocalClass = CadastreEJBLocal.class,
-    loadMethod = "getCadastreObjects", saveMethod = "saveCadastreObject")
-    @ChildEntityList(parentIdField = "baUnitId", childIdField = "spatialUnitId",
-    manyToManyClass = BaUnitContainsSpatialUnit.class)
-    private List<CadastreObject> cadastreObjectList;
+    @ExternalEJB(ejbLocalClass = CadastreEJBLocal.class, loadMethod = "getCadastreObject")
+    @ChildEntity(childIdField = "cadastreObjectId", readOnly=true)
+    private CadastreObject cadastreObject;
+    @Column(name = "cadastre_object_id")
+    private String cadastreObjectId;
     private Boolean locked;
     @ChildEntityList(parentIdField = "baUnitId")
     private List<ChildBaUnitInfo> childBaUnits;
@@ -211,12 +209,28 @@ public class BaUnit extends AbstractVersionedEntity {
         this.baUnitNotationList = baUnitNotationList;
     }
 
-    public List<CadastreObject> getCadastreObjectList() {
-        return cadastreObjectList;
+    public CadastreObject getCadastreObject() {
+        return cadastreObject;
     }
 
-    public void setCadastreObjectList(List<CadastreObject> cadastreObjectList) {
-        this.cadastreObjectList = cadastreObjectList;
+    public void setCadastreObject(CadastreObject cadastreObject) {
+        this.cadastreObject = cadastreObject;
+    }
+
+    public String getCadastreObjectId() {
+        return cadastreObjectId;
+    }
+
+    public void setCadastreObjectId(String cadastreObjectId) {
+        this.cadastreObjectId = cadastreObjectId;
+    }
+
+    public Boolean getLocked() {
+        return locked;
+    }
+
+    public void setLocked(Boolean locked) {
+        this.locked = locked;
     }
 
     public List<Rrr> getRrrList() {
@@ -271,32 +285,16 @@ public class BaUnit extends AbstractVersionedEntity {
         return locked;
     }
 
-    private String generateBaUnitNumber() {
-        String result = "";
-        SystemEJBLocal systemEJB = RepositoryUtility.tryGetEJB(SystemEJBLocal.class);
-        if (systemEJB != null) {
-            Result newNumberResult = systemEJB.checkRuleGetResultSingle("generate-baunit-nr", null);
-            if (newNumberResult != null && newNumberResult.getValue() != null) {
-                result = newNumberResult.getValue().toString();
-            }
-        }
-        return result;
-    }
-
     @Override
     public void preSave() {
         if (this.isNew()) {
             setTransactionId(LocalInfo.getTransactionId());
         }
-        if (getNameFirstpart() == null || getNameFirstpart().length() < 1
-                || getNameLastpart() == null || getNameLastpart().length() < 1) {
-            String baUnitNumber = generateBaUnitNumber();
-            if (baUnitNumber != null && baUnitNumber.contains("/")) {
-                String[] numberParts = baUnitNumber.split("/");
-                setNameFirstpart(numberParts[0]);
-                setNameLastpart(numberParts[1]);
-            }
+        if(StringUtility.isEmpty(getCadastreObjectId()) || !getCadastreObjectId().equals(getCadastreObject().getId())){
+            setCadastreObjectId(getCadastreObject().getId());
         }
+        setNameFirstpart(getCadastreObject().getNameFirstpart());
+        setNameLastpart(getCadastreObject().getNameLastpart());
         super.preSave();
     }
 }
