@@ -106,9 +106,7 @@ public class AdministrativeEJBIT extends AbstractEJBTest {
             baUnit.setRrrList(rrrs);
 
             List<CadastreObject> objs = new ArrayList<CadastreObject>();
-            objs.add(this.getCadastreObject("part1", "part1"));
-            objs.add(this.getCadastreObject("part2", "part2"));
-            baUnit.setCadastreObjectList(objs);
+            baUnit.setCadastreObject(this.getCadastreObject("part1", "part1"));
             BaUnit result = instance.createBaUnit(null, baUnit);
             assertNotNull(result);
             System.out.println("Creation of baunit succeeded.");

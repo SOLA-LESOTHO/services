@@ -145,9 +145,7 @@ public class Development extends AbstractEJBTest {
             baUnit.setRrrList(rrrs);
 
             List<CadastreObject> objs = new ArrayList<CadastreObject>();
-            objs.add(this.getCadastreObject("part1", "part1"));
-            objs.add(this.getCadastreObject("part2", "part2"));
-            baUnit.setCadastreObjectList(objs);
+            baUnit.setCadastreObject(this.getCadastreObject("part2", "part2"));
             return baUnit;
         
     }

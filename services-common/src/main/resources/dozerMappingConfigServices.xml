@@ -18,12 +18,6 @@
             <b>rrrList</b>
         </field>
         <field custom-converter="org.sola.common.mapping.NonCumulativeListConverter"
-               custom-converter-param="org.sola.services.ejb.cadastre.repository.entities.CadastreObject,
-               org.sola.services.boundary.transferobjects.cadastre.CadastreObjectTO">
-            <a>cadastreObjectList</a>
-            <b>cadastreObjectList</b>
-        </field>
-        <field custom-converter="org.sola.common.mapping.NonCumulativeListConverter"
                custom-converter-param="org.sola.services.ejb.administrative.repository.entities.BaUnitNotation,
                org.sola.services.boundary.transferobjects.administrative.BaUnitNotationTO">
             <a>baUnitNotationList</a>

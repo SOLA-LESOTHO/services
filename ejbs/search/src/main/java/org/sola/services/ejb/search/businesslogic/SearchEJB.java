@@ -802,12 +802,18 @@ public class SearchEJB extends AbstractEJB implements SearchEJBLocal {
         params.put(paramLastPart, nameLastPart);
         List result = getRepository().executeSql(params);
         byte[] value = null;
+<<<<<<< HEAD
         if (result.size() > 0) {
             value = (byte[]) ((HashMap) result.get(0)).get("extent");
+=======
+        if (result != null && result.size()>0 && result.get(0) != null){
+            value = (byte[]) ((HashMap)result.get(0)).get("extent");
+>>>>>>> 73109a5c3dd60cb5b2c06d7755191e17ae8789f1
         }
         return value;
     }
 
+<<<<<<< HEAD
     /*
      * LAA additionas - thoriso
      *
@@ -877,5 +883,32 @@ public class SearchEJB extends AbstractEJB implements SearchEJBLocal {
                 : searchParams.getLodgementDateTo());
 
         return params;
+=======
+    @Override
+    public List<CadastreObjectSearchResult> searchCadastreObjects(CadastreObjectSearchParams searchParams) {
+        if(searchParams==null)
+            return null;
+        
+        if (searchParams.getNameFirstPart() == null) {
+            searchParams.setNameFirstPart("");
+        }
+        if (searchParams.getNameLastPart() == null) {
+            searchParams.setNameLastPart("");
+        }
+        if (searchParams.getLandUseCode() == null) {
+            searchParams.setLandUseCode("");
+        }
+        if (searchParams.getAddress() == null) {
+            searchParams.setAddress("");
+        }
+        
+        Map params = new HashMap<String, Object>();
+        params.put(CommonSqlProvider.PARAM_QUERY, CadastreObjectSearchResult.QUERY_SEARCH);
+        params.put(CadastreObjectSearchResult.PARAM_NAME_FIRST_PART, searchParams.getNameFirstPart());
+        params.put(CadastreObjectSearchResult.PARAM_NAME_LAST_PART, searchParams.getNameLastPart());
+        params.put(CadastreObjectSearchResult.PARAM_LAND_USE_CODE, searchParams.getLandUseCode());
+        params.put(CadastreObjectSearchResult.PARAM_ADDRESS, searchParams.getAddress());
+        return getRepository().getEntityList(CadastreObjectSearchResult.class, params);
+>>>>>>> 73109a5c3dd60cb5b2c06d7755191e17ae8789f1
     }
 }
