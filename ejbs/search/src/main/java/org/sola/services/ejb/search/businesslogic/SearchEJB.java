@@ -522,7 +522,7 @@ public class SearchEJB extends AbstractEJB implements SearchEJBLocal {
         params.put("name_lastpart", spatialQuery.getNameLastPart());
         return getSpatialResultForNavigation(spatialQuery.getQueryName(), params);
     }
-    
+
     private Map getSpatialNavigationQueryParams(QueryForNavigation spatialQuery) {
         Map params = new HashMap<String, Object>();
         params.put("minx", spatialQuery.getWest());
@@ -533,9 +533,9 @@ public class SearchEJB extends AbstractEJB implements SearchEJBLocal {
         params.put("pixel_res", spatialQuery.getPixelResolution());
         return params;
     }
-    
+
     private ResultForNavigationInfo getSpatialResultForNavigation(
-            String queryName, Map params){
+            String queryName, Map params) {
         ResultForNavigationInfo spatialResultInfo = new ResultForNavigationInfo();
         getRepository().setLoadInhibitors(new Class[]{DynamicQueryField.class});
         List<SpatialResult> result = executeDynamicQuery(SpatialResult.class,
@@ -543,7 +543,7 @@ public class SearchEJB extends AbstractEJB implements SearchEJBLocal {
         getRepository().clearLoadInhibitors();
         spatialResultInfo.setToAdd(result);
         return spatialResultInfo;
-        
+
     }
 
     /**
@@ -756,7 +756,7 @@ public class SearchEJB extends AbstractEJB implements SearchEJBLocal {
     public List<RightsExportResult> searchRightsForExport(RightsExportParams searchParams) {
         Map params = new HashMap<String, Object>();
         Calendar cal = Calendar.getInstance();
-        
+
         if (searchParams.getDateFrom() == null) {
             searchParams.setDateFrom(new GregorianCalendar(1, 1, 1, 0, 0).getTime());
         } else {
@@ -774,7 +774,7 @@ public class SearchEJB extends AbstractEJB implements SearchEJBLocal {
             cal.set(Calendar.MINUTE, 59);
             searchParams.setDateTo(cal.getTime());
         }
-        
+
         if (searchParams.getRightTypeCode() == null) {
             searchParams.setRightTypeCode("");
         }
@@ -787,9 +787,9 @@ public class SearchEJB extends AbstractEJB implements SearchEJBLocal {
 
     /**
      * Get the extent of the public display map.
-     * 
+     *
      * @param nameLastPart
-     * @return 
+     * @return
      */
     @Override
     public byte[] getExtentOfPublicDisplayMap(String nameLastPart) {
@@ -802,9 +802,80 @@ public class SearchEJB extends AbstractEJB implements SearchEJBLocal {
         params.put(paramLastPart, nameLastPart);
         List result = getRepository().executeSql(params);
         byte[] value = null;
-        if (result.size()>0){
-            value = (byte[]) ((HashMap)result.get(0)).get("extent");
+        if (result.size() > 0) {
+            value = (byte[]) ((HashMap) result.get(0)).get("extent");
         }
         return value;
-    }    
+    }
+
+    /*
+     * LAA additionas - thoriso
+     *
+     */
+    /**
+     * Executes a search on all Disputes. Uses dispute number, lease number
+     * (rrr_id), plot number (cadaster_id), and dates between lodgement date and
+     * completion .
+     *
+     * <p>Requires the {@linkplain RolesConstants#ADMINISTRATIVE_BA_UNIT_SEARCH}
+     * role.</p>
+     *
+     * @param searchParams The search criteria to use.
+     * @return A maximum of 100 BA Units matching the search criteria.
+     */
+    @Override
+    @RolesAllowed(RolesConstants.ADMINISTRATIVE_DISPUTE_SEARCH)
+    public List<DisputeSearchResult> searchDispute(DisputeSearchParams searchParams) {
+        Map params = processDisputeSearchParams(searchParams);
+        params.put(CommonSqlProvider.PARAM_QUERY, DisputeSearchResult.SEARCH_QUERY);
+        return getRepository().getEntityList(DisputeSearchResult.class, params);
+    }
+
+    private Map<String, Object> processDisputeSearchParams(DisputeSearchParams searchParams) {
+        Map params = new HashMap<String, Object>();
+
+
+        params.put(DisputeSearchResult.QUERY_PARAM_DISP_NR,
+                searchParams.getNr() == null ? "" : searchParams.getNr());
+
+        params.put(DisputeSearchResult.QUERY_PARAM_LEASE_NR,
+                searchParams.getLeaseNumber() == null ? "" : searchParams.getLeaseNumber());
+
+        params.put(DisputeSearchResult.QUERY_PARAM_PLOT_NR,
+                searchParams.getPlotNumber() == null ? "" : searchParams.getPlotNumber());
+
+        if (searchParams.getNr() != null
+                && searchParams.getNr().trim().isEmpty()) {
+            searchParams.setNr(null);
+        }
+        if (searchParams.getLeaseNumber() != null
+                && searchParams.getLeaseNumber().trim().isEmpty()) {
+            searchParams.setLeaseNumber(null);
+        }
+        if (searchParams.getPlotNumber() != null
+                && searchParams.getPlotNumber().trim().isEmpty()) {
+            searchParams.setPlotNumber(null);
+        }
+        params.put(DisputeSearchResult.QUERY_PARAM_LODGEMENT_DATE_FROM,
+                searchParams.getLodgementDateFrom() == null
+                ? new GregorianCalendar(1, 1, 1).getTime()
+                : searchParams.getLodgementDateFrom());
+
+        params.put(DisputeSearchResult.QUERY_PARAM_LODGEMENT_DATE_TO,
+                searchParams.getLodgementDateTo() == null
+                ? new GregorianCalendar(1, 1, 1).getTime()
+                : searchParams.getLodgementDateTo());
+
+        params.put(DisputeSearchResult.QUERY_PARAM_COMPLETION_DATE_FROM,
+                searchParams.getCompletionDateFrom() == null
+                ? new GregorianCalendar(1, 1, 1).getTime()
+                : searchParams.getCompletionDateTo());
+
+        params.put(DisputeSearchResult.QUERY_PARAM_COMPLETION_DATE_TO,
+                searchParams.getCompletionDateTo() == null
+                ? new GregorianCalendar(1, 1, 1).getTime()
+                : searchParams.getLodgementDateTo());
+
+        return params;
+    }
 }

@@ -111,10 +111,10 @@ public class AdministrativeEJB extends AbstractEJB
      * values.
      */
     @Override
-    public List<LeaseCondition> getLeaseConditions(String languageCode){
+    public List<LeaseCondition> getLeaseConditions(String languageCode) {
         return getRepository().getCodeList(LeaseCondition.class, languageCode);
     }
-    
+
     /**
      * Retrieves all administrative.mortgage_type code values.
      *
@@ -605,15 +605,15 @@ public class AdministrativeEJB extends AbstractEJB
             String params, String languageCode) {
         return this.validatePublicDisplay(params, languageCode);
     }
-    
-    
-     /**
-     * Returns list of systematic registration applications
-     * that matches the specified search string. This
-     * 
+
+    /**
+     * Returns list of systematic registration applications that matches the
+     * specified search string. This
+     *
      *
      * @param searchString The search string to use
-     * @return list of systematic registration applications matching the search string
+     * @return list of systematic registration applications matching the search
+     * string
      */
     @Override
     @RolesAllowed(RolesConstants.ADMINISTRATIVE_SYSTEMATIC_REGISTRATION)
@@ -630,6 +630,7 @@ public class AdministrativeEJB extends AbstractEJB
         result = getRepository().executeFunction(queryParams, SysRegManagement.class);
         return result;
     }
+
     @Override
     @RolesAllowed(RolesConstants.ADMINISTRATIVE_SYSTEMATIC_REGISTRATION)
     public List<SysRegStatus> getSysRegStatus(SysRegManagementParams params, String languageCode) {
@@ -645,7 +646,7 @@ public class AdministrativeEJB extends AbstractEJB
         result = getRepository().executeFunction(queryParams, SysRegStatus.class);
         return result;
     }
-    
+
     @Override
     @RolesAllowed(RolesConstants.ADMINISTRATIVE_SYSTEMATIC_REGISTRATION)
     public List<SysRegProgress> getSysRegProgress(SysRegManagementParams params, String languageCode) {
@@ -662,4 +663,161 @@ public class AdministrativeEJB extends AbstractEJB
         return result;
     }
 
+    /**
+     * THORISO - LEGAL (DISPUTES)
+     *
+     */
+
+    /*
+     * Retrieves the DisputeComments matching the supplied identifier.
+     *
+     * @param id The DisputeComments identifier @return The DisputeComments
+     * details or null if the identifier is invalid.
+     */
+    @Override
+    public DisputeComments getDisputeCommentsById(String id) {
+        DisputeComments result = null;
+        if (id != null) {
+            result = getRepository().getEntity(DisputeComments.class, id);
+        }
+        return result;
+    }
+
+    /**
+     * Returns the details for the specified Dispute.
+     *
+     * <p>No role is required to execute this method.</p>
+     *
+     * @param id The identifier of the source to retrieve.
+     */
+    @Override
+    public Dispute getDisputeById(String id) {
+        return getRepository().getEntity(Dispute.class, id);
+    }
+
+    /**
+     * Returns the details for the specified Dispute.
+     *
+     * <p>No role is required to execute this method.</p>
+     *
+     * @param nr The identifier of the source to retrieve.
+     */
+    @Override
+    public Dispute getDisputeByNr(String nr) {
+        return getRepository().getEntity(Dispute.class, nr);
+    }
+
+    @Override
+    public Dispute getDisputeByUser(String userId) {
+        if (userId != null) {
+            Map params = new HashMap<String, Object>();
+            params.put(CommonSqlProvider.PARAM_WHERE_PART, Dispute.QUERY_WHERE_BYUSERID);
+            params.put(Dispute.QUERY_PARAMETER_USERID, userId);
+            return getRepository().getEntity(Dispute.class, params);
+        } else {
+            return null;
+        }
+    }
+
+    @Override
+    public Dispute getDispute() {
+        String id = null;
+        if (id != null) {
+            return getRepository().getEntity(Dispute.class,id);
+        }
+        return null;
+    }
+
+    /**
+     * Creates a new Dispute record with a default status of pending.
+     */
+    @Override
+    @RolesAllowed(RolesConstants.ADMINISTRATIVE_DISPUTE_SAVE)
+    public Dispute createDispute(Dispute dispute) {
+        if (dispute == null) {
+            return null;
+        }
+        return saveDispute(dispute);
+    }
+
+    /**
+     * Saves any updates to an existing Dispute.
+     */
+    @Override
+    @RolesAllowed(RolesConstants.ADMINISTRATIVE_DISPUTE_SAVE)
+    public Dispute saveDispute(Dispute dispute) {
+        if (dispute == null) {
+            return null;
+        }
+
+        return getRepository().saveEntity(dispute);
+    }
+
+    /**
+     * Saves any updates to Dispute comments.
+     */
+    @Override
+    @RolesAllowed(RolesConstants.ADMINISTRATIVE_DISPUTE_COMMENTS_SAVE)
+    public DisputeComments saveDisputeComments(DisputeComments disputeComments) {
+        if (disputeComments == null) {
+            return null;
+        }
+
+        return getRepository().saveEntity(disputeComments);
+    }
+
+    /**
+     * Retrieves all administrative.dispute_type code values.
+     *
+     * @param languageCode The language code to use for localization of display
+     * values.
+     */
+    @Override
+    public List<DisputeType> getDisputeType(String languageCode) {
+        return getRepository().getCodeList(DisputeType.class, languageCode);
+    }
+
+    /**
+     * Retrieves all administrative.dispute_action code values.
+     *
+     * @param languageCode The language code to use for localization of display
+     * values.
+     */
+    @Override
+    public List<DisputeAction> getDisputeAction(String languageCode) {
+        return getRepository().getCodeList(DisputeAction.class, languageCode);
+    }
+
+    /**
+     * Retrieves all administrative.dispute_category code values.
+     *
+     * @param languageCode The language code to use for localization of display
+     * values.
+     */
+    @Override
+    public List<DisputeCategory> getDisputeCategory(String languageCode) {
+        return getRepository().getCodeList(DisputeCategory.class, languageCode);
+    }
+
+    /**
+     * Retrieves all administrative.dispute_status code values.
+     *
+     * @param languageCode The language code to use for localization of display
+     * values.
+     */
+    @Override
+    public List<DisputeStatus> getDisputeStatus(String languageCode) {
+        return getRepository().getCodeList(DisputeStatus.class, languageCode);
+    }
+
+    /**
+     * Retrieves all administrative.other_authorities code values.
+     *
+     * @param languageCode The language code to use for localization of display
+     * values.
+     */
+    @Override
+    public List<OtherAuthorities> getOtherAuthorities(String languageCode) {
+        return getRepository().getCodeList(OtherAuthorities.class, languageCode);
+    }
 }
