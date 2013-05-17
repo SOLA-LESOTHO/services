@@ -1277,5 +1277,11 @@ public class ApplicationEJB extends AbstractEJB implements ApplicationEJBLocal {
                 SysRegCertificates.QUERY_WHERE_BYNR, params);
     }
 
+    @Override
+    public List<ApplicationForm> getApplicationForms(String lang) {
+        return getRepository().getCodeList(ApplicationForm.class, lang);
+    }
+
+
     
 }
