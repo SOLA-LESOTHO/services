@@ -105,7 +105,7 @@ public class CadastreEJB extends AbstractEJB implements CadastreEJBLocal {
         searchString = searchString.replaceAll("\\\\|\\/", " ");
         params.put("search_string", searchString);
         params.put(CommonSqlProvider.PARAM_LIMIT_PART, numberOfMaxRecordsReturned);
-        params.put(CommonSqlProvider.PARAM_ORDER_BY_PART, CadastreObject.QUERY_ORDER_BY_SEARCHBYPARTS); 
+        params.put(CommonSqlProvider.PARAM_ORDER_BY_PART, CadastreObject.QUERY_ORDER_BY_SEARCHBYPARTS);
         return getRepository().getEntityList(CadastreObject.class,
                 CadastreObject.QUERY_WHERE_SEARCHBYPARTS, params);
     }
@@ -125,7 +125,7 @@ public class CadastreEJB extends AbstractEJB implements CadastreEJBLocal {
         HashMap params = new HashMap();
         params.put("search_string", searchString);
         params.put(CommonSqlProvider.PARAM_LIMIT_PART, numberOfMaxRecordsReturned);
-        params.put(CommonSqlProvider.PARAM_ORDER_BY_PART, CadastreObject.QUERY_ORDER_BY_SEARCHBYPARTS); 
+        params.put(CommonSqlProvider.PARAM_ORDER_BY_PART, CadastreObject.QUERY_ORDER_BY_SEARCHBYPARTS);
         return getRepository().getEntityList(CadastreObject.class,
                 CadastreObject.QUERY_WHERE_SEARCHBYALLPARTS, params);
     }
@@ -421,13 +421,13 @@ public class CadastreEJB extends AbstractEJB implements CadastreEJBLocal {
         params.put("transaction_id", transactionId);
         return getRepository().getEntityList(SpatialUnitTemporary.class, params);
     }
-    
-     /**
+
+    /**
      * Locates cadastre object's area size
      *
      *
-     * 
-     * @param colist the list of cadastre object 
+     *
+     * @param colist the list of cadastre object
      * @return The total area size
      */
     @Override
@@ -438,4 +438,45 @@ public class CadastreEJB extends AbstractEJB implements CadastreEJBLocal {
         return getRepository().getEntity(SpatialValueArea.class, params);
     }
 
+    @Override
+    public GroundRentMultiplicationFactor getMultiplicationFacotr(String landUseCode, String landGradeCode, String valuationZoneCode) {
+
+        HashMap params = new HashMap();
+        params.put("land_use_code", landUseCode);
+        params.put("land_grade_code", landGradeCode);
+        params.put("valuation_zone", valuationZoneCode);
+
+        return getRepository().getEntity(GroundRentMultiplicationFactor.class,
+                GroundRentMultiplicationFactor.QUERY_WHERE_SEARCHBYLANDUSEGRADEANDZONE, params);
+    }
+
+    /**
+     * Retrieves all cadastre.land_use_grade code value based on the land use
+     * and land grade
+     *
+     * @param landUseCode The land use code to use for determining specific land
+     * use of the parcel.
+     * @param landGradeCode The land grade code to use for determining grade of
+     * a given parcel.
+     */
+    @Override
+    public LandUseGrade getLandUseGrade(String landUseCode, String landGradeCode) {
+        HashMap params = new HashMap();
+        params.put("land_use_code", landUseCode);
+        params.put("land_grade_code", landGradeCode);
+
+        return getRepository().getEntity(LandUseGrade.class,
+                LandUseGrade.QUERY_WHERE_SEARCHBYLANDUSEANDGRADE, params);
+    }
+
+    /**
+     * Retrieves all cadastre.land_grade_type code values.
+     *
+     * @param languageCode The language code to use for localization of display
+     * values.
+     */
+    @Override
+    public List<LandGradeType> getLandGradeTypes(String languageCode) {
+        return getRepository().getCodeList(LandGradeType.class, languageCode);
+    }
 }

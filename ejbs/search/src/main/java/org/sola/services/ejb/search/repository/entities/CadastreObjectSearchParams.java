@@ -27,7 +27,7 @@ public class CadastreObjectSearchParams extends AbstractEntity {
     public void setLandUseCode(String landUseCode) {
         this.landUseCode = landUseCode;
     }
-
+  
     public String getNameFirstPart() {
         return nameFirstPart;
     }

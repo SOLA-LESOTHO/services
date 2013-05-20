@@ -50,6 +50,8 @@ import org.sola.services.common.repository.entities.AbstractCodeEntity;
 public class RequestType extends AbstractCodeEntity {
     
     public static String CADASTRE_CHANGE = "cadastreChange";
+    
+    public static final String NEW_LEASE = "newLease";
 
     @Column(name = "nr_days_to_complete")
     private int nrDaysToComplete;
