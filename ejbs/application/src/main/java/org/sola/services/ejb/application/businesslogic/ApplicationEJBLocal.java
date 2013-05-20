@@ -45,6 +45,14 @@ import org.sola.services.ejb.application.repository.entities.*;
  */
 @Local
 public interface ApplicationEJBLocal extends AbstractEJBLocal {
+    
+    /** 
+     * Returns application forms reference data. 
+     * @param lang Language code to use for getting translated display 
+     * value and description.
+     */
+    List<ApplicationForm> getApplicationForms(String lang);
+
 
     /**
      * See {@linkplain ApplicationEJB#getApplication(java.lang.String)
