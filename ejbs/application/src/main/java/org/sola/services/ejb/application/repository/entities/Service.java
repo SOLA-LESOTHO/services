@@ -1,28 +1,30 @@
 /**
  * ******************************************************************************************
- * Copyright (C) 2012 - Food and Agriculture Organization of the United Nations (FAO).
- * All rights reserved.
+ * Copyright (C) 2012 - Food and Agriculture Organization of the United Nations
+ * (FAO). All rights reserved.
  *
- * Redistribution and use in source and binary forms, with or without modification,
- * are permitted provided that the following conditions are met:
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
  *
- *    1. Redistributions of source code must retain the above copyright notice,this list
- *       of conditions and the following disclaimer.
- *    2. Redistributions in binary form must reproduce the above copyright notice,this list
- *       of conditions and the following disclaimer in the documentation and/or other
- *       materials provided with the distribution.
- *    3. Neither the name of FAO nor the names of its contributors may be used to endorse or
- *       promote products derived from this software without specific prior written permission.
+ * 1. Redistributions of source code must retain the above copyright notice,this
+ * list of conditions and the following disclaimer. 2. Redistributions in binary
+ * form must reproduce the above copyright notice,this list of conditions and
+ * the following disclaimer in the documentation and/or other materials provided
+ * with the distribution. 3. Neither the name of FAO nor the names of its
+ * contributors may be used to endorse or promote products derived from this
+ * software without specific prior written permission.
  *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY
- * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES
- * OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT
- * SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
- * SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,PROCUREMENT
- * OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
- * HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT,STRICT LIABILITY,OR TORT
- * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
- * EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
+ * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+ * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,PROCUREMENT OF
+ * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+ * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+ * CONTRACT,STRICT LIABILITY,OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING
+ * IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+ * POSSIBILITY OF SUCH DAMAGE.
  * *********************************************************************************************
  */
 /*
@@ -41,10 +43,11 @@ import org.sola.services.common.repository.DefaultSorter;
 import org.sola.services.common.repository.entities.AbstractVersionedEntity;
 
 /**
- * Entity representing the application.service table. 
+ * Entity representing the application.service table.
+ *
  * @author soladev
  */
-@DefaultSorter(sortString="service_order")
+@DefaultSorter(sortString = "service_order")
 @Table(name = "service", schema = "application")
 public class Service extends AbstractVersionedEntity {
 
@@ -61,9 +64,9 @@ public class Service extends AbstractVersionedEntity {
     private Date lodgingDatetime;
     @Column(name = "expected_completion_date")
     private Date expectedCompletionDate;
-    @Column(name = "status_code", insertable=false, updatable=false)
+    @Column(name = "status_code", insertable = false, updatable = false)
     private String statusCode;
-    @Column(name = "action_code", insertable=false, updatable=false)
+    @Column(name = "action_code", insertable = false, updatable = false)
     private String actionCode;
     @Column(name = "action_notes")
     private String actionNotes;
@@ -73,9 +76,17 @@ public class Service extends AbstractVersionedEntity {
     private BigDecimal areaFee;
     @Column(name = "value_fee")
     private BigDecimal valueFee;
-    @Column(insertable=false, updatable=false, name = "concatenated_name")
+    @Column(insertable = false, updatable = false, name = "concatenated_name")
     @AccessFunctions(onSelect = "application.get_concatenated_name(id)")
     private String concatenatedName;
+    @Column(name = "service_fee")
+    private BigDecimal serviceFee;
+    @Column(name = "stamp_duty")
+    private BigDecimal stampDuty;
+    @Column(name = "ground_rent")
+    private BigDecimal groundRent;
+    @Column(name = "transfer_duty")
+    private BigDecimal transferDuty;
 
     public Service() {
         super();
@@ -110,7 +121,7 @@ public class Service extends AbstractVersionedEntity {
         return applicationId;
     }
 
-    public void setApplicationId(String applicationId) { 
+    public void setApplicationId(String applicationId) {
         this.applicationId = applicationId;
     }
 
@@ -177,6 +188,7 @@ public class Service extends AbstractVersionedEntity {
     public void setValueFee(BigDecimal valueFee) {
         this.valueFee = valueFee;
     }
+
     public String getConcatenatedName() {
         return concatenatedName;
     }
@@ -184,5 +196,36 @@ public class Service extends AbstractVersionedEntity {
     public void setConcatenatedName(String concatenatedName) {
         this.concatenatedName = concatenatedName;
     }
-    
+
+    public BigDecimal getGroundRent() {
+        return groundRent;
+    }
+
+    public void setGroundRent(BigDecimal groundRent) {
+        this.groundRent = groundRent;
+    }
+
+    public BigDecimal getServiceFee() {
+        return serviceFee;
+    }
+
+    public void setServiceFee(BigDecimal serviceFee) {
+        this.serviceFee = serviceFee;
+    }
+
+    public BigDecimal getStampDuty() {
+        return stampDuty;
+    }
+
+    public void setStampDuty(BigDecimal stampDuty) {
+        this.stampDuty = stampDuty;
+    }
+
+    public BigDecimal getTransferDuty() {
+        return transferDuty;
+    }
+
+    public void setTransferDuty(BigDecimal transferDuty) {
+        this.transferDuty = transferDuty;
+    }  
 }

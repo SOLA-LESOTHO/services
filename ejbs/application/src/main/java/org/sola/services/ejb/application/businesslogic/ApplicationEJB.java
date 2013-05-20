@@ -43,6 +43,10 @@ import org.sola.services.common.faults.SOLAValidationException;
 import org.sola.services.common.repository.CommonSqlProvider;
 import org.sola.services.ejb.administrative.businesslogic.AdministrativeEJBLocal;
 import org.sola.services.ejb.application.repository.entities.*;
+import org.sola.services.ejb.cadastre.businesslogic.CadastreEJBLocal;
+import org.sola.services.ejb.cadastre.repository.entities.CadastreObject;
+import org.sola.services.ejb.cadastre.repository.entities.GroundRentMultiplicationFactor;
+import org.sola.services.ejb.cadastre.repository.entities.LandUseGrade;
 import org.sola.services.ejb.party.repository.entities.Party;
 import org.sola.services.ejb.source.businesslogic.SourceEJBLocal;
 import org.sola.services.ejb.source.repository.entities.Source;
@@ -70,6 +74,8 @@ public class ApplicationEJB extends AbstractEJB implements ApplicationEJBLocal {
     private TransactionEJBLocal transactionEJB;
     @EJB
     private AdministrativeEJBLocal administrativeEJB;
+    @EJB
+    private CadastreEJBLocal cadastreEJB;
 
     /**
      * Sets the entity package for the EJB to
@@ -236,17 +242,31 @@ public class ApplicationEJB extends AbstractEJB implements ApplicationEJBLocal {
      */
     private void calculateLodgementFees(Application application) {
 
-        // Get the total area and the total value of the properties on the application
-        BigDecimal totalArea = BigDecimal.ZERO;
+        String landGradeCode = "";
+        String landUseCode = "";
+
         Money totalValue = new Money(BigDecimal.ZERO);
-        if (application.getPropertyList() != null) {
-            for (ApplicationProperty prop : application.getPropertyList()) {
-                if (prop.getArea() != null) {
-                    totalArea = totalArea.add(prop.getArea().abs());
+        
+        Money totalFee;
+        
+        Money registrationFeeTotal = new Money(BigDecimal.ZERO);
+        
+        Money stampDutyTotal = new Money(BigDecimal.ZERO);
+        
+        Money groundRent = new Money(BigDecimal.ZERO);
+
+        //Get land use, land grade, and the total value of the property
+        if (application.getCadastreObjectList() != null) {
+            for (CadastreObject cadastre : application.getCadastreObjectList()) {
+                if (cadastre.getLandGradeCode() != null) {
+                    landGradeCode = cadastre.getLandGradeCode();
                 }
-                if (prop.getTotalValue() != null) {
-                    Money propertyValue = new Money(prop.getTotalValue().abs());
-                    totalValue = totalValue.plus(propertyValue);
+                if (cadastre.getLandUseCode() != null) {
+                    landUseCode = cadastre.getLandUseCode();
+                }
+
+                if (cadastre.getValuationAmount() != null) {
+                    totalValue = new Money(cadastre.getValuationAmount().abs());
                 }
             }
         }
@@ -261,36 +281,47 @@ public class ApplicationEJB extends AbstractEJB implements ApplicationEJBLocal {
         if (application.getServiceList() != null) {
             for (Service ser : application.getServiceList()) {
                 Money baseFee = new Money(BigDecimal.ZERO);
-                Money areaFee = new Money(BigDecimal.ZERO);
-                Money valueFee = new Money(BigDecimal.ZERO);
+                Money serviceFee = new Money(BigDecimal.ZERO);
+                Money stampDuty = new Money(BigDecimal.ZERO);
                 if (requestTypes != null) {
                     for (RequestType type : requestTypes) {
                         if (ser.getRequestTypeCode().equals(type.getCode())) {
                             if (type.getBaseFee() != null) {
                                 baseFee = new Money(type.getBaseFee().abs());
                             }
-                            if (type.getAreaBaseFee() != null) {
-                                areaFee = new Money(type.getAreaBaseFee().abs()).times(totalArea);
+
+                            if (RequestType.NEW_LEASE.equals(type.getCode())) {
+                                serviceFee = determineServiceFee(landUseCode, landGradeCode);
+                                stampDuty = calculateDuty(AdminFeeType.STAMP_DUTY, totalValue);
                             }
-                            if (type.getValueBaseFee() != null) {
-                                valueFee = totalValue.times(type.getValueBaseFee().abs());
-                            }
+
                             break;
                         }
                     }
                 }
                 ser.setBaseFee(baseFee.getAmount());
-                ser.setAreaFee(areaFee.getAmount());
-                ser.setValueFee(valueFee.getAmount());
-                servicesFeeTotal = servicesFeeTotal.plus(baseFee).plus(areaFee).plus(valueFee);
+                ser.setServiceFee(serviceFee.getAmount());
+                ser.setStampDuty(stampDuty.getAmount());
+                
+                servicesFeeTotal = servicesFeeTotal.plus(serviceFee);
+                registrationFeeTotal = registrationFeeTotal.plus(baseFee);
+                stampDutyTotal = stampDutyTotal.plus(stampDuty);
             }
         }
 
-        // Calculate the tax and the total fee for the application.
+        // Calculate the total fee for the application.
+        
+        totalFee = servicesFeeTotal.plus(registrationFeeTotal).plus(stampDutyTotal).plus(groundRent);
+        
         application.setServicesFee(servicesFeeTotal.getAmount());
-        Money taxAmount = servicesFeeTotal.times(systemEJB.getTaxRate());
-        application.setTax(taxAmount.getAmount());
-        application.setTotalFee((servicesFeeTotal.plus(taxAmount)).getAmount());
+        
+        application.setRegistrationFee(registrationFeeTotal.getAmount());
+        
+        application.setStampDuty(stampDutyTotal.getAmount());
+
+        application.setTotalFee(totalFee.getAmount());
+        
+        application.setGroundRent(groundRent.getAmount());
 
         if (application.getTotalAmountPaid() == null) {
             application.setTotalAmountPaid(BigDecimal.ZERO);
@@ -566,7 +597,7 @@ public class ApplicationEJB extends AbstractEJB implements ApplicationEJBLocal {
     @Override
     @RolesAllowed(RolesConstants.APPLICATION_SERVICE_START)
     public List<ValidationResult> serviceActionStart(String serviceId, String languageCode, int rowVersion) {
-        
+
         RoleVerifier validRole = getRoleVerifier(serviceId);
 
         if (!validRole.isRoleCheck()) {
@@ -992,7 +1023,7 @@ public class ApplicationEJB extends AbstractEJB implements ApplicationEJBLocal {
 
         ServiceActionType serviceActionType = getRepository().getCode(ServiceActionType.class, actionCode, languageCode);
         List<ValidationResult> validationResultList = this.validateService(service, languageCode, serviceActionType);
-        
+
         if (systemEJB.validationSucceeded(validationResultList)) {
             transactionEJB.changeTransactionStatusFromService(serviceId, serviceActionType.getStatusToSet());
             service.setStatusCode(serviceActionType.getStatusToSet());
@@ -1239,13 +1270,13 @@ public class ApplicationEJB extends AbstractEJB implements ApplicationEJBLocal {
         params.put(RoleVerifier.QUERY_PARAM_USERNAME, getUserName());
         return getRepository().getEntity(RoleVerifier.class, params);
     }
-    
-      /**
-     * Returns the list of ba_unit_id for approved systematic registration
-     * that matches the specified search string. 
+
+    /**
+     * Returns the list of ba_unit_id for approved systematic registration that
+     * matches the specified search string.
      *
      * @param searchString The search string to use
-     * @return The list of  ba_unit_id for approved systematic registration
+     * @return The list of ba_unit_id for approved systematic registration
      */
     @Override
     @RolesAllowed(RolesConstants.ADMINISTRATIVE_SYSTEMATIC_REGISTRATION)
@@ -1256,13 +1287,14 @@ public class ApplicationEJB extends AbstractEJB implements ApplicationEJBLocal {
         return getRepository().getEntityList(SysRegCertificates.class,
                 SysRegCertificates.QUERY_WHERE_SEARCHBYPARTS, params);
     }
-    
-      /**
-     * Returns the list of ba_unit_id for a specific approved systematic registration
-     * that matches the specified search string. 
+
+    /**
+     * Returns the list of ba_unit_id for a specific approved systematic
+     * registration that matches the specified search string.
      *
      * @param searchString The search string to use
-     * @return The list of  ba_unit_id for a specific approved systematic registration
+     * @return The list of ba_unit_id for a specific approved systematic
+     * registration
      */
     @Override
     @RolesAllowed(RolesConstants.ADMINISTRATIVE_SYSTEMATIC_REGISTRATION)
@@ -1271,11 +1303,12 @@ public class ApplicationEJB extends AbstractEJB implements ApplicationEJBLocal {
         params.put(CommonSqlProvider.PARAM_WHERE_PART, SysRegCertificates.QUERY_WHERE_BYNR);
         params.put(SysRegCertificates.QUERY_PARAMETER_NR, nr);
         params.put("search_string", searchString);
-        
+
 
         return getRepository().getEntityList(SysRegCertificates.class,
                 SysRegCertificates.QUERY_WHERE_BYNR, params);
     }
+
 
     @Override
     public List<ApplicationForm> getApplicationForms(String lang) {
@@ -1283,5 +1316,143 @@ public class ApplicationEJB extends AbstractEJB implements ApplicationEJBLocal {
     }
 
 
+    private List<AdminFeeType> getAdminFeeTypes(String languageCode) {
+        return getRepository().getCodeList(AdminFeeType.class, languageCode);
+    }
+
     
+     /**
+     * Determines service fee based on grade and land use
+     */
+    private Money determineServiceFee(String landUse, String landGrade) {
+
+        Money serviceFee;
+        LandUseGrade landUseGrade;
+
+        landUseGrade = cadastreEJB.getLandUseGrade(landUse, landGrade);
+        serviceFee = new Money(landUseGrade.getAdminFee().abs());
+
+        return serviceFee;
+    }
+
+    /*
+     * Calculates stamp duty or transfer duty. @param feeType the fee Code used
+     * for determining whether it is stamp duty or transfer duty calculation.
+     * @param valuationAmount is the value of the parcel/property
+     */
+    private Money calculateDuty(String feeType, Money valuationAmount) {
+
+        BigDecimal lowerRate;
+
+        BigDecimal upperRate;
+
+        Money thresholdValue;
+
+        Money surplusValue;
+
+        Money duty;
+
+        String lowerRateCode;
+
+        String upperRateCode;
+
+        String thresholdCode;
+
+        List<AdminFeeType> feeTypes = this.getAdminFeeTypes("en");
+
+        lowerRateCode = getFeeTypeCode(feeType, AdminFeeType.LOWER_RATE);
+
+        upperRateCode = getFeeTypeCode(feeType, AdminFeeType.UPPER_RATE);
+
+        thresholdCode = getFeeTypeCode(feeType, AdminFeeType.THRESHOLD_VALUE);
+
+
+        lowerRate = getRateValue(feeTypes, lowerRateCode);
+
+        upperRate = getRateValue(feeTypes, upperRateCode);
+
+        thresholdValue = new Money(getRateValue(feeTypes, thresholdCode));
+
+        if (valuationAmount.compareTo(thresholdValue) == 1) {
+            surplusValue = valuationAmount.minus(thresholdValue);
+            duty = surplusValue.times(upperRate).plus(thresholdValue.times(lowerRate));
+        } else {
+            duty = valuationAmount.times(lowerRate);
+        }
+
+        return duty;
+
+    }
+
+    private BigDecimal getRateValue(List<AdminFeeType> feeTypes, String feeCode) {
+
+        BigDecimal rateValue = BigDecimal.ZERO;
+
+        for (AdminFeeType type : feeTypes) {
+            if ((feeCode != null) && (feeCode.equals(type.getCode()))) {
+                rateValue = type.getRate();
+            }
+        }
+
+        return rateValue;
+    }
+
+    private String getFeeTypeCode(String primaryRate, String secondaryRate) {
+
+        String feeTypeCode = null;
+
+
+        if (primaryRate.equals(AdminFeeType.STAMP_DUTY)) {
+            feeTypeCode = AdminFeeType.STAMP_DUTY;
+        } else if (primaryRate.equals(AdminFeeType.TRANSFER_DUTY)) {
+            feeTypeCode = AdminFeeType.TRANSFER_DUTY;
+        }
+
+
+        if (secondaryRate.equals(AdminFeeType.LOWER_RATE)) {
+            feeTypeCode = feeTypeCode + AdminFeeType.CODE_SUFFIX + AdminFeeType.LOWER_RATE;
+        } else if (secondaryRate.equals(AdminFeeType.UPPER_RATE)) {
+            feeTypeCode = feeTypeCode + AdminFeeType.CODE_SUFFIX + AdminFeeType.UPPER_RATE;
+        } else if (secondaryRate.equals(AdminFeeType.THRESHOLD_VALUE)) {
+            feeTypeCode = feeTypeCode + AdminFeeType.CODE_SUFFIX + AdminFeeType.THRESHOLD_VALUE;
+        } else {
+            feeTypeCode = null;
+        }
+
+        return feeTypeCode;
+    }
+
+    private Money calculateGroundRent(String landUse, String landGrade, String valuationZoneCode, Money totalValue) {
+
+        Money groundRent;
+
+        BigDecimal groundRentRate;
+
+        BigDecimal groundRentFactor;
+
+        LandUseGrade landUseGrade;
+
+        GroundRentMultiplicationFactor multiplicationFactor;
+
+        landUseGrade = cadastreEJB.getLandUseGrade(landUse, landGrade);
+
+        multiplicationFactor = cadastreEJB.getMultiplicationFacotr(landUse, landGrade, valuationZoneCode);
+
+        if (multiplicationFactor != null) {
+            groundRentFactor = multiplicationFactor.getMultiplicationFactor();
+        } else {
+            groundRentFactor = BigDecimal.ONE;
+        }
+
+        if (landUseGrade != null) {
+            groundRentRate = landUseGrade.getGroundRentRate();
+        } else {
+            groundRentRate = BigDecimal.ONE;
+        }
+
+
+        groundRent = totalValue.times(groundRentRate).times(groundRentFactor);
+
+        return groundRent;
+    }
 }
