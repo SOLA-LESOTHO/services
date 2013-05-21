@@ -461,12 +461,17 @@ public class CadastreEJB extends AbstractEJB implements CadastreEJBLocal {
      */
     @Override
     public LandUseGrade getLandUseGrade(String landUseCode, String landGradeCode) {
-        HashMap params = new HashMap();
-        params.put("land_use_code", landUseCode);
-        params.put("land_grade_code", landGradeCode);
+        if ((landUseCode != null) && (landGradeCode != null)){
+            HashMap params = new HashMap();
+            params.put("land_use_code", landUseCode);
+            params.put("land_grade_code", landGradeCode);
 
-        return getRepository().getEntity(LandUseGrade.class,
+            return getRepository().getEntity(LandUseGrade.class,
                 LandUseGrade.QUERY_WHERE_SEARCHBYLANDUSEANDGRADE, params);
+        }
+        else{
+            return null;
+        }
     }
 
     /**

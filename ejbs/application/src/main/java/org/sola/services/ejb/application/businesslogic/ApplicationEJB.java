@@ -47,6 +47,7 @@ import org.sola.services.ejb.cadastre.businesslogic.CadastreEJBLocal;
 import org.sola.services.ejb.cadastre.repository.entities.CadastreObject;
 import org.sola.services.ejb.cadastre.repository.entities.GroundRentMultiplicationFactor;
 import org.sola.services.ejb.cadastre.repository.entities.LandUseGrade;
+import org.sola.services.ejb.cadastre.repository.entities.SpatialValueArea;
 import org.sola.services.ejb.party.repository.entities.Party;
 import org.sola.services.ejb.source.businesslogic.SourceEJBLocal;
 import org.sola.services.ejb.source.repository.entities.Source;
@@ -245,15 +246,21 @@ public class ApplicationEJB extends AbstractEJB implements ApplicationEJBLocal {
         String landGradeCode = "";
         String landUseCode = "";
 
+        BigDecimal totalArea = BigDecimal.ZERO;
+
         Money totalValue = new Money(BigDecimal.ZERO);
-        
+
         Money totalFee;
-        
+
         Money registrationFeeTotal = new Money(BigDecimal.ZERO);
-        
+
+        Money servicesFeeTotal = new Money(BigDecimal.ZERO);
+
         Money stampDutyTotal = new Money(BigDecimal.ZERO);
-        
+
         Money groundRent = new Money(BigDecimal.ZERO);
+
+        SpatialValueArea spatialValueArea;
 
         //Get land use, land grade, and the total value of the property
         if (application.getCadastreObjectList() != null) {
@@ -264,12 +271,16 @@ public class ApplicationEJB extends AbstractEJB implements ApplicationEJBLocal {
                 if (cadastre.getLandUseCode() != null) {
                     landUseCode = cadastre.getLandUseCode();
                 }
-
                 if (cadastre.getValuationAmount() != null) {
                     totalValue = new Money(cadastre.getValuationAmount().abs());
                 }
+                spatialValueArea = cadastreEJB.getSpatialValueArea(cadastre.getId());
+                if (spatialValueArea != null){
+                  totalArea = spatialValueArea.getCalculatedAreaSize();  
+                }      
             }
         }
+
 
         // Calculate the fee for each service and the total services fee for the application.
         // Uses the money type to ensure all calculations yeild consisent results. Note that the
@@ -277,7 +288,7 @@ public class ApplicationEJB extends AbstractEJB implements ApplicationEJBLocal {
 
         //Elton: Not important in this context what language the request types are asked
         List<RequestType> requestTypes = this.getRequestTypes("en");
-        Money servicesFeeTotal = new Money(BigDecimal.ZERO);
+
         if (application.getServiceList() != null) {
             for (Service ser : application.getServiceList()) {
                 Money baseFee = new Money(BigDecimal.ZERO);
@@ -293,6 +304,7 @@ public class ApplicationEJB extends AbstractEJB implements ApplicationEJBLocal {
                             if (RequestType.NEW_LEASE.equals(type.getCode())) {
                                 serviceFee = determineServiceFee(landUseCode, landGradeCode);
                                 stampDuty = calculateDuty(AdminFeeType.STAMP_DUTY, totalValue);
+                                groundRent = calculateGroundRent(landUseCode, landGradeCode, landUseCode, totalArea);
                             }
 
                             break;
@@ -302,7 +314,7 @@ public class ApplicationEJB extends AbstractEJB implements ApplicationEJBLocal {
                 ser.setBaseFee(baseFee.getAmount());
                 ser.setServiceFee(serviceFee.getAmount());
                 ser.setStampDuty(stampDuty.getAmount());
-                
+
                 servicesFeeTotal = servicesFeeTotal.plus(serviceFee);
                 registrationFeeTotal = registrationFeeTotal.plus(baseFee);
                 stampDutyTotal = stampDutyTotal.plus(stampDuty);
@@ -310,17 +322,17 @@ public class ApplicationEJB extends AbstractEJB implements ApplicationEJBLocal {
         }
 
         // Calculate the total fee for the application.
-        
+
         totalFee = servicesFeeTotal.plus(registrationFeeTotal).plus(stampDutyTotal).plus(groundRent);
-        
+
         application.setServicesFee(servicesFeeTotal.getAmount());
-        
+
         application.setRegistrationFee(registrationFeeTotal.getAmount());
-        
+
         application.setStampDuty(stampDutyTotal.getAmount());
 
         application.setTotalFee(totalFee.getAmount());
-        
+
         application.setGroundRent(groundRent.getAmount());
 
         if (application.getTotalAmountPaid() == null) {
@@ -1309,19 +1321,16 @@ public class ApplicationEJB extends AbstractEJB implements ApplicationEJBLocal {
                 SysRegCertificates.QUERY_WHERE_BYNR, params);
     }
 
-
     @Override
     public List<ApplicationForm> getApplicationForms(String lang) {
         return getRepository().getCodeList(ApplicationForm.class, lang);
     }
 
-
     private List<AdminFeeType> getAdminFeeTypes(String languageCode) {
         return getRepository().getCodeList(AdminFeeType.class, languageCode);
     }
 
-    
-     /**
+    /**
      * Determines service fee based on grade and land use
      */
     private Money determineServiceFee(String landUse, String landGrade) {
@@ -1421,10 +1430,16 @@ public class ApplicationEJB extends AbstractEJB implements ApplicationEJBLocal {
 
         return feeTypeCode;
     }
+    
+    /*
+     * Calculation of ground rent is a simplified one; 
+     * it does not include road class factor
+     * as well as percentage of land usable
+     */
 
-    private Money calculateGroundRent(String landUse, String landGrade, String valuationZoneCode, Money totalValue) {
-
-        Money groundRent;
+    private Money calculateGroundRent(String landUse, String landGrade, String valuationZoneCode, BigDecimal totalArea) {
+        
+        BigDecimal groundRent;
 
         BigDecimal groundRentRate;
 
@@ -1451,8 +1466,8 @@ public class ApplicationEJB extends AbstractEJB implements ApplicationEJBLocal {
         }
 
 
-        groundRent = totalValue.times(groundRentRate).times(groundRentFactor);
+        groundRent = totalArea.multiply(groundRentRate).multiply(groundRentFactor);
 
-        return groundRent;
+        return new Money(groundRent);
     }
 }
