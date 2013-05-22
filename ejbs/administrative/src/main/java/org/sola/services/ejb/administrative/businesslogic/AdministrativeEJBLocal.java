@@ -35,6 +35,8 @@ import javax.ejb.Local;
 import org.sola.services.common.br.ValidationResult;
 import org.sola.services.common.ejbs.AbstractSolaTransactionEJBLocal;
 import org.sola.services.ejb.administrative.repository.entities.*;
+//import org.sola.services.ejb.search.repository.entities.DisputeSearchParams;
+import org.sola.services.ejb.source.repository.entities.Source;
 
 /**
  * Provides local interface for the {@linkplain AdministrativeEJB}
@@ -59,7 +61,7 @@ public interface AdministrativeEJBLocal extends AbstractSolaTransactionEJBLocal 
      * AdministrativeEJB.getLeaseConditions}
      */
     List<LeaseCondition> getLeaseConditions(String languageCode);
-    
+
     /**
      * see {@linkplain AdministrativeEJB#getMortgageTypes(java.lang.String)
      * AdministrativeEJB.getMortgageTypes}
@@ -171,12 +173,109 @@ public interface AdministrativeEJBLocal extends AbstractSolaTransactionEJBLocal 
      */
     List<SysRegPubDisStateLand> getSysRegPubDisStateLandByLocation(String searchString, String languageCode);
 
-    List<ValidationResult> publicDisplay(String params, String languageCode) ;
-    
+    List<ValidationResult> publicDisplay(String params, String languageCode);
+
     List<SysRegManagement> getSysRegManagement(SysRegManagementParams params, String languageCode);
-    
+
     List<SysRegStatus> getSysRegStatus(SysRegManagementParams params, String languageCode);
-    
+
     List<SysRegProgress> getSysRegProgress(SysRegManagementParams params, String languageCode);
+
+    /**
+     * THORISO - LEGAL
+     *
+     */
     
+    
+    /**
+     * See {@linkplain AdministrativeEJB#getDisputeById(java.lang.String)
+     * AdministrativeEJB.getDisputeById}.
+     */
+    Dispute getDisputeById(String id);
+   
+      /**
+     * See {@linkplain AdministrativeEJB#getDisputeByNr(java.lang.String)
+     * AdministrativeEJB.getDisputeByNr}.
+     */
+    Dispute getDisputeByNr(String nr);
+    /**
+     * See {@linkplain AdministrativeEJB#getDispute(java.lang.String)
+     * AdministrativeEJB.getDispute}.
+     */
+    
+    Dispute getDispute();
+    
+    /**
+     * See {@linkplain AdministrativeEJB#getDisputeByUser(java.lang.String)
+     * AdministrativeEJB.getDisputeByUser}.
+     */
+     Dispute getDisputeByUser(String userId);
+    /**
+     * see {@linkplain AdministrativeEJB#getDisputeAction(java.lang.String)
+     * AdministrativeEJB.getDisputeAction}
+     */
+    List<DisputeAction> getDisputeAction(String languageCode);
+
+    /**
+     * see {@linkplain AdministrativeEJB#getDisputeCategory(java.lang.String)
+     * AdministrativeEJB.getDisputeCategory}
+     */
+    List<DisputeCategory> getDisputeCategory(String languageCode);
+    
+       /**
+     * see {@linkplain AdministrativeEJB#getDisputeType(java.lang.String)
+     * AdministrativeEJB.getDisputeType}
+     */
+    List<DisputeType> getDisputeType(String languageCode);
+
+    /**
+     * see {@linkplain AdministrativeEJB#getDisputeStatus(java.lang.String)
+     * AdministrativeEJB.getDisputeStatus}
+     */
+    List<DisputeStatus> getDisputeStatus(String languageCode);
+
+    /**
+     * see {@linkplain AdministrativeEJB#getOtherAuthorities(java.lang.String)
+     * AdministrativeEJB.getOtherAuthorities}
+     */
+    List<OtherAuthorities> getOtherAuthorities(String languageCode);
+
+    /**
+     * see {@linkplain AdministrativeEJB#getDisputeCommentsById(java.lang.String)
+     * AdministrativeEJB.getDisputeCommentsById}
+     */
+    DisputeComments getDisputeCommentsById(String id);
+    
+
+    /**
+     * see {@linkplain AdministrativeEJB#createDispute(java.lang.String,
+     * org.sola.services.ejb.administrative.repository.entities.Dispute)
+     * AdministrativeEJB.createDispute}
+     */
+    Dispute createDispute(Dispute dispute);
+
+    /**
+     * See {@linkplain AdministrativeEJB#saveDispute(java.lang.String,
+     * org.sola.services.ejb.administrative.repository.entities.Dispute)
+     * AdministrativeEJB.saveDispute}
+     */
+    Dispute saveDispute(Dispute dispute);
+
+    /**
+     * See {@linkplain AdministrativeEJB#saveDispute(java.lang.String,
+     * org.sola.services.ejb.administrative.repository.entities.Dispute)
+     * AdministrativeEJB.saveDispute}
+     */
+    DisputeComments saveDisputeComments(DisputeComments disputeComments);
+    /**
+     * see {@linkplain AdministrativeEJB#getDisputePartyById(java.lang.String)
+     * AdministrativeEJB.getDisputePartyById}
+     */
+    DisputeParty getDisputePartyById(String id);
+    /**
+     * See {@linkplain AdministrativeEJB#saveDisputeParty(java.lang.String,
+     * org.sola.services.ejb.administrative.repository.entities.DisputeParty)
+     * AdministrativeEJB.saveDisputeParty}
+     */
+    DisputeParty saveDisputeParty(DisputeParty disputeParty);
 }

@@ -29,8 +29,10 @@
  */
 package org.sola.services.ejb.search.repository;
 
+import java.util.Date;
 import static org.apache.ibatis.jdbc.SqlBuilder.*;
 import org.sola.services.ejb.search.repository.entities.BaUnitSearchResult;
+import org.sola.services.ejb.search.repository.entities.DisputeSearchResult;
 
 /**
  *
@@ -442,4 +444,6 @@ public class SearchSqlProvider {
         sql = SQL();
         return sql;
     }
+    
+    
 }
