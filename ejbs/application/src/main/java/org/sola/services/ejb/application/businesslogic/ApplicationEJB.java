@@ -245,6 +245,7 @@ public class ApplicationEJB extends AbstractEJB implements ApplicationEJBLocal {
 
         String landGradeCode = "";
         String landUseCode = "";
+        String valuationZone = "";
 
         BigDecimal totalArea = BigDecimal.ZERO;
 
@@ -273,6 +274,9 @@ public class ApplicationEJB extends AbstractEJB implements ApplicationEJBLocal {
                 }
                 if (cadastre.getValuationAmount() != null) {
                     totalValue = new Money(cadastre.getValuationAmount().abs());
+                }
+                if(cadastre.getValuationZone() != null){
+                    valuationZone = cadastre.getValuationZone();
                 }
                 spatialValueArea = cadastreEJB.getSpatialValueArea(cadastre.getId());
                 if (spatialValueArea != null){
@@ -304,7 +308,7 @@ public class ApplicationEJB extends AbstractEJB implements ApplicationEJBLocal {
                             if (RequestType.NEW_LEASE.equals(type.getCode())) {
                                 serviceFee = determineServiceFee(landUseCode, landGradeCode);
                                 stampDuty = calculateDuty(AdminFeeType.STAMP_DUTY, totalValue);
-                                groundRent = calculateGroundRent(landUseCode, landGradeCode, landUseCode, totalArea);
+                                groundRent = calculateGroundRent(landUseCode, landGradeCode, valuationZone, totalArea);
                             }
 
                             break;
@@ -1439,7 +1443,7 @@ public class ApplicationEJB extends AbstractEJB implements ApplicationEJBLocal {
 
     private Money calculateGroundRent(String landUse, String landGrade, String valuationZoneCode, BigDecimal totalArea) {
         
-        BigDecimal groundRent;
+        Money groundRent = new Money(BigDecimal.ONE);
 
         BigDecimal groundRentRate;
 
@@ -1466,8 +1470,8 @@ public class ApplicationEJB extends AbstractEJB implements ApplicationEJBLocal {
         }
 
 
-        groundRent = totalArea.multiply(groundRentRate).multiply(groundRentFactor);
+        groundRent = groundRent.times(totalArea).times(groundRentRate).times(groundRentFactor);
 
-        return new Money(groundRent);
+        return groundRent;
     }
 }
