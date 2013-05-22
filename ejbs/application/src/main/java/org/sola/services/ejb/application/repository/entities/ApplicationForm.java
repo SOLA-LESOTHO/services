@@ -9,7 +9,7 @@ import org.sola.services.common.repository.DefaultSorter;
 import org.sola.services.common.repository.entities.AbstractCodeEntity;
 import javax.persistence.Table;
 import javax.persistence.Column;
-@Table(name = "client_type", schema = "external")
+@Table(name = "application_form", schema = "application")
 @DefaultSorter(sortString="display_value")    
 public class ApplicationForm extends AbstractCodeEntity{
 
