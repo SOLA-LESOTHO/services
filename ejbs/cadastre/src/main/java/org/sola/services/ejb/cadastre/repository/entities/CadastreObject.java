@@ -126,6 +126,8 @@ public class CadastreObject extends AbstractVersionedEntity {
     private List<SpatialValueArea> spatialValueAreaList;
     @Column(name = "land_use_code")
     private String landUseCode;
+    @Column(name = "land_grade_code")
+    private String landGradeCode;
     @Column(name="survey_date")
     private Date surveyDate;
     @Column(name="surveyor")
@@ -140,6 +142,14 @@ public class CadastreObject extends AbstractVersionedEntity {
     @ChildEntityList(parentIdField = "cadastreObjectId", childIdField = "addressId",
     manyToManyClass = AddressForCadastreObject.class)
     private List<Address> addressList;
+
+    public String getLandGradeCode() {
+        return landGradeCode;
+    }
+
+    public void setLandGradeCode(String landGradeCode) {
+        this.landGradeCode = landGradeCode;
+    }
     
     public String getLandUseCode() {
         return landUseCode;

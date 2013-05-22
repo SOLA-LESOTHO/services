@@ -41,6 +41,24 @@ import org.sola.services.ejb.cadastre.repository.entities.*;
 public interface CadastreEJBLocal extends AbstractEJBLocal {
 
     /**
+     * See {@linkplain CadastreEJB#getMultiplicationFacotr(java.lang.String, java.lang.String, java.lang.String)
+     * CadastreEJB.getCadastreObjectTypes}.
+     */
+    GroundRentMultiplicationFactor getMultiplicationFacotr(String landUseCode, String landGradeCode, String valuationZoneCode);
+
+    /**
+     * See {@linkplain CadastreEJB#getLandGradeTypes(java.lang.String)
+     * CadastreEJB.getCadastreObjectTypes}.
+     */
+    List<LandGradeType> getLandGradeTypes(String languageCode);
+
+    /**
+     * See {@linkplain CadastreEJB#getLandUseGrade(java.lang.String, java.lang.String)
+     * CadastreEJB.getCadastreObjectTypes}.
+     */
+    LandUseGrade getLandUseGrade(String landUseCode, String landGradeCode);
+
+    /**
      * See {@linkplain CadastreEJB#getLandUseTypes(java.lang.String)
      * CadastreEJB.getCadastreObjectTypes}.
      */
@@ -163,12 +181,10 @@ public interface CadastreEJBLocal extends AbstractEJBLocal {
      */
     List<SpatialUnitTemporary> getSpatialUnitTemporaryListByTransaction(
             String transactionId);
-    
+
     /**
      * see {@linkplain CadastreEJB#getSpatialValueArea(java.lang.String)
      * CadastreEJB.getSpatialValueArea}
      */
     public SpatialValueArea getSpatialValueArea(String colist);
-
-   
 }
