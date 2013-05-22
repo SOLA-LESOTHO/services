@@ -35,7 +35,7 @@ import javax.ejb.Local;
 import org.sola.services.common.br.ValidationResult;
 import org.sola.services.common.ejbs.AbstractSolaTransactionEJBLocal;
 import org.sola.services.ejb.administrative.repository.entities.*;
-import org.sola.services.ejb.search.repository.entities.DisputeSearchParams;
+//import org.sola.services.ejb.search.repository.entities.DisputeSearchParams;
 import org.sola.services.ejb.source.repository.entities.Source;
 
 /**
