@@ -27,6 +27,8 @@ public class CadastreObjectSearchResult extends AbstractVersionedEntity {
     private String statusCode;
     @Column(name = "land_use_code")
     private String landUseCode;
+    @Column(name = "land_grade_code")
+    private String landGradeCode;
     @Column(name="survey_date")
     private Date surveyDate;
     @Column(name="survey_fee")
@@ -50,7 +52,7 @@ public class CadastreObjectSearchResult extends AbstractVersionedEntity {
             + "(SELECT size FROM cadastre.spatial_value_area cov WHERE cov.spatial_unit_id = co.id AND type_code='officialArea' LIMIT 1) AS area, "
             + "(SELECT string_agg(ad.description, ', ') FROM address.address ad INNER JOIN cadastre.spatial_unit_address sad "
             + "  ON ad.id = sad.spatial_unit_id WHERE sa.spatial_unit_id = co.id) AS address, "
-            + "co.source_reference, co.land_use_code, co.valuation_amount, co.status_code, co.rowversion, co.change_user, co.rowidentifier "
+            + "co.source_reference, co.land_use_code, co.land_grade_code, co.valuation_amount, co.status_code, co.rowversion, co.change_user, co.rowidentifier "
             + "FROM cadastre.cadastre_object co LEFT JOIN cadastre.spatial_unit_address sa ON co.id = sa.spatial_unit_id "
             + "LEFT JOIN address.address a ON sa.address_id = a.id "
             + "WHERE POSITION(LOWER(#{" + PARAM_NAME_FIRST_PART + "}) IN LOWER(co.name_firstpart)) > 0 AND "
@@ -104,6 +106,14 @@ public class CadastreObjectSearchResult extends AbstractVersionedEntity {
         this.landUseCode = landUseCode;
     }
 
+    public String getLandGradeCode() {
+        return landGradeCode;
+    }
+
+    public void setLandGradeCode(String landGradeCode) {
+        this.landGradeCode = landGradeCode;
+    }
+       
     public String getNameFirstpart() {
         return nameFirstpart;
     }
