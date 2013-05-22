@@ -31,6 +31,7 @@
  */
 package org.sola.services.ejb.administrative.repository.entities;
 
+import java.util.Date;
 import javax.persistence.Column;
 import javax.persistence.Id;
 import javax.persistence.Table;
@@ -40,22 +41,25 @@ import org.sola.services.common.repository.entities.AbstractVersionedEntity;
 import org.sola.services.ejb.system.br.Result;
 import org.sola.services.ejb.system.businesslogic.SystemEJBLocal;
 
+
 /**
  * This Entity represents the administrative.dispute_comments table.
  * @author thoriso
  */
 
 @Table(name = "dispute_comments", schema = "administrative")
-@DefaultSorter(sortString="dispute_id, dispute_status")
+@DefaultSorter(sortString="dispute_id, dispute_action")
 public class DisputeComments extends AbstractVersionedEntity {
 
     @Id
     @Column(name = "id")
     private String id;
-    @Column(name = "dispute_id")
-    private String disputeId;
-    @Column(name = "dispute_status")
-    private String disputeStatus;
+    @Column(name = "dispute_nr")
+    private String disputeNr;
+    @Column(name = "update_date", updatable = false, insertable = false)
+    private Date updateDate;
+    @Column(name = "dispute_action_code")
+    private String disputeActionCode;
     @Column(name = "comments")
     private String comments;
     @Column(name = "updated_by")
@@ -71,23 +75,24 @@ public class DisputeComments extends AbstractVersionedEntity {
         this.comments = comments;
     }
 
-    public String getDisputeId() {
-        return disputeId;
+    public String getDisputeNr() {
+        return disputeNr;
     }
 
-    public void setDisputeId(String disputeId) {
-        this.disputeId = disputeId;
+    public void setDisputeNr(String disputeNr) {
+        this.disputeNr = disputeNr;
     }
 
-    public String getDisputeStatus() {
-        return disputeStatus;
+    public String getDisputeActionCode() {
+        return disputeActionCode;
     }
 
-    public void setDisputeStatus(String disputeStatus) {
-        this.disputeStatus = disputeStatus;
+    public void setDisputeActionCode(String disputeActionCode) {
+        this.disputeActionCode = disputeActionCode;
     }
 
     public String getId() {
+        id = id == null ? generateId() : id;
         return id;
     }
 
@@ -109,6 +114,14 @@ public class DisputeComments extends AbstractVersionedEntity {
 
     public void setUpdatedBy(String updatedBy) {
         this.updatedBy = updatedBy;
+    }
+
+    public Date getUpdateDate() {
+        return updateDate;
+    }
+
+    public void setUpdateDate(Date updateDate) {
+        this.updateDate = updateDate;
     }
     
 }

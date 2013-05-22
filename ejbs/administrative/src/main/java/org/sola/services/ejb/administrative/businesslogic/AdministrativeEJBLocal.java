@@ -245,6 +245,7 @@ public interface AdministrativeEJBLocal extends AbstractSolaTransactionEJBLocal 
      * AdministrativeEJB.getDisputeCommentsById}
      */
     DisputeComments getDisputeCommentsById(String id);
+    
 
     /**
      * see {@linkplain AdministrativeEJB#createDispute(java.lang.String,
@@ -266,4 +267,15 @@ public interface AdministrativeEJBLocal extends AbstractSolaTransactionEJBLocal 
      * AdministrativeEJB.saveDispute}
      */
     DisputeComments saveDisputeComments(DisputeComments disputeComments);
+    /**
+     * see {@linkplain AdministrativeEJB#getDisputePartyById(java.lang.String)
+     * AdministrativeEJB.getDisputePartyById}
+     */
+    DisputeParty getDisputePartyById(String id);
+    /**
+     * See {@linkplain AdministrativeEJB#saveDisputeParty(java.lang.String,
+     * org.sola.services.ejb.administrative.repository.entities.DisputeParty)
+     * AdministrativeEJB.saveDisputeParty}
+     */
+    DisputeParty saveDisputeParty(DisputeParty disputeParty);
 }

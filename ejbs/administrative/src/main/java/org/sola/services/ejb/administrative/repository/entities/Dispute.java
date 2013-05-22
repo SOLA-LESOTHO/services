@@ -36,7 +36,7 @@ package org.sola.services.ejb.administrative.repository.entities;
 import javax.persistence.Column;
 import javax.persistence.Id;
 import javax.persistence.Table;
-import org.sola.services.common.repository.AccessFunctions;
+import java.util.Date;
 import org.sola.services.common.repository.DefaultSorter;
 import org.sola.services.common.repository.RepositoryUtility;
 import org.sola.services.common.repository.entities.AbstractVersionedEntity;
@@ -51,41 +51,36 @@ import org.sola.services.ejb.system.businesslogic.SystemEJBLocal;
 @Table(name = "dispute", schema = "administrative")
 @DefaultSorter(sortString = "lodgement_date, nr")
 public class Dispute extends AbstractVersionedEntity {
-    
+
     public static final String QUERY_PARAMETER_USERID = "userId";
     public static final String QUERY_WHERE_BYUSERID = "user_id = "
-           + "#{" + QUERY_PARAMETER_USERID + "}";
+            + "#{" + QUERY_PARAMETER_USERID + "}";
     @Id
     @Column(name = "id")
     private String id;
     @Column(name = "nr")
     private String nr;
-    @Column(name = "lodgement_date")
-    private String lodgementDate;
-    @Column(name = "completion_date")
-    private String completiondate;
-    @Column(name = "dispute_category")
-    private String disputeCategory;
-    @Column(name = "dispute_type")
-    private String disputeType;
+    @Column(name = "lodgement_date", updatable = false, insertable = false)
+    private Date lodgementDate;
+    @Column(name = "completion_date", updatable = false, insertable = false)
+    private Date completiondate;
+    @Column(name = "dispute_category_code")
+    private String disputeCategoryCode;
+    @Column(name = "dispute_type_code")
+    private String disputeTypeCode;
     @Column(name = "status_code", updatable = false)
     private String statusCode;
-    @Column(name = "application_id")
-    private String applicationId;
     @Column(name = "rrr_id")
     private String rrrId;
     @Column(name = "plot_location")
     private String plotLocation;
     @Column(name = "cadastre_object_id")
     private String cadastreObjectId;
-    //@Column(name = "user_id")
-    private String userId;
-    
-
-     public Dispute() {
+   
+    public Dispute() {
         super();
     }
-    
+
     private String generateDisputeNumber() {
         String result = "";
         SystemEJBLocal systemEJB = RepositoryUtility.tryGetEJB(SystemEJBLocal.class);
@@ -98,14 +93,6 @@ public class Dispute extends AbstractVersionedEntity {
         return result;
     }
 
-    public String getApplicationId() {
-        return applicationId;
-    }
-
-    public void setApplicationId(String applicationId) {
-        this.applicationId = applicationId;
-    }
-
     public String getCadastreObjectId() {
         return cadastreObjectId;
     }
@@ -114,35 +101,35 @@ public class Dispute extends AbstractVersionedEntity {
         this.cadastreObjectId = cadastreObjectId;
     }
 
-    public String getDisputeCategory() {
-        return disputeCategory;
+    public String getDisputeCategoryCode() {
+        return disputeCategoryCode;
     }
 
-    public void setDisputeCategory(String disputeCategory) {
-        this.disputeCategory = disputeCategory;
+    public void setDisputeCategoryCode(String disputeCategoryCode) {
+        this.disputeCategoryCode = disputeCategoryCode;
     }
 
-    public String getDisputeType() {
-        return disputeType;
+    public String getDisputeTypeCode() {
+        return disputeTypeCode;
     }
 
-    public void setDisputeType(String disputeType) {
-        this.disputeType = disputeType;
+    public void setDisputeTypeCode(String disputeTypeCode) {
+        this.disputeTypeCode = disputeTypeCode;
     }
 
-    public String getLodgementDate() {
+    public Date getLodgementDate() {
         return lodgementDate;
     }
 
-    public void setLodgementDate(String lodgementDate) {
+    public void setLodgementDate(Date lodgementDate) {
         this.lodgementDate = lodgementDate;
     }
 
-    public String getCompletiondate() {
+    public Date getCompletiondate() {
         return completiondate;
     }
 
-    public void setCompletiondate(String completiondate) {
+    public void setCompletiondate(Date completiondate) {
         this.completiondate = completiondate;
     }
 
@@ -170,16 +157,6 @@ public class Dispute extends AbstractVersionedEntity {
         this.rrrId = rrrId;
     }
 
-  /*  public String getPendingActionCode() {
-        return pendingActionCode;
-    }
-
-    public void setPendingActionCode(String pendingActionCode) {
-        this.pendingActionCode = pendingActionCode;
-    }
-    * 
-    */
-
     public String getStatusCode() {
         return statusCode;
     }
@@ -200,14 +177,6 @@ public class Dispute extends AbstractVersionedEntity {
     public void setId(String id) {
         this.id = id;
     }
-
-    //public String getUserId() {
-   //     return userId;
-   // }
-
-   // public void setUserId(String userId) {
-   //     this.userId = userId;
-   // }
 
     @Override
     public void preSave() {

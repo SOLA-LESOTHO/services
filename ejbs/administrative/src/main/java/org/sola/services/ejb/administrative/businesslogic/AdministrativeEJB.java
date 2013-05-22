@@ -34,6 +34,7 @@ import java.util.*;
 import javax.annotation.security.RolesAllowed;
 import javax.ejb.EJB;
 import javax.ejb.Stateless;
+import org.sola.common.DateUtility;
 import org.sola.common.RolesConstants;
 import org.sola.services.common.EntityAction;
 import org.sola.services.common.LocalInfo;
@@ -706,6 +707,18 @@ public class AdministrativeEJB extends AbstractEJB
     public Dispute getDisputeByNr(String nr) {
         return getRepository().getEntity(Dispute.class, nr);
     }
+    /**
+     * Returns the details for the specified Dispute Party.
+     *
+     * <p>No role is required to execute this method.</p>
+     *
+     * @param Id The identifier of the source to retrieve.
+     */
+    @Override
+    public DisputeParty getDisputePartyById(String id) {
+        return getRepository().getEntity(DisputeParty.class, id);
+    }
+
 
     @Override
     public Dispute getDisputeByUser(String userId) {
@@ -736,6 +749,14 @@ public class AdministrativeEJB extends AbstractEJB
     public Dispute createDispute(Dispute dispute) {
         if (dispute == null) {
             return null;
+        }
+        
+        if (dispute.getLodgementDate() == null) {
+            dispute.setLodgementDate(DateUtility.now());
+        }
+        
+        if (dispute.getCompletiondate() == null){
+            dispute.setCompletiondate(DateUtility.now());
         }
         return saveDispute(dispute);
     }
@@ -819,5 +840,18 @@ public class AdministrativeEJB extends AbstractEJB
     @Override
     public List<OtherAuthorities> getOtherAuthorities(String languageCode) {
         return getRepository().getCodeList(OtherAuthorities.class, languageCode);
+    }
+    
+     /**
+     * Saves any updates to Dispute Party.
+     */
+    @Override
+    @RolesAllowed(RolesConstants.ADMINISTRATIVE_DISPUTE_PARTY_SAVE)
+    public DisputeParty saveDisputeParty(DisputeParty disputeParty) {
+        if (disputeParty == null) {
+            return null;
+        }
+
+        return getRepository().saveEntity(disputeParty);
     }
 }
