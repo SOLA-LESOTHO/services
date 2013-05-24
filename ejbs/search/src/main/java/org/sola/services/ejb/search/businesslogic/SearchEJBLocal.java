@@ -186,6 +186,16 @@ public interface SearchEJBLocal extends AbstractEJBLocal {
      */
     byte[] getExtentOfPublicDisplayMap(String nameLastPart);
     
+    
+    /*
+     * LAA - Additions by Thoriso
+     */
+    
+        /**
+     * See {@linkplain SearchEJB#searchDispute(org.sola.services.ejb.search.repository.entities.DisputeSearchParams)
+     * SearchEJB.searchDispute}.
+     */
+    List<DisputeSearchResult> searchDispute(DisputeSearchParams searchParams);
     /**
      * See {@linkplain SearchEJB#searchCadastreObjects(org.sola.services.ejb.search.repository.entities.CadastreObjectSearchParams)}.
      */
