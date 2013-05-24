@@ -138,6 +138,8 @@ public class CadastreObject extends AbstractVersionedEntity {
     private BigDecimal valuationAmount;
     @Column(name="survey_fee")
     private BigDecimal surveyFee;
+    @Column(name="valuation_zone")
+    private String valuationZone;
     @ExternalEJB(ejbLocalClass = AddressEJBLocal.class, loadMethod = "getAddresses", saveMethod="saveAddress")
     @ChildEntityList(parentIdField = "cadastreObjectId", childIdField = "addressId",
     manyToManyClass = AddressForCadastreObject.class)
@@ -304,6 +306,14 @@ public class CadastreObject extends AbstractVersionedEntity {
         this.addressList = addressList;
     }
 
+    public String getValuationZone() {
+        return valuationZone;
+    }
+
+    public void setValuationZone(String valuationZone) {
+        this.valuationZone = valuationZone;
+    }
+ 
     /**
      * Sets the transaction Id on the entity prior to save.
      */
