@@ -1,26 +1,30 @@
 /**
  * ******************************************************************************************
- * Copyright (C) 2012 - Food and Agriculture Organization of the United Nations (FAO). All rights
- * reserved.
+ * Copyright (C) 2012 - Food and Agriculture Organization of the United Nations
+ * (FAO). All rights reserved.
  *
- * Redistribution and use in source and binary forms, with or without modification, are permitted
- * provided that the following conditions are met:
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
  *
- * 1. Redistributions of source code must retain the above copyright notice,this list of conditions
- * and the following disclaimer. 2. Redistributions in binary form must reproduce the above
- * copyright notice,this list of conditions and the following disclaimer in the documentation and/or
- * other materials provided with the distribution. 3. Neither the name of FAO nor the names of its
- * contributors may be used to endorse or promote products derived from this software without
- * specific prior written permission.
+ * 1. Redistributions of source code must retain the above copyright notice,this
+ * list of conditions and the following disclaimer. 2. Redistributions in binary
+ * form must reproduce the above copyright notice,this list of conditions and
+ * the following disclaimer in the documentation and/or other materials provided
+ * with the distribution. 3. Neither the name of FAO nor the names of its
+ * contributors may be used to endorse or promote products derived from this
+ * software without specific prior written permission.
  *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR
- * IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND
- * FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR
- * CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
- * DAMAGES (INCLUDING, BUT NOT LIMITED TO,PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
- * DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
- * WHETHER IN CONTRACT,STRICT LIABILITY,OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY
- * WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
+ * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+ * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,PROCUREMENT OF
+ * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+ * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+ * CONTRACT,STRICT LIABILITY,OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING
+ * IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+ * POSSIBILITY OF SUCH DAMAGE.
  * *********************************************************************************************
  */
 /*
@@ -31,6 +35,8 @@ package org.sola.services.ejb.search.repository;
 
 import java.util.Date;
 import static org.apache.ibatis.jdbc.SqlBuilder.*;
+import org.sola.common.StringUtility;
+import org.sola.services.ejb.search.repository.entities.BaUnitSearchParams;
 import org.sola.services.ejb.search.repository.entities.BaUnitSearchResult;
 import org.sola.services.ejb.search.repository.entities.DisputeSearchResult;
 
@@ -48,7 +54,6 @@ public class SearchSqlProvider {
     private static final String SOURCE_GROUP = "Source";
     private static final String AGENT_GROUP = "Agent";
     private static final String CONTACT_PERSON_GROUP = "Contact person";
-    
     private static final String CHANGE_ACTION = "changed";
     private static final String ADDED_PROPERTY = "ADDED PROPERTY: ";
     private static final String DELETED_PROPERTY = "DELETED PROPERTY: ";
@@ -59,7 +64,6 @@ public class SearchSqlProvider {
     private static final String ADDED_CONTACT_PERSON = "ADDED CONTACT PERSON: ";
     private static final String DELETED_CONTACT_PERSON = "REMOVED CONTACT PERSON: ";
 
-    
     public static String buildApplicationLogSql() {
         String sql;
         int sortClassifier = 1;
@@ -159,32 +163,6 @@ public class SearchSqlProvider {
         WHERE("ser.application_id = #{" + PARAM_APPLICATION_ID + "}");
         WHERE("ser_hist.rowidentifier = ser.rowidentifier");
 
-//        sql = sql + SQL() + " UNION ";
-//        sortClassifier++;
-
-//        // RRR
-//        BEGIN();
-//        SELECT("'" + RRR_GROUP + "' AS record_group");
-//        SELECT("rrr.type_code AS record_type");
-//        SELECT(sortClassifier + " as sort_classifier");
-//        SELECT("rrr.id AS record_id");       
-//        SELECT("rrr.rowversion AS record_sequence");
-//        SELECT("rrr.nr::text AS nr");
-//        SELECT("'changesMade'  AS action_code");
-//        SELECT("note.notation_text AS notation");
-//        SELECT("COALESCE(note.change_time, rrr.change_time) AS change_time");
-//        SELECT("(SELECT (appuser.first_name::text || ' '::text) || appuser.last_name::text"
-//                + " FROM system.appuser"
-//                + " WHERE appuser.username::text = COALESCE(note.change_user, rrr.change_user))"
-//                + " AS user_fullname");
-//        FROM("application.service ser");
-//        FROM("transaction.transaction tran");
-//        FROM("administrative.rrr LEFT JOIN administrative.notation note ON "
-//                + " rrr.id = note.rrr_id");
-//        WHERE("ser.application_id = #{" + PARAM_APPLICATION_ID + "}");
-//        WHERE("tran.from_service_id = ser.id");
-//        WHERE("rrr.transaction_id = tran.id");
-         
         sql = sql + SQL() + " UNION ";
         sortClassifier++;
 
@@ -193,20 +171,20 @@ public class SearchSqlProvider {
         SELECT("'" + PROPERTY_GROUP + "' AS record_group");
         SELECT("'" + PROPERTY_GROUP + "' AS record_type");
         SELECT(sortClassifier + " as sort_classifier");
-        SELECT("prop1.id AS record_id");
+        SELECT("prop1.ba_unit_id AS record_id");
         SELECT("prop1.rowversion AS record_sequence");
         SELECT("''::text AS nr");
-        SELECT("replace(prop1.change_action,'i','" + ADDED_PROPERTY + "')||prop1.name_firstpart||'/'||prop1.name_lastpart AS action_code");
+        SELECT("replace(prop1.change_action,'i','" + ADDED_PROPERTY + "')||pb.name_firstpart||'-'||pb.name_lastpart AS action_code");
         SELECT("NULL::text AS notation");
         SELECT("prop1.change_time");
         SELECT("(SELECT (appuser.first_name::text || ' '::text) || appuser.last_name::text"
                 + " FROM system.appuser"
                 + " WHERE appuser.username::text = prop1.change_user::text)"
                 + " AS user_fullname");
-        FROM("application.application_property prop1 ");
+        FROM("application.application_property prop1 LEFT JOIN administrative.ba_unit pb ON prop1.ba_unit_id=pb.id ");
         WHERE("prop1.application_id = #{" + PARAM_APPLICATION_ID + "}");
-        
-         sql = sql + SQL() + " UNION ";
+
+        sql = sql + SQL() + " UNION ";
         sortClassifier++;
 
         // Application property History
@@ -214,11 +192,11 @@ public class SearchSqlProvider {
         SELECT("'" + PROPERTY_GROUP + "' AS record_group");
         SELECT("'" + PROPERTY_GROUP + "' AS record_type");
         SELECT(sortClassifier + " as sort_classifier");
-        SELECT("prop_hist.id AS record_id");
+        SELECT("prop_hist.ba_unit_id AS record_id");
         SELECT("prop_hist.rowversion AS record_sequence");
         SELECT("''::text AS nr");
-        SELECT("CASE WHEN prop_hist.change_action = 'i' then replace(prop_hist.change_action,'i','" + ADDED_PROPERTY + "')||' - '|| prop_hist.name_firstpart|| '/'||prop_hist.name_lastpart"
-                + "  WHEN prop_hist.change_action = 'd' then replace(prop_hist.change_action,'d','" + DELETED_PROPERTY + "')||' - '|| prop_hist.name_firstpart|| '/'||prop_hist.name_lastpart"
+        SELECT("CASE WHEN prop_hist.change_action = 'i' then replace(prop_hist.change_action,'i','" + ADDED_PROPERTY + "')||' - '|| pbh.name_firstpart|| '-'||pbh.name_lastpart"
+                + "  WHEN prop_hist.change_action = 'd' then replace(prop_hist.change_action,'d','" + DELETED_PROPERTY + "')||' - '|| pbh.name_firstpart|| '-'||pbh.name_lastpart"
                 + "  END AS action_code");
         SELECT("NULL::text AS notation");
         SELECT("prop_hist.change_time");
@@ -226,14 +204,14 @@ public class SearchSqlProvider {
                 + " FROM system.appuser"
                 + " WHERE appuser.username::text = prop_hist.change_user::text)"
                 + " AS user_fullname");
-        FROM("application.application_property_historic prop_hist");
+        FROM("application.application_property_historic prop_hist LEFT JOIN administrative.ba_unit pbh ON prop_hist.ba_unit_id=pbh.id");
         WHERE("prop_hist.application_id = #{" + PARAM_APPLICATION_ID + "}");
-        
-        
+
+
         sql = sql + SQL() + " UNION ";
         sortClassifier++;
 
-         // SOURCE
+        // SOURCE
         BEGIN();
         SELECT("'" + SOURCE_GROUP + "' AS record_group");
         SELECT("'" + SOURCE_GROUP + "' AS record_type");
@@ -252,7 +230,7 @@ public class SearchSqlProvider {
                 + " LEFT JOIN source.source source "
                 + " ON source1.source_id = source.id ");
         WHERE("source1.application_id = #{" + PARAM_APPLICATION_ID + "}");
-        
+
         sql = sql + SQL() + " UNION ";
         sortClassifier++;
 
@@ -277,14 +255,14 @@ public class SearchSqlProvider {
                 + " LEFT JOIN source.source source "
                 + " ON source1.source_id = source.id ");
         WHERE("source1.application_id = #{" + PARAM_APPLICATION_ID + "}");
-       
-        
+
+
         sql = sql + SQL() + " UNION ";
         sortClassifier++;
 
         // AGENT 
         BEGIN();
-        
+
         SELECT("'" + AGENT_GROUP + "' AS record_group");
         SELECT("'" + AGENT_GROUP + "' AS record_type");
         SELECT(sortClassifier + " as sort_classifier");
@@ -302,13 +280,13 @@ public class SearchSqlProvider {
         FROM("party.party party");
         WHERE("app.id = #{" + PARAM_APPLICATION_ID + "}");
         WHERE("app.agent_id=party.id");
-        
+
         sql = sql + SQL() + " UNION ";
         sortClassifier++;
 
         // AGENT History
         BEGIN();
-        
+
         SELECT("'" + AGENT_GROUP + "' AS record_group");
         SELECT("'" + AGENT_GROUP + "' AS record_type");
         SELECT(sortClassifier + " as sort_classifier");
@@ -316,8 +294,8 @@ public class SearchSqlProvider {
         SELECT("app.rowversion AS record_sequence");
         SELECT("''::text AS nr");
         SELECT("CASE WHEN (app.change_action='i') then replace(party.change_action,'i','" + ADDED_AGENT + "')||' - '||coalesce(party.name,'')||' '||coalesce(party.last_name,'')"
-        + " ELSE  replace(app.change_action,app.change_action,'" + DELETED_AGENT + "')||' - '||coalesce(party.name,'')||' '||coalesce(party.last_name,'')"
-        + " END AS action_code");
+                + " ELSE  replace(app.change_action,app.change_action,'" + DELETED_AGENT + "')||' - '||coalesce(party.name,'')||' '||coalesce(party.last_name,'')"
+                + " END AS action_code");
         SELECT("NULL::text AS notation");
         SELECT("app.change_time");
         SELECT("(SELECT (appuser.first_name::text || ' '::text) || appuser.last_name::text"
@@ -325,21 +303,21 @@ public class SearchSqlProvider {
                 + " WHERE appuser.username::text = app.change_user::text)"
                 + " AS user_fullname");
         FROM("application.application new_app");
-        FROM("application.application_historic app"  
-                + " LEFT JOIN party.party party" 
-                + "  ON app.agent_id = party.id"); 
+        FROM("application.application_historic app"
+                + " LEFT JOIN party.party party"
+                + "  ON app.agent_id = party.id");
         WHERE("app.id = #{" + PARAM_APPLICATION_ID + "}");
         WHERE("app.agent_id != new_app.agent_id");
         WHERE("app.agent_id=party.id");
         WHERE("((app.rowversion - 1) = new_app.rowversion OR (app.rowversion) = new_app.rowversion)");
-       
+
         sql = sql + SQL() + " UNION ";
         sortClassifier++;
 
-        
+
         // contact_person 
         BEGIN();
-        
+
         SELECT("'" + CONTACT_PERSON_GROUP + "' AS record_group");
         SELECT("'" + CONTACT_PERSON_GROUP + "' AS record_type");
         SELECT(sortClassifier + " as sort_classifier");
@@ -357,22 +335,22 @@ public class SearchSqlProvider {
         FROM("party.party party");
         WHERE("app.id = #{" + PARAM_APPLICATION_ID + "}");
         WHERE("app.contact_person_id=party.id");
-        
+
         sql = sql + SQL() + " UNION ";
         sortClassifier++;
 
         // contact_person History
         BEGIN();
-        
+
         SELECT("'" + CONTACT_PERSON_GROUP + "' AS record_group");
         SELECT("'" + CONTACT_PERSON_GROUP + "' AS record_type");
         SELECT(sortClassifier + " as sort_classifier");
         SELECT("app.contact_person_id AS record_id");
         SELECT("app.rowversion AS record_sequence");
-        SELECT("''::text AS nr"); 
+        SELECT("''::text AS nr");
         SELECT("CASE WHEN (app.change_action='i') then replace(party.change_action,'i','" + ADDED_CONTACT_PERSON + "')||' - '||coalesce(party.name,'')||' '||coalesce(party.last_name,'')"
-        + " ELSE  replace(app.change_action,app.change_action,'" + DELETED_CONTACT_PERSON + "')||' - '||coalesce(party.name,'')||' '||coalesce(party.last_name,'')"
-        + " END AS action_code");
+                + " ELSE  replace(app.change_action,app.change_action,'" + DELETED_CONTACT_PERSON + "')||' - '||coalesce(party.name,'')||' '||coalesce(party.last_name,'')"
+                + " END AS action_code");
         SELECT("NULL::text AS notation");
         SELECT("app.change_time");
         SELECT("(SELECT (appuser.first_name::text || ' '::text) || appuser.last_name::text"
@@ -380,14 +358,14 @@ public class SearchSqlProvider {
                 + " WHERE appuser.username::text = app.change_user::text)"
                 + " AS user_fullname");
         FROM("application.application new_app");
-        FROM("application.application_historic app"  
-                + " LEFT JOIN party.party_historic party" 
-                + "  ON app.contact_person_id = party.id"); 
+        FROM("application.application_historic app"
+                + " LEFT JOIN party.party_historic party"
+                + "  ON app.contact_person_id = party.id");
         WHERE("app.id = #{" + PARAM_APPLICATION_ID + "}");
         WHERE("app.contact_person_id != new_app.contact_person_id");
         WHERE("app.contact_person_id=party.id");
         WHERE("((app.rowversion - 1) = new_app.rowversion OR (app.rowversion) = new_app.rowversion)");
-       
+
         ORDER_BY("change_time, sort_classifier, nr");
 
         sql = sql + SQL();
@@ -396,17 +374,14 @@ public class SearchSqlProvider {
     }
 
     /**
-     * Uses the BA Unit Search parameters to build an appropriate SQL Query. This method does not
-     * inject the search parameter values into the SQL as that would prevent the database from
-     * performing statement caching.
+     * Uses the BA Unit Search parameters to build an appropriate SQL Query.
+     * This method does not inject the search parameter values into the SQL as
+     * that would prevent the database from performing statement caching.
      *
-     * @param nameFirstPart The name first part search parameter value
-     * @param nameLastPart The name last part search parameter value
-     * @param owernName The owner name search parameter value
+     * @param params BaUnit search parameters
      * @return SQL String
      */
-    public static String buildSearchBaUnitSql(String nameFirstPart,
-            String nameLastPart, String owernName) {
+    public static String buildSearchBaUnitSql(BaUnitSearchParams params) {
         String sql;
         BEGIN();
         SELECT("DISTINCT prop.id");
@@ -421,22 +396,29 @@ public class SearchSqlProvider {
                 + "AND pr1.rrr_id = rrr1.id "
                 + "AND p1.id = pr1.party_id ) AS rightholders");
         FROM("administrative.ba_unit prop");
-        if (owernName != null) {
+        
+        if (params.getOwnerName() != null || !StringUtility.isEmpty(params.getLeaseNumber())) {
             FROM("administrative.rrr rrr");
-            FROM("administrative.party_for_rrr pr");
-            FROM("party.party p");
-            WHERE("rrr.ba_unit_id = prop.id");
-            WHERE("rrr.status_code = 'current'");
-            WHERE("pr.rrr_id = rrr.id");
-            WHERE("p.id = pr.party_id");
-            WHERE("compare_strings(#{" + BaUnitSearchResult.QUERY_PARAM_OWNER_NAME + "}, "
-                    + "COALESCE(p.name, '') || ' ' || COALESCE(p.last_name, '') || ' ' || COALESCE(p.alias, ''))");
+            if (!StringUtility.isEmpty(params.getLeaseNumber())) {
+                WHERE("rrr.registration_number = #{" + BaUnitSearchResult.QUERY_PARAM_LEASE_NUMBER + "}");
+            }
+            if (params.getOwnerName() != null) {
+                FROM("administrative.party_for_rrr pr");
+                FROM("party.party p");
+                WHERE("rrr.ba_unit_id = prop.id");
+                WHERE("rrr.status_code = 'current'");
+                WHERE("pr.rrr_id = rrr.id");
+                WHERE("p.id = pr.party_id");
+                WHERE("compare_strings(#{" + BaUnitSearchResult.QUERY_PARAM_OWNER_NAME + "}, "
+                        + "COALESCE(p.name, '') || ' ' || COALESCE(p.last_name, '') || ' ' || COALESCE(p.alias, ''))");
+            }
         }
-        if (nameFirstPart != null) {
+
+        if (params.getNameFirstPart() != null) {
             WHERE("compare_strings(#{" + BaUnitSearchResult.QUERY_PARAM_NAME_FIRSTPART
                     + "}, COALESCE(prop.name_firstpart, ''))");
         }
-        if (nameLastPart != null) {
+        if (params.getNameLastPart() != null) {
             WHERE("compare_strings(#{" + BaUnitSearchResult.QUERY_PARAM_NAME_LASTPART
                     + "}, COALESCE(prop.name_lastpart, ''))");
         }
@@ -444,6 +426,4 @@ public class SearchSqlProvider {
         sql = SQL();
         return sql;
     }
-    
-    
 }

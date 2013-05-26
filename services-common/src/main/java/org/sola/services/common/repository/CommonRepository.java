@@ -92,7 +92,7 @@ public interface CommonRepository {
 
     <T extends AbstractReadOnlyEntity> List<T> getEntityListByIds(Class<T> entityClass,
             List<String> ids, Map params);
-
+           
     void clearLoadInhibitors();
 
     void setLoadInhibitors(Class<?>[] entityClasses);

@@ -133,20 +133,15 @@ public class ApplicationEJBIT extends AbstractEJBTest {
         byte[] locationAsBytes = wkbWritter.write(geom);
         application.setLocation(locationAsBytes);
 
-        System.out.println("Add properties");
-        //Adding properties to the application
-        ApplicationProperty applicationProperty1 = new ApplicationProperty();
-        applicationProperty1.setNameFirstpart("first_part1");
-        applicationProperty1.setNameLastpart("last_part1");
-
-        ApplicationProperty applicationProperty2 = new ApplicationProperty();
-        applicationProperty2.setNameFirstpart("first_part2");
-        applicationProperty2.setNameLastpart("last_part2");
-
-        List<ApplicationProperty> props = new ArrayList<ApplicationProperty>();
-        props.add(applicationProperty1);
-        props.add(applicationProperty2);
-        application.setPropertyList(props);
+//        System.out.println("Add properties");
+//        //Adding properties to the application
+//        ApplicationProperty applicationProperty1 = new ApplicationProperty();
+//
+//        ApplicationProperty applicationProperty2 = new ApplicationProperty();
+//        List<ApplicationProperty> props = new ArrayList<ApplicationProperty>();
+//        props.add(applicationProperty1);
+//        props.add(applicationProperty2);
+//        application.setPropertyList(props);
 
         System.out.println("Add sources");
         Source source1 = new Source();
@@ -493,45 +488,6 @@ public class ApplicationEJBIT extends AbstractEJBTest {
         }
     }
 
-    @Test
-    @Ignore
-    public void testApplicationDeleteProperty() throws Exception {
-        if (skipIntegrationTest()) {
-            return;
-        }
-        System.out.println("testApplicationDeleteProperty");
-        String id = applicationId;
-        ApplicationEJBLocal instance = (ApplicationEJBLocal) getEJBInstance(ApplicationEJB.class.getSimpleName());
-        System.out.println("Id = " + applicationId);
-        // Manage the scope of the transction so the Application entity does not
-        // detach before the ServicesInAPplication can be lazy loadded. 
-        UserTransaction tx = getUserTransaction();
-        try {
-            tx.begin();
-            Application result = instance.getApplication(id);
-            if (result == null) {
-                System.out.println("Couldn't find app for id " + id.toString());
-            } else {
-                System.out.println("Got Application");
-
-                if (result.getPropertyList() != null) {
-                    System.out.println("Number of properties=" + result.getPropertyList().size());
-                    if (result.getPropertyList().size() > 0) {
-                        ApplicationProperty appProp = result.getPropertyList().get(0);
-                        //  appProp.setChangeAction('d');
-                        System.out.println("Changed change action status to delete ");
-                    }
-                }
-            }
-            tx.commit();
-        } finally {
-            if (tx.getStatus() != Status.STATUS_NO_TRANSACTION) {
-                tx.rollback();
-                System.out.println("Failed Transction!");
-            }
-        }
-        //this.testGetApplication();
-    }
 
     /**
      * Test of validate method, of class ApplicationEJB.
@@ -699,12 +655,10 @@ public class ApplicationEJBIT extends AbstractEJBTest {
 
 
             System.out.println(">>> Add Property & Sources");
-            ApplicationProperty prop = new ApplicationProperty();
-            prop.setNameFirstpart("first");
-            prop.setNameLastpart("last");
-            List<ApplicationProperty> props = new ArrayList<ApplicationProperty>();
-            props.add(prop);
-            result4.setPropertyList(props);
+//            ApplicationProperty prop = new ApplicationProperty();
+//            List<ApplicationProperty> props = new ArrayList<ApplicationProperty>();
+//            props.add(prop);
+//            result4.setPropertyList(props);
 
             Source source1 = new Source();
             source1.setTypeCode("title");

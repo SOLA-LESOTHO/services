@@ -160,18 +160,12 @@ public class Development extends AbstractEJBTest{
 
         System.out.println("Add properties");
         //Adding properties to the application
-        ApplicationProperty applicationProperty1 = new ApplicationProperty();
-        applicationProperty1.setNameFirstpart("first_part1");
-        applicationProperty1.setNameLastpart("last_part1");
-
-        ApplicationProperty applicationProperty2 = new ApplicationProperty();
-        applicationProperty2.setNameFirstpart("first_part2");
-        applicationProperty2.setNameLastpart("last_part2");
-
-        List<ApplicationProperty> props = new ArrayList<ApplicationProperty>();
-        props.add(applicationProperty1);
-        props.add(applicationProperty2);
-        application.setPropertyList(props);
+//        ApplicationProperty applicationProperty1 = new ApplicationProperty();
+//        ApplicationProperty applicationProperty2 = new ApplicationProperty();
+//        List<ApplicationProperty> props = new ArrayList<ApplicationProperty>();
+//        props.add(applicationProperty1);
+//        props.add(applicationProperty2);
+//        application.setPropertyList(props);
 
         System.out.println("Add sources");
         Source source1 = new Source();

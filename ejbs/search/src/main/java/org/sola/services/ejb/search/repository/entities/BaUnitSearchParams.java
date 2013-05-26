@@ -33,6 +33,7 @@ public class BaUnitSearchParams extends AbstractEntity {
     private String nameFirstPart;
     private String nameLastPart;
     private String ownerName;
+    private String leaseNumber;
     
     public BaUnitSearchParams(){
         super();
@@ -60,5 +61,13 @@ public class BaUnitSearchParams extends AbstractEntity {
 
     public void setOwnerName(String ownerName) {
         this.ownerName = ownerName;
+    }
+
+    public String getLeaseNumber() {
+        return leaseNumber;
+    }
+
+    public void setLeaseNumber(String leaseNumber) {
+        this.leaseNumber = leaseNumber;
     }
 }

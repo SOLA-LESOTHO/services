@@ -158,6 +158,8 @@ public interface SearchEJBLocal extends AbstractEJBLocal {
      */
     List<BaUnitSearchResult> searchBaUnits(BaUnitSearchParams searchParams);
 
+    List<BaUnitSearchResult> searchBaUnitsByIds(List<String> baUnitIds);
+            
     /**
      * See {@linkplain SearchEJB#getQueryListAll()
      * SearchEJB.getQueryListAll}.

@@ -698,27 +698,48 @@ public class SearchEJB extends AbstractEJB implements SearchEJBLocal {
     public List<BaUnitSearchResult> searchBaUnits(BaUnitSearchParams searchParams) {
         Map params = new HashMap<String, Object>();
 
-        if (searchParams.getNameFirstPart() != null
-                && searchParams.getNameFirstPart().trim().isEmpty()) {
-            searchParams.setNameFirstPart(null);
+        if (searchParams.getNameFirstPart() == null) {
+            searchParams.setNameFirstPart("");
         }
-        if (searchParams.getNameLastPart() != null
-                && searchParams.getNameLastPart().trim().isEmpty()) {
-            searchParams.setNameLastPart(null);
+        if (searchParams.getNameLastPart() == null) {
+            searchParams.setNameLastPart("");
         }
-        if (searchParams.getOwnerName() != null && searchParams.getOwnerName().trim().isEmpty()) {
-            searchParams.setOwnerName(null);
+        if (searchParams.getOwnerName() == null) {
+            searchParams.setOwnerName("");
+        }
+        
+        if (searchParams.getLeaseNumber() == null) {
+            searchParams.setLeaseNumber("");
         }
 
-        params.put(CommonSqlProvider.PARAM_QUERY,
-                SearchSqlProvider.buildSearchBaUnitSql(searchParams.getNameFirstPart(),
-                searchParams.getNameLastPart(), searchParams.getOwnerName()));
+        params.put(CommonSqlProvider.PARAM_QUERY, BaUnitSearchResult.QUERY_SEARCH_BY_PARAMS);
         params.put(BaUnitSearchResult.QUERY_PARAM_OWNER_NAME, searchParams.getOwnerName());
         params.put(BaUnitSearchResult.QUERY_PARAM_NAME_FIRSTPART, searchParams.getNameFirstPart());
         params.put(BaUnitSearchResult.QUERY_PARAM_NAME_LASTPART, searchParams.getNameLastPart());
+        params.put(BaUnitSearchResult.QUERY_PARAM_LEASE_NUMBER, searchParams.getLeaseNumber());
         return getRepository().getEntityList(BaUnitSearchResult.class, params);
     }
 
+    @Override
+    public List<BaUnitSearchResult> searchBaUnitsByIds(List<String> baUnitIds){
+        Map params = new HashMap<String, Object>();
+        String whereClause = "WHERE prop.id IN (";
+        
+        int i = 0;
+        for (String id : baUnitIds) {
+            whereClause = whereClause + "#{idVal" + i + "}, ";
+            params.put("idVal" + i, id);
+            i++;
+        }
+
+        whereClause = whereClause.substring(0, whereClause.length() - 2) + ")";
+        String query = BaUnitSearchResult.QUERY_SEARCH_SELECT_PART + whereClause 
+                + " ORDER BY " + BaUnitSearchResult.QUERY_ORDER_BY + "LIMIT 100";
+        
+        params.put(CommonSqlProvider.PARAM_QUERY, query);
+        return getRepository().getEntityListByIds(BaUnitSearchResult.class, baUnitIds, params);
+    }
+    
     /**
      * Retrieves the list of active spatial search options from the
      * system.map_search_option table.

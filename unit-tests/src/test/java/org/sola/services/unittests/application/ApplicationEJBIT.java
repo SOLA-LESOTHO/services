@@ -138,25 +138,6 @@ public class ApplicationEJBIT extends AbstractEJBTest {
         source2.setLaNr("lanr-2");
         source2.setTypeCode("documentDigital");
 
-//        application.addSource(source1);
-//        application.addSource(source2);
-
-
-        //Adding properties to the application
-        ApplicationProperty applicationProperty1 = new ApplicationProperty();
-        applicationProperty1.setNameFirstpart("first_part1");
-        applicationProperty1.setNameLastpart("last_part1");
-        applicationProperty1.setArea(new BigDecimal("0.23"));
-        applicationProperty1.setTotalValue(new BigDecimal("10000"));
-
-        ApplicationProperty applicationProperty2 = new ApplicationProperty();
-        applicationProperty2.setNameFirstpart("first_part2");
-        applicationProperty2.setNameLastpart("last_part2");
-        applicationProperty2.setTotalValue(new BigDecimal("12300"));
-
-//        application.addProperty(applicationProperty1);
-//        application.addProperty(applicationProperty2);
-
         ApplicationEJBLocal instance = (ApplicationEJBLocal) getEJBInstance(APP_MODULE_NAME,
                 ApplicationEJB.class.getSimpleName());
         PartyEJBLocal partyEJB = (PartyEJBLocal) getEJBInstance(PARTY_MODULE_NAME,
@@ -384,46 +365,5 @@ public class ApplicationEJBIT extends AbstractEJBTest {
                 System.out.println("Failed Transction!");
             }
         }
-    }
-
-    @Test
-    @Ignore
-    public void testApplicationDeleteProperty() throws Exception {
-        if (skipIntegrationTest()) {
-            return;
-        }
-        System.out.println("testApplicationDeleteProperty");
-        String id = applicationId;
-        ApplicationEJBLocal instance = (ApplicationEJBLocal) getEJBInstance(APP_MODULE_NAME,
-                ApplicationEJB.class.getSimpleName());
-        System.out.println("Id = " + applicationId);
-        // Manage the scope of the transction so the Application entity does not
-        // detach before the ServicesInAPplication can be lazy loadded. 
-        UserTransaction tx = getUserTransaction();
-        try {
-            tx.begin();
-            Application result = instance.getApplication(id);
-            if (result == null) {
-                System.out.println("Couldn't find app for id " + id.toString());
-            } else {
-                System.out.println("Got Application");
-
-                if (result.getPropertyList() != null) {
-                    System.out.println("Number of properties=" + result.getPropertyList().size());
-                    if (result.getPropertyList().size() > 0) {
-                        ApplicationProperty appProp = result.getPropertyList().get(0);
-                       // appProp.setChangeAction('d');
-                        System.out.println("Changed change action status to delete ");
-                    }
-                }
-            }
-            tx.commit();
-        } finally {
-            if (tx.getStatus() != Status.STATUS_NO_TRANSACTION) {
-                tx.rollback();
-                System.out.println("Failed Transction!");
-            }
-        }
-        //this.testGetApplication();
     }
 }

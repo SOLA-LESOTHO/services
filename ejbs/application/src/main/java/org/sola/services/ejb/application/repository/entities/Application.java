@@ -51,6 +51,8 @@ import org.sola.services.ejb.cadastre.businesslogic.CadastreEJBLocal;
 import org.sola.services.ejb.cadastre.repository.entities.CadastreObject;
 import org.sola.services.ejb.party.businesslogic.PartyEJBLocal;
 import org.sola.services.ejb.party.repository.entities.Party;
+import org.sola.services.ejb.search.businesslogic.SearchEJBLocal;
+import org.sola.services.ejb.search.repository.entities.BaUnitSearchResult;
 import org.sola.services.ejb.source.businesslogic.SourceEJBLocal;
 import org.sola.services.ejb.source.repository.entities.Source;
 import org.sola.services.ejb.system.br.Result;
@@ -112,8 +114,10 @@ public class Application extends AbstractVersionedEntity {
     private Party agent;
     @ChildEntityList(parentIdField = "applicationId")
     private List<Service> serviceList;
-    @ChildEntityList(parentIdField = "applicationId")
-    private List<ApplicationProperty> propertyList;
+    @ExternalEJB(ejbLocalClass = SearchEJBLocal.class, loadMethod = "searchBaUnitsByIds")
+    @ChildEntityList(parentIdField = "applicationId", childIdField="baUnitId", 
+            manyToManyClass=ApplicationProperty.class)
+    private List<BaUnitSearchResult> propertyList;
     @ExternalEJB(ejbLocalClass = SourceEJBLocal.class,
     loadMethod = "getSources", saveMethod = "saveSource")
     @ChildEntityList(parentIdField = "applicationId", childIdField = "sourceId",
@@ -315,12 +319,12 @@ public class Application extends AbstractVersionedEntity {
         }
     }
 
-    public List<ApplicationProperty> getPropertyList() {
-        propertyList = propertyList == null ? new ArrayList<ApplicationProperty>() : propertyList;
+    public List<BaUnitSearchResult> getPropertyList() {
+        propertyList = propertyList == null ? new ArrayList<BaUnitSearchResult>() : propertyList;
         return propertyList;
     }
 
-    public void setPropertyList(List<ApplicationProperty> propertyList) {
+    public void setPropertyList(List<BaUnitSearchResult> propertyList) {
         this.propertyList = propertyList;
     }
 
