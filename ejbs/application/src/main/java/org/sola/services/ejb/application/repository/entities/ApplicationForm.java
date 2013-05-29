@@ -13,21 +13,4 @@ import javax.persistence.Column;
 @DefaultSorter(sortString="display_value")    
 public class ApplicationForm extends AbstractCodeEntity{
 
-    @Column(name="content")
-    private byte[] content;
-
-    public ApplicationForm() {
-        super();
-    }
-    
-    public byte[] getContent() {
-        return content;
-    }
-
-    public void setContent(byte[] content) {
-        this.content = content;
-    }
-    
-    
-    
 }
