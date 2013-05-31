@@ -716,7 +716,11 @@ public class AdministrativeEJB extends AbstractEJB
      */
     @Override
     public DisputeParty getDisputePartyById(String id) {
-        return getRepository().getEntity(DisputeParty.class, id);
+        DisputeParty result = null;
+        if (id != null) {
+            result = getRepository().getEntity(DisputeParty.class, id);
+        }
+        return result;
     }
 
 
@@ -733,8 +737,7 @@ public class AdministrativeEJB extends AbstractEJB
     }
 
     @Override
-    public Dispute getDispute() {
-        String id = null;
+    public Dispute getDispute(String id) {
         if (id != null) {
             return getRepository().getEntity(Dispute.class,id);
         }
