@@ -49,15 +49,15 @@ import org.sola.services.ejb.system.businesslogic.SystemEJBLocal;
  * @author thoriso
  */
 @Table(name = "dispute_party", schema = "administrative")
-@DefaultSorter(sortString = "nr")
+@DefaultSorter(sortString = "dispute_nr")
 
 public class DisputeParty extends AbstractVersionedEntity {
 
     @Id
     @Column(name = "id")
     private String id;
-    @Column(name = "dispute_id")
-    private String disputeId;
+    @Column(name = "dispute_nr")
+    private String disputeNr;
     @Column(name=  "party_role")
     private String partyRole;
     @Column(name=  "party_id")
@@ -68,15 +68,16 @@ public class DisputeParty extends AbstractVersionedEntity {
         super();
     }
 
-    public String getDisputeId() {
-        return disputeId;
+    public String getDisputeNr() {
+        return disputeNr;
     }
 
-    public void setDisputeId(String disputeId) {
-        this.disputeId = disputeId;
+    public void setDisputeNr(String disputeNr) {
+        this.disputeNr = disputeNr;
     }
 
     public String getId() {
+        id = id == null ? generateId() : id;
         return id;
     }
 

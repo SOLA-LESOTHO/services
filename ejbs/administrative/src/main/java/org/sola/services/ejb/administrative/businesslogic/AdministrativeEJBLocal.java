@@ -203,7 +203,7 @@ public interface AdministrativeEJBLocal extends AbstractSolaTransactionEJBLocal 
      * AdministrativeEJB.getDispute}.
      */
     
-    Dispute getDispute();
+    Dispute getDispute(String id);
     
     /**
      * See {@linkplain AdministrativeEJB#getDisputeByUser(java.lang.String)

@@ -101,6 +101,5 @@ public class DisputeSearchParams extends AbstractEntity {
         this.plotNumber = plotNumber;
     }
 
- 
-
+  
 }

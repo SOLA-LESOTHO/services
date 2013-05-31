@@ -866,18 +866,18 @@ public class SearchEJB extends AbstractEJB implements SearchEJBLocal {
         params.put(DisputeSearchResult.QUERY_PARAM_PLOT_NR,
                 searchParams.getPlotNumber() == null ? "" : searchParams.getPlotNumber());
 
-        if (searchParams.getNr() != null
-                && searchParams.getNr().trim().isEmpty()) {
-            searchParams.setNr(null);
-        }
-        if (searchParams.getLeaseNumber() != null
-                && searchParams.getLeaseNumber().trim().isEmpty()) {
-            searchParams.setLeaseNumber(null);
-        }
-        if (searchParams.getPlotNumber() != null
-                && searchParams.getPlotNumber().trim().isEmpty()) {
-            searchParams.setPlotNumber(null);
-        }
+//        if (searchParams.getNr() != null
+//                && searchParams.getNr().trim().isEmpty()) {
+//            searchParams.setNr(null);
+//        }
+//        if (searchParams.getLeaseNumber() != null
+//                && searchParams.getLeaseNumber().trim().isEmpty()) {
+//            searchParams.setLeaseNumber(null);
+//        }
+//        if (searchParams.getPlotNumber() != null
+//                && searchParams.getPlotNumber().trim().isEmpty()) {
+//            searchParams.setPlotNumber(null);
+//        }
         params.put(DisputeSearchResult.QUERY_PARAM_LODGEMENT_DATE_FROM,
                 searchParams.getLodgementDateFrom() == null
                 ? new GregorianCalendar(1, 1, 1).getTime()
@@ -885,7 +885,7 @@ public class SearchEJB extends AbstractEJB implements SearchEJBLocal {
 
         params.put(DisputeSearchResult.QUERY_PARAM_LODGEMENT_DATE_TO,
                 searchParams.getLodgementDateTo() == null
-                ? new GregorianCalendar(1, 1, 1).getTime()
+                ? new GregorianCalendar(2500, 1, 1).getTime()
                 : searchParams.getLodgementDateTo());
 
         params.put(DisputeSearchResult.QUERY_PARAM_COMPLETION_DATE_FROM,
@@ -895,7 +895,7 @@ public class SearchEJB extends AbstractEJB implements SearchEJBLocal {
 
         params.put(DisputeSearchResult.QUERY_PARAM_COMPLETION_DATE_TO,
                 searchParams.getCompletionDateTo() == null
-                ? new GregorianCalendar(1, 1, 1).getTime()
+                ? new GregorianCalendar(2500, 1, 1).getTime()
                 : searchParams.getLodgementDateTo());
 
         return params;
