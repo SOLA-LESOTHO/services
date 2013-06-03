@@ -31,6 +31,7 @@ package org.sola.services.ejb.application.businesslogic;
 
 import java.io.Serializable;
 import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.util.*;
 import javax.annotation.security.RolesAllowed;
 import javax.ejb.EJB;
@@ -275,13 +276,13 @@ public class ApplicationEJB extends AbstractEJB implements ApplicationEJBLocal {
                 if (cadastre.getValuationAmount() != null) {
                     totalValue = new Money(cadastre.getValuationAmount().abs());
                 }
-                if(cadastre.getValuationZone() != null){
+                if (cadastre.getValuationZone() != null) {
                     valuationZone = cadastre.getValuationZone();
                 }
                 spatialValueArea = cadastreEJB.getSpatialValueArea(cadastre.getId());
-                if (spatialValueArea != null){
-                  totalArea = spatialValueArea.getCalculatedAreaSize();  
-                }      
+                if (spatialValueArea != null) {
+                    totalArea = spatialValueArea.getCalculatedAreaSize();
+                }
             }
         }
 
@@ -1334,6 +1335,24 @@ public class ApplicationEJB extends AbstractEJB implements ApplicationEJBLocal {
         return getRepository().getCodeList(AdminFeeType.class, languageCode);
     }
 
+    private List<AdminRateType> getAdminRateTypes(String languageCode) {
+        return getRepository().getCodeList(AdminRateType.class, languageCode);
+    }
+
+    private AdminFeeRate getAdminFeeRate(String feeCode, String rateCode) {
+
+        if ((feeCode != null) && (rateCode != null)) {
+            HashMap params = new HashMap();
+            params.put("fee_code", feeCode);
+            params.put("rate_code", rateCode);
+
+            return getRepository().getEntity(AdminFeeRate.class,
+                    AdminFeeRate.QUERY_WHERE_SEARCHBYFEEANDRATE, params);
+        } else {
+            return null;
+        }
+    }
+
     /**
      * Determines service fee based on grade and land use
      */
@@ -1365,26 +1384,12 @@ public class ApplicationEJB extends AbstractEJB implements ApplicationEJBLocal {
 
         Money duty;
 
-        String lowerRateCode;
 
-        String upperRateCode;
+        lowerRate = getRateValue(feeType, AdminRateType.LOWER_RATE);
 
-        String thresholdCode;
+        upperRate = getRateValue(feeType, AdminRateType.UPPER_RATE);
 
-        List<AdminFeeType> feeTypes = this.getAdminFeeTypes("en");
-
-        lowerRateCode = getFeeTypeCode(feeType, AdminFeeType.LOWER_RATE);
-
-        upperRateCode = getFeeTypeCode(feeType, AdminFeeType.UPPER_RATE);
-
-        thresholdCode = getFeeTypeCode(feeType, AdminFeeType.THRESHOLD_VALUE);
-
-
-        lowerRate = getRateValue(feeTypes, lowerRateCode);
-
-        upperRate = getRateValue(feeTypes, upperRateCode);
-
-        thresholdValue = new Money(getRateValue(feeTypes, thresholdCode));
+        thresholdValue = new Money(getRateValue(feeType, AdminRateType.THRESHOLD_VALUE));
 
         if (valuationAmount.compareTo(thresholdValue) == 1) {
             surplusValue = valuationAmount.minus(thresholdValue);
@@ -1397,52 +1402,27 @@ public class ApplicationEJB extends AbstractEJB implements ApplicationEJBLocal {
 
     }
 
-    private BigDecimal getRateValue(List<AdminFeeType> feeTypes, String feeCode) {
+    private BigDecimal getRateValue(String feeCode, String rateCode) {
 
         BigDecimal rateValue = BigDecimal.ZERO;
 
-        for (AdminFeeType type : feeTypes) {
-            if ((feeCode != null) && (feeCode.equals(type.getCode()))) {
-                rateValue = type.getRate();
-            }
+        AdminFeeRate adminFeeRate;
+
+        adminFeeRate = this.getAdminFeeRate(feeCode, rateCode);
+
+        if (adminFeeRate != null) {
+            rateValue = adminFeeRate.getRateValue();
         }
 
         return rateValue;
     }
 
-    private String getFeeTypeCode(String primaryRate, String secondaryRate) {
-
-        String feeTypeCode = null;
-
-
-        if (primaryRate.equals(AdminFeeType.STAMP_DUTY)) {
-            feeTypeCode = AdminFeeType.STAMP_DUTY;
-        } else if (primaryRate.equals(AdminFeeType.TRANSFER_DUTY)) {
-            feeTypeCode = AdminFeeType.TRANSFER_DUTY;
-        }
-
-
-        if (secondaryRate.equals(AdminFeeType.LOWER_RATE)) {
-            feeTypeCode = feeTypeCode + AdminFeeType.CODE_SUFFIX + AdminFeeType.LOWER_RATE;
-        } else if (secondaryRate.equals(AdminFeeType.UPPER_RATE)) {
-            feeTypeCode = feeTypeCode + AdminFeeType.CODE_SUFFIX + AdminFeeType.UPPER_RATE;
-        } else if (secondaryRate.equals(AdminFeeType.THRESHOLD_VALUE)) {
-            feeTypeCode = feeTypeCode + AdminFeeType.CODE_SUFFIX + AdminFeeType.THRESHOLD_VALUE;
-        } else {
-            feeTypeCode = null;
-        }
-
-        return feeTypeCode;
-    }
-    
     /*
-     * Calculation of ground rent is a simplified one; 
-     * it does not include road class factor
-     * as well as percentage of land usable
+     * Calculation of ground rent is a simplified one; it does not include road
+     * class factor as well as percentage of land usable
      */
-
     private Money calculateGroundRent(String landUse, String landGrade, String valuationZoneCode, BigDecimal totalArea) {
-        
+
         Money groundRent = new Money(BigDecimal.ONE);
 
         BigDecimal groundRentRate;
@@ -1473,5 +1453,42 @@ public class ApplicationEJB extends AbstractEJB implements ApplicationEJBLocal {
         groundRent = groundRent.times(totalArea).times(groundRentRate).times(groundRentFactor);
 
         return groundRent;
+    }
+    
+    private Money calculateDutyOnGroundRent(String landUse, String landGrade, Money groundRent){
+       
+        Money dutyOnGroundRent = new Money(BigDecimal.ONE);
+
+        LandUseGrade landUseGrade;
+        
+        BigInteger dutyOnGroundRentFactor = BigInteger.ZERO;
+        
+        // take ground rent find modulo of 100
+        BigInteger groundRentDivident = groundRent.getAmount().toBigInteger();
+        
+        BigInteger groundRentDivisor = BigInteger.valueOf(100);
+        
+        BigInteger groundRentModulo;
+        
+        if (groundRentDivident.compareTo(groundRentDivisor) == 1) {
+            groundRentModulo = groundRentDivident.mod(groundRentDivisor);
+            groundRentModulo = groundRentModulo.add(groundRentDivident.divide(groundRentDivisor)); 
+        }
+        else{
+            groundRentModulo = BigInteger.ONE;
+        }
+        
+       
+                
+        landUseGrade = cadastreEJB.getLandUseGrade(landUse, landGrade);
+        
+        if (landUseGrade != null){
+            dutyOnGroundRentFactor = landUseGrade.getDutyOnGroundRent().toBigInteger();
+        }
+        
+        //modulo/qotient * factor
+        dutyOnGroundRent = dutyOnGroundRent.times(dutyOnGroundRentFactor.intValue()).times(groundRentModulo.intValue());
+        
+        return dutyOnGroundRent;
     }
 }

@@ -854,4 +854,9 @@ public class AdministrativeEJB extends AbstractEJB
 
         return getRepository().saveEntity(disputeParty);
     }
+    
+    @Override
+    public List<DeedType> getDeedTypes(String languageCode){
+        return getRepository().getCodeList(DeedType.class, languageCode);
+    }
 }
