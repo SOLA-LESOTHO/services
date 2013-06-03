@@ -278,4 +278,10 @@ public interface AdministrativeEJBLocal extends AbstractSolaTransactionEJBLocal 
      * AdministrativeEJB.saveDisputeParty}
      */
     DisputeParty saveDisputeParty(DisputeParty disputeParty);
+    
+     /**
+     * See {@linkplain AdministrativeEJB#getBaUnitRelTypes(java.lang.String)
+     * AdministrativeEJB.getBaUnitRelTypes}
+     */
+    List<DeedType> getDeedTypes(String languageCode);
 }

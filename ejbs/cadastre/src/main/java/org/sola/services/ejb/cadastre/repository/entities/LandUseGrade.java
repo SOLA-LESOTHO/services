@@ -56,6 +56,8 @@ public class LandUseGrade extends AbstractEntity {
     BigDecimal adminFee;
     @Column(name = "ground_rent_rate")
     BigDecimal groundRentRate;
+    @Column(name = "duty_on_ground_rent")
+    BigDecimal dutyOnGroundRent;
 
     public LandUseGrade() {
         super();
@@ -91,5 +93,13 @@ public class LandUseGrade extends AbstractEntity {
 
     public void setLandUseCode(String landUseCode) {
         this.landUseCode = landUseCode;
+    }
+
+    public BigDecimal getDutyOnGroundRent() {
+        return dutyOnGroundRent;
+    }
+
+    public void setDutyOnGroundRent(BigDecimal dutyOnGroundRent) {
+        this.dutyOnGroundRent = dutyOnGroundRent;
     }
 }

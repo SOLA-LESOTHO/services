@@ -97,6 +97,8 @@ public class Rrr extends AbstractVersionedEntity {
     private String registrationNumber;
     @Column(name="status_change_date", updatable=false, insertable=false)
     private Date statusChangeDate;
+    @Column(name = "deed_type_code")
+    private String deedTypeCode;
     // Child entity fields
     @ChildEntity(insertBeforeParent = false, parentIdField = "rrrId")
     private BaUnitNotation notation;
@@ -341,6 +343,14 @@ public class Rrr extends AbstractVersionedEntity {
     public void setStatusChangeDate(Date statusChangeDate) {
         this.statusChangeDate = statusChangeDate;
     }
+
+    public String getDeedTypeCode() {
+        return deedTypeCode;
+    }
+
+    public void setDeedTypeCode(String deedTypeCode) {
+        this.deedTypeCode = deedTypeCode;
+    }  
 
     @Override
     public void preSave() {

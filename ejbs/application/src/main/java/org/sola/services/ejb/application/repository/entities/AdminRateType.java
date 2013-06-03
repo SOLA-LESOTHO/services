@@ -38,21 +38,21 @@ import org.sola.services.common.repository.DefaultSorter;
 import org.sola.services.common.repository.entities.AbstractCodeEntity;
 
 /**
- * Entity representing the application.administrative fee code table. This code
+ * Entity representing the application.administrative rate code table. This code
  * entity includes some additional field beyond the standard code, description,
  * display_value and status used for most code entities.
  *
  * @author soladev
  */
-@Table(name = "admin_fee_type", schema = "application")
+@Table(name = "admin_rate_type", schema = "application")
 @DefaultSorter(sortString = "display_value")
-public class AdminFeeType extends AbstractCodeEntity {
-    
-    public static final String STAMP_DUTY = "stampDuty";
-    public static final String TRANSFER_DUTY = "transferDuty";
+public class AdminRateType extends AbstractCodeEntity {
 
-    public AdminFeeType() {
+    public static final String LOWER_RATE = "lowerRate";
+    public static final String UPPER_RATE = "upperRate";
+    public static final String THRESHOLD_VALUE = "thresholdValue";
+
+    public AdminRateType() {
         super();
     }
-
 }
