@@ -52,6 +52,8 @@ public class RequestType extends AbstractCodeEntity {
     public static String CADASTRE_CHANGE = "cadastreChange";
     
     public static final String NEW_LEASE = "newLease";
+    
+    public static final String REGISTER_LEASE = "registerLease";
 
     @Column(name = "nr_days_to_complete")
     private int nrDaysToComplete;

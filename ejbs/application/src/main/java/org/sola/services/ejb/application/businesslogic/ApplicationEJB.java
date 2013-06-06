@@ -308,8 +308,9 @@ public class ApplicationEJB extends AbstractEJB implements ApplicationEJBLocal {
 
                             if (RequestType.NEW_LEASE.equals(type.getCode())) {
                                 serviceFee = determineServiceFee(landUseCode, landGradeCode);
-                                stampDuty = calculateDuty(AdminFeeType.STAMP_DUTY, totalValue);
+                                //stampDuty = calculateDutyOnTransfer(AdminFeeType.STAMP_DUTY, totalValue);
                                 groundRent = calculateGroundRent(landUseCode, landGradeCode, valuationZone, totalArea);
+                                stampDuty = calculateDutyOnGroundRent( landUseCode, landGradeCode, groundRent);
                             }
 
                             break;
@@ -1372,7 +1373,7 @@ public class ApplicationEJB extends AbstractEJB implements ApplicationEJBLocal {
      * for determining whether it is stamp duty or transfer duty calculation.
      * @param valuationAmount is the value of the parcel/property
      */
-    private Money calculateDuty(String feeType, Money valuationAmount) {
+    private Money calculateDutyOnTransfer(String feeType, Money valuationAmount) {
 
         BigDecimal lowerRate;
 
