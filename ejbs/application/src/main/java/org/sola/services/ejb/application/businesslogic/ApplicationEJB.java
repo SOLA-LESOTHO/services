@@ -1492,4 +1492,9 @@ public class ApplicationEJB extends AbstractEJB implements ApplicationEJBLocal {
         
         return dutyOnGroundRent;
     }
+
+    @Override
+    public ApplicationFormWithBinary getApplicationFormWithBinary(String code, String lang) {
+        return getRepository().getCode(ApplicationFormWithBinary.class, code, lang);
+    }
 }

@@ -52,8 +52,14 @@ public interface ApplicationEJBLocal extends AbstractEJBLocal {
      * value and description.
      */
     List<ApplicationForm> getApplicationForms(String lang);
-
-
+    
+    /** 
+     * Returns application form with binary content. 
+     * @param lang Language code to use for getting translated display value and description.
+     * @param code Application form code
+     */
+    ApplicationFormWithBinary getApplicationFormWithBinary(String code, String lang);
+ 
     /**
      * See {@linkplain ApplicationEJB#getApplication(java.lang.String)
      * ApplicationEJB.getApplication}.
