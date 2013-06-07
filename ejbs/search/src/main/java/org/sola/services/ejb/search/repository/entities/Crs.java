@@ -33,39 +33,43 @@ package org.sola.services.ejb.search.repository.entities;
 
 import javax.persistence.Column;
 import javax.persistence.Id;
+import javax.persistence.Table;
+import org.sola.services.common.repository.AccessFunctions;
 import org.sola.services.common.repository.entities.AbstractReadOnlyEntity;
 
 /**
  *
- * @author soladev
+ * @author Elton Manoku
  */
-public class Setting extends AbstractReadOnlyEntity {
+@Table(name = "crs", schema = "system")
+public class Crs extends AbstractReadOnlyEntity {
 
-    public static final String QUERY_SQL_FOR_MAP_SETTINGS =
-            "SELECT name as id, vl from system.setting where active and name like 'map%'";
+    public static String ORDER_COLUMN = "item_order";
     @Id
-    @Column(name = "id")
-    private String id;
-    @Column(name = "vl")
-    private String vl;
+    @Column
+    private int srid;
+    @AccessFunctions(onSelect = "(select srtext from public.spatial_ref_sys where srid = crs.srid)")
+    @Column(name = "wkt")
+    private String wkt;
 
-    public Setting() {
+    public Crs() {
         super();
     }
 
-    public String getId() {
-        return id;
+    public int getSrid() {
+        return srid;
     }
 
-    public void setId(String id) {
-        this.id = id;
+    public void setSrid(int srid) {
+        this.srid = srid;
     }
 
-    public String getVl() {
-        return vl;
+    public String getWkt() {
+        return wkt;
     }
 
-    public void setVl(String vl) {
-        this.vl = vl;
+    public void setWkt(String wkt) {
+        this.wkt = wkt;
     }
+
 }
