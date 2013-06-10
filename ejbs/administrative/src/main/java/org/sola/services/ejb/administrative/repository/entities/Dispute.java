@@ -37,9 +37,14 @@ import javax.persistence.Column;
 import javax.persistence.Id;
 import javax.persistence.Table;
 import java.util.Date;
+import java.util.List;
+import java.util.ArrayList;
+import org.sola.services.common.repository.ChildEntityList;
 import org.sola.services.common.repository.DefaultSorter;
+import org.sola.services.common.repository.ExternalEJB;
 import org.sola.services.common.repository.RepositoryUtility;
 import org.sola.services.common.repository.entities.AbstractVersionedEntity;
+import org.sola.services.ejb.cadastre.businesslogic.CadastreEJBLocal;
 import org.sola.services.ejb.system.br.Result;
 import org.sola.services.ejb.system.businesslogic.SystemEJBLocal;
 
@@ -63,7 +68,7 @@ public class Dispute extends AbstractVersionedEntity {
     @Column(name = "lodgement_date", updatable = false, insertable = false)
     private Date lodgementDate;
     @Column(name = "completion_date", updatable = false, insertable = false)
-    private Date completiondate;
+    private Date completionDate;
     @Column(name = "dispute_category_code")
     private String disputeCategoryCode;
     @Column(name = "dispute_type_code")
@@ -71,12 +76,17 @@ public class Dispute extends AbstractVersionedEntity {
     @Column(name = "status_code", updatable = false)
     private String statusCode;
     @Column(name = "rrr_id")
-    private String rrrId;
+    private String leaseNumber;
     @Column(name = "plot_location")
     private String plotLocation;
     @Column(name = "cadastre_object_id")
-    private String cadastreObjectId;
+    private String plotNumber;
+    @ChildEntityList(parentIdField = "disputeNr")
+    private List<DisputeComments> disputeCommentsList;
+    private List<DisputeParty> disputePartyList;
+    
    
+
     public Dispute() {
         super();
     }
@@ -93,12 +103,12 @@ public class Dispute extends AbstractVersionedEntity {
         return result;
     }
 
-    public String getCadastreObjectId() {
-        return cadastreObjectId;
+    public String getPlotNumber() {
+        return plotNumber;
     }
 
-    public void setCadastreObjectId(String cadastreObjectId) {
-        this.cadastreObjectId = cadastreObjectId;
+    public void setPlotNumber(String plotNumber) {
+        this.plotNumber = plotNumber;
     }
 
     public String getDisputeCategoryCode() {
@@ -125,12 +135,12 @@ public class Dispute extends AbstractVersionedEntity {
         this.lodgementDate = lodgementDate;
     }
 
-    public Date getCompletiondate() {
-        return completiondate;
+    public Date getCompletionDate() {
+        return completionDate;
     }
 
-    public void setCompletiondate(Date completiondate) {
-        this.completiondate = completiondate;
+    public void setCompletionDate(Date completionDate) {
+        this.completionDate = completionDate;
     }
 
     public String getNr() {
@@ -149,12 +159,12 @@ public class Dispute extends AbstractVersionedEntity {
         this.plotLocation = plotLocation;
     }
 
-    public String getRrrId() {
-        return rrrId;
+    public String getLeaseNumber() {
+        return leaseNumber;
     }
 
-    public void setRrrId(String rrrId) {
-        this.rrrId = rrrId;
+    public void setLeaseNumber(String leaseNumber) {
+        this.leaseNumber = leaseNumber;
     }
 
     public String getStatusCode() {
@@ -176,6 +186,23 @@ public class Dispute extends AbstractVersionedEntity {
 
     public void setId(String id) {
         this.id = id;
+    }
+
+    public List<DisputeComments> getDisputeCommentsList() {
+        disputeCommentsList = disputeCommentsList == null ? new ArrayList<DisputeComments>() : disputeCommentsList;
+        return disputeCommentsList;
+    }
+
+    public void setDisputeCommentsList(List<DisputeComments> disputeCommentsList) {
+        this.disputeCommentsList = disputeCommentsList;
+    }
+    
+     public List<DisputeParty> getDisputePartyList() {
+        return disputePartyList;
+    }
+
+    public void setDisputePartyList(List<DisputeParty> disputePartyList) {
+        this.disputePartyList = disputePartyList;
     }
 
     @Override
