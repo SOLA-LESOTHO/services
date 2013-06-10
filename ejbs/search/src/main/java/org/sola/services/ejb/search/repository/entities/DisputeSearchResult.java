@@ -48,19 +48,22 @@ public class DisputeSearchResult extends AbstractReadOnlyEntity {
     public static final String QUERY_PARAM_COMPLETION_DATE_FROM = "completionDateFrom";
     public static final String QUERY_PARAM_COMPLETION_DATE_TO = "completionDateTo";
     public static final String QUERY_ORDER_BY = "disp.nr";
-    
-    
-    public static final String SELECT_PART = "SELECT disp.id, disp.nr,disp.lodgement_date,disp.completion_date, "
-    + "disp.rrr_id, disp.cadastre_object_id ";
-    public static final String FROM_PART = "FROM administrative.dispute disp ";
-    public static final String WHERE_PART = "WHERE compare_strings(#{" + QUERY_PARAM_DISP_NR + "}, COALESCE(disp.nr,''))"
-            + " AND compare_strings(#{" + QUERY_PARAM_LEASE_NR + "}, COALESCE(disp.rrr_id, ''))"
-            + " AND compare_strings(#{" + QUERY_PARAM_PLOT_NR + "}, COALESCE(disp.cadastre_object_id, ''))"
-            + " AND disp.lodgement_date BETWEEN #{" + QUERY_PARAM_LODGEMENT_DATE_FROM + "} AND #{" + QUERY_PARAM_LODGEMENT_DATE_TO + "}"
-            + " AND disp.completion_date BETWEEN #{" + QUERY_PARAM_COMPLETION_DATE_FROM + "} AND #{" + QUERY_PARAM_COMPLETION_DATE_TO + "}";
-    public static final String SEARCH_QUERY = SELECT_PART + FROM_PART + " LIMIT 101";
-    //public static final String SEARCH_QUERY = SELECT_PART + FROM_PART + WHERE_PART + " LIMIT 101";
-    
+    public static final String SELECT_PART = "SELECT disp.id, disp.nr, disp.lodgement_date, disp.completion_date, "
+            + "disp.rrr_id, disp.cadastre_object_id, disp.dispute_category_code, disp.dispute_type_code, disp.status_code, disp.plot_location ";
+           // + "pty.id, pty.dispute_nr, pty.party_role, pty.party_id, "
+           // + " com.id, com.dispute_nr, com.update_date, com.dispute_action_code, com.comments, com.other_authorities_code";
+    public static final String FROM_PART = " FROM administrative.dispute disp ";
+    /*
+    public static final String FROM_PART = " FROM administrative.dispute disp LEFT JOIN administrative.dispute_party pty ON disp.nr = pty.dispute_nr "
+            + "LEFT JOIN administrative.dispute_comments com ON disp.nr = com.dispute_nr "; 
+    */
+    public static final String WHERE_PART = " WHERE (disp.nr = #{" + QUERY_PARAM_DISP_NR + "} OR COALESCE(#{" + QUERY_PARAM_DISP_NR + "}, '') = '') "
+            + " AND (disp.rrr_id = #{" + QUERY_PARAM_LEASE_NR + "} OR COALESCE(#{" + QUERY_PARAM_LEASE_NR + "}, '') = '') "
+            + " AND (disp.lodgement_date BETWEEN #{" + QUERY_PARAM_LODGEMENT_DATE_FROM + "} AND #{" + QUERY_PARAM_LODGEMENT_DATE_TO + "} OR (disp.lodgement_date IS NULL)) "
+            + " AND (disp.cadastre_object_id = #{" + QUERY_PARAM_PLOT_NR + "} OR COALESCE(#{" + QUERY_PARAM_PLOT_NR + "}, '') = '') "
+            + " AND (disp.completion_date BETWEEN #{" + QUERY_PARAM_COMPLETION_DATE_FROM + "} AND #{" + QUERY_PARAM_COMPLETION_DATE_TO + "} OR (disp.completion_date IS NULL)) ";
+  
+    public static final String SEARCH_QUERY = SELECT_PART + FROM_PART + WHERE_PART + " LIMIT 101";
     @Id
     @Column
     private String id;
@@ -76,6 +79,14 @@ public class DisputeSearchResult extends AbstractReadOnlyEntity {
     private String leaseNumber;
     @Column(name = "cadastre_object_id")
     private String plotNumber;
+    @Column(name = "dispute_category_code")
+    private String disputeCategoryCode;
+    @Column(name = "dispute_type_code")
+    private String disputeTypeCode;
+    @Column(name = "status_code")
+    private String statusCode;
+    @Column(name = "plot_location")
+    private String plotLocation;
 
     public Date getCompletiondate() {
         return completiondate;
@@ -83,6 +94,22 @@ public class DisputeSearchResult extends AbstractReadOnlyEntity {
 
     public void setCompletiondate(Date completiondate) {
         this.completiondate = completiondate;
+    }
+
+    public String getDisputeCategoryCode() {
+        return disputeCategoryCode;
+    }
+
+    public void setDisputeCategoryCode(String disputeCategoryCode) {
+        this.disputeCategoryCode = disputeCategoryCode;
+    }
+
+    public String getDisputeTypeCode() {
+        return disputeTypeCode;
+    }
+
+    public void setDisputeTypeCode(String disputeTypeCode) {
+        this.disputeTypeCode = disputeTypeCode;
     }
 
     public String getId() {
@@ -123,5 +150,21 @@ public class DisputeSearchResult extends AbstractReadOnlyEntity {
 
     public void setPlotNumber(String plotNumber) {
         this.plotNumber = plotNumber;
+    }
+
+    public String getStatusCode() {
+        return statusCode;
+    }
+
+    public void setStatusCode(String statusCode) {
+        this.statusCode = statusCode;
+    }
+
+    public String getPlotLocation() {
+        return plotLocation;
+    }
+
+    public void setPlotLocation(String plotLocation) {
+        this.plotLocation = plotLocation;
     }
 }

@@ -758,8 +758,8 @@ public class AdministrativeEJB extends AbstractEJB
             dispute.setLodgementDate(DateUtility.now());
         }
         
-        if (dispute.getCompletiondate() == null){
-            dispute.setCompletiondate(DateUtility.now());
+        if (dispute.getCompletionDate() == null){
+            dispute.setCompletionDate(DateUtility.now());
         }
         return saveDispute(dispute);
     }
