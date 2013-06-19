@@ -29,14 +29,11 @@
  */
 package org.sola.services.ejb.administrative.businesslogic;
 
-import java.util.Date;
 import java.util.List;
 import javax.ejb.Local;
 import org.sola.services.common.br.ValidationResult;
 import org.sola.services.common.ejbs.AbstractSolaTransactionEJBLocal;
 import org.sola.services.ejb.administrative.repository.entities.*;
-//import org.sola.services.ejb.search.repository.entities.DisputeSearchParams;
-import org.sola.services.ejb.source.repository.entities.Source;
 
 /**
  * Provides local interface for the {@linkplain AdministrativeEJB}
@@ -55,12 +52,6 @@ public interface AdministrativeEJBLocal extends AbstractSolaTransactionEJBLocal 
      * AdministrativeEJB.getBaUnitTypes}
      */
     List<BaUnitType> getBaUnitTypes(String languageCode);
-
-    /**
-     * see {@linkplain AdministrativeEJB#getLeaseConditions(java.lang.String)
-     * AdministrativeEJB.getLeaseConditions}
-     */
-    List<LeaseCondition> getLeaseConditions(String languageCode);
 
     /**
      * see {@linkplain AdministrativeEJB#getMortgageTypes(java.lang.String)
@@ -284,4 +275,10 @@ public interface AdministrativeEJBLocal extends AbstractSolaTransactionEJBLocal 
      * AdministrativeEJB.getBaUnitRelTypes}
      */
     List<DeedType> getDeedTypes(String languageCode);
+    
+    /**
+     * See {@linkplain AdministrativeEJB#saveLease(org.sola.services.ejb.administrative.repository.entities.Lease)
+     * AdministrativeEJB.saveLease}
+     */
+    Lease saveLease(Lease lease);
 }

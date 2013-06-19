@@ -36,6 +36,9 @@ import javax.ejb.EJB;
 import javax.ejb.Stateless;
 import org.sola.common.DateUtility;
 import org.sola.common.RolesConstants;
+import org.sola.common.SOLAAccessException;
+import org.sola.common.SOLAException;
+import org.sola.common.messaging.ServiceMessage;
 import org.sola.services.common.EntityAction;
 import org.sola.services.common.LocalInfo;
 import org.sola.services.common.br.ValidationResult;
@@ -103,17 +106,6 @@ public class AdministrativeEJB extends AbstractEJB
     @Override
     public List<BaUnitType> getBaUnitTypes(String languageCode) {
         return getRepository().getCodeList(BaUnitType.class, languageCode);
-    }
-
-    /**
-     * Retrieves all administrative.lease_condition code values.
-     *
-     * @param languageCode The language code to use for localization of display
-     * values.
-     */
-    @Override
-    public List<LeaseCondition> getLeaseConditions(String languageCode) {
-        return getRepository().getCodeList(LeaseCondition.class, languageCode);
     }
 
     /**
@@ -861,5 +853,17 @@ public class AdministrativeEJB extends AbstractEJB
     @Override
     public List<DeedType> getDeedTypes(String languageCode){
         return getRepository().getCodeList(DeedType.class, languageCode);
+    }
+
+    @Override
+    public Lease saveLease(Lease lease) {
+        if(lease==null){
+            return null;
+        }
+        if(lease.getStatusCode()!=null && !lease.getStatusCode().equals("") && 
+                !lease.getStatusCode().equalsIgnoreCase("pending")){
+            throw new SOLAException(ServiceMessage.LEASE_MUST_HAVE_PENDING_STATE, new Object[]{lease.getStatusCode()});
+        }
+        return getRepository().saveEntity(lease);
     }
 }
