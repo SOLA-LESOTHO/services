@@ -285,6 +285,7 @@ public class AdministrativeEJBIT extends AbstractEJBTest {
     //@Ignore
     public void testGetBaUnitById() throws Exception {
         baUnitId = "1096f4cc-8ff4-4322-9730-683efd07c2fc";
+        baUnitId = "e7db584e-d360-11e2-aea0-bbc94c11fe24";
         //baUnitId = "3118304";
         
         System.out.println("get baunit with id:" + baUnitId);
