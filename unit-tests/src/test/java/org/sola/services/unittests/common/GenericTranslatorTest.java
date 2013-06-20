@@ -112,7 +112,7 @@ public class GenericTranslatorTest {
                     assertFalse(app.getAgent() == outApp.getAgent());
                 }
             }
-            assertEquals(appTO.getAgent().getId(), outApp.getAgentId());
+            assertEquals(appTO.getAgent().getId(), outApp.getAgent().getId());
             assertPartySummary(app == null ? null : app.getAgent(), appTO.getAgent(),
                     outApp.getAgent());
         }
