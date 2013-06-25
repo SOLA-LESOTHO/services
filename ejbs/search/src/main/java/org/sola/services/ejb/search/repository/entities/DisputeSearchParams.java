@@ -39,6 +39,7 @@ public class DisputeSearchParams extends AbstractEntity {
     private Date completionDateTo;
     private String leaseNumber;
     private String plotNumber;
+    private String casetype;
  
     
     public DisputeSearchParams(){
@@ -101,5 +102,12 @@ public class DisputeSearchParams extends AbstractEntity {
         this.plotNumber = plotNumber;
     }
 
-  
+    public String getCasetype() {
+        return casetype;
+    }
+
+    public void setCasetype(String casetype) {
+        this.casetype = casetype;
+    }
+
 }
