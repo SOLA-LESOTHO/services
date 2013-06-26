@@ -752,10 +752,11 @@ public class AdministrativeEJB extends AbstractEJB
 
     @Override
     public Dispute getDispute(String id) {
+        Dispute result = null;
         if (id != null) {
-            return getRepository().getEntity(Dispute.class, id);
+            result =  getRepository().getEntity(Dispute.class,id);
         }
-        return null;
+        return result;
     }
 
     /**
@@ -785,10 +786,13 @@ public class AdministrativeEJB extends AbstractEJB
     @RolesAllowed(RolesConstants.ADMINISTRATIVE_DISPUTE_SAVE)
     public Dispute saveDispute(Dispute dispute) {
         if (dispute == null) {
-            return null;
+            return dispute;
         }
 
-        return getRepository().saveEntity(dispute);
+        dispute =  getRepository().saveEntity(dispute);
+        
+        return dispute;
+        
     }
 
     /**

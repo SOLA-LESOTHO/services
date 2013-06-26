@@ -81,6 +81,12 @@ public class Dispute extends AbstractVersionedEntity {
     private String plotLocation;
     @Column(name = "cadastre_object_id")
     private String plotNumber;
+    @Column(name = "casetype")
+    private String caseType;
+    @Column(name = "primary_respondent")
+    private boolean primaryRespondent;
+    @Column(name = "action_required")
+    private String actionRequired;
     @ChildEntityList(parentIdField = "disputeNr")
     private List<DisputeComments> disputeCommentsList;
     private List<DisputeParty> disputePartyList;
@@ -101,6 +107,30 @@ public class Dispute extends AbstractVersionedEntity {
             }
         }
         return result;
+    }
+
+    public String getCaseType() {
+        return caseType;
+    }
+
+    public void setCaseType(String caseType) {
+        this.caseType = caseType;
+    }
+
+    public String getActionRequired() {
+        return actionRequired;
+    }
+
+    public void setActionRequired(String actionRequired) {
+        this.actionRequired = actionRequired;
+    }
+
+    public boolean isPrimaryRespondent() {
+        return primaryRespondent;
+    }
+
+    public void setPrimaryRespondent(boolean primaryRespondent) {
+        this.primaryRespondent = primaryRespondent;
     }
 
     public String getPlotNumber() {

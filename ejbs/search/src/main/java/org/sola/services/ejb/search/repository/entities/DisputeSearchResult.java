@@ -47,18 +47,16 @@ public class DisputeSearchResult extends AbstractReadOnlyEntity {
     public static final String QUERY_PARAM_LODGEMENT_DATE_TO = "lodgementDateTo";
     public static final String QUERY_PARAM_COMPLETION_DATE_FROM = "completionDateFrom";
     public static final String QUERY_PARAM_COMPLETION_DATE_TO = "completionDateTo";
+    public static final String QUERY_PARAM_CASE_TYPE = "casetype";
     public static final String QUERY_ORDER_BY = "disp.nr";
     public static final String SELECT_PART = "SELECT disp.id, disp.nr, disp.lodgement_date, disp.completion_date, "
-            + "disp.rrr_id, disp.cadastre_object_id, disp.dispute_category_code, disp.dispute_type_code, disp.status_code, disp.plot_location ";
-           // + "pty.id, pty.dispute_nr, pty.party_role, pty.party_id, "
-           // + " com.id, com.dispute_nr, com.update_date, com.dispute_action_code, com.comments, com.other_authorities_code";
+            + "disp.rrr_id, disp.cadastre_object_id, disp.dispute_category_code, disp.dispute_type_code, disp.status_code, disp.plot_location, disp.casetype ";
+           
     public static final String FROM_PART = " FROM administrative.dispute disp ";
-    /*
-    public static final String FROM_PART = " FROM administrative.dispute disp LEFT JOIN administrative.dispute_party pty ON disp.nr = pty.dispute_nr "
-            + "LEFT JOIN administrative.dispute_comments com ON disp.nr = com.dispute_nr "; 
-    */
+    
     public static final String WHERE_PART = " WHERE (disp.nr = #{" + QUERY_PARAM_DISP_NR + "} OR COALESCE(#{" + QUERY_PARAM_DISP_NR + "}, '') = '') "
             + " AND (disp.rrr_id = #{" + QUERY_PARAM_LEASE_NR + "} OR COALESCE(#{" + QUERY_PARAM_LEASE_NR + "}, '') = '') "
+            + " AND (disp.casetype = #{" + QUERY_PARAM_CASE_TYPE + "} OR COALESCE(#{" + QUERY_PARAM_CASE_TYPE + "}, '') = '') "
             + " AND (disp.lodgement_date BETWEEN #{" + QUERY_PARAM_LODGEMENT_DATE_FROM + "} AND #{" + QUERY_PARAM_LODGEMENT_DATE_TO + "} OR (disp.lodgement_date IS NULL)) "
             + " AND (disp.cadastre_object_id = #{" + QUERY_PARAM_PLOT_NR + "} OR COALESCE(#{" + QUERY_PARAM_PLOT_NR + "}, '') = '') "
             + " AND (disp.completion_date BETWEEN #{" + QUERY_PARAM_COMPLETION_DATE_FROM + "} AND #{" + QUERY_PARAM_COMPLETION_DATE_TO + "} OR (disp.completion_date IS NULL)) ";
@@ -87,6 +85,8 @@ public class DisputeSearchResult extends AbstractReadOnlyEntity {
     private String statusCode;
     @Column(name = "plot_location")
     private String plotLocation;
+    @Column(name = "casetype")
+    private String caseType;
 
     public Date getCompletiondate() {
         return completiondate;
@@ -166,5 +166,13 @@ public class DisputeSearchResult extends AbstractReadOnlyEntity {
 
     public void setPlotLocation(String plotLocation) {
         this.plotLocation = plotLocation;
+    }
+
+    public String getCaseType() {
+        return caseType;
+    }
+
+    public void setCaseType(String caseType) {
+        this.caseType = caseType;
     }
 }
