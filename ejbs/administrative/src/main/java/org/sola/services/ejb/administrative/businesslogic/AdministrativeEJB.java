@@ -30,13 +30,14 @@
 package org.sola.services.ejb.administrative.businesslogic;
 
 import java.io.Serializable;
+import java.math.BigDecimal;
 import java.util.*;
 import javax.annotation.security.RolesAllowed;
 import javax.ejb.EJB;
 import javax.ejb.Stateless;
 import org.sola.common.DateUtility;
+import org.sola.common.Money;
 import org.sola.common.RolesConstants;
-import org.sola.common.SOLAAccessException;
 import org.sola.common.SOLAException;
 import org.sola.common.messaging.ServiceMessage;
 import org.sola.services.common.EntityAction;
@@ -46,6 +47,11 @@ import org.sola.services.common.ejbs.AbstractEJB;
 import org.sola.services.common.faults.SOLAValidationException;
 import org.sola.services.common.repository.CommonSqlProvider;
 import org.sola.services.ejb.administrative.repository.entities.*;
+import org.sola.services.ejb.cadastre.businesslogic.CadastreEJBLocal;
+import org.sola.services.ejb.cadastre.repository.entities.CadastreObject;
+import org.sola.services.ejb.cadastre.repository.entities.GroundRentMultiplicationFactor;
+import org.sola.services.ejb.cadastre.repository.entities.LandUseGrade;
+import org.sola.services.ejb.cadastre.repository.entities.SpatialValueArea;
 import org.sola.services.ejb.system.businesslogic.SystemEJBLocal;
 import org.sola.services.ejb.system.repository.entities.BrValidation;
 import org.sola.services.ejb.transaction.businesslogic.TransactionEJBLocal;
@@ -67,6 +73,8 @@ public class AdministrativeEJB extends AbstractEJB
     private SystemEJBLocal systemEJB;
     @EJB
     private TransactionEJBLocal transactionEJB;
+    @EJB
+    private CadastreEJBLocal cadastreEJB;
 
     /**
      * Sets the entity package for the EJB to
@@ -281,6 +289,20 @@ public class AdministrativeEJB extends AbstractEJB
             }
         }
 
+        // Lease
+        params = new HashMap<String, Object>();
+        params.put(CommonSqlProvider.PARAM_WHERE_PART, Lease.QUERY_WHERE_BY_TRANSACTION_ID);
+        params.put(Lease.QUERY_PARAMETER_TRANSACTIONID, transactionId);
+        params.put("username", getUserName());
+        List<LeaseStatusChanger> leaseStatusChangerList = getRepository().getEntityList(LeaseStatusChanger.class, params);
+        for (LeaseStatusChanger lease : leaseStatusChangerList) {
+            //validationResult.addAll(this.validateRrr(lease, languageCode));
+            //if (systemEJB.validationSucceeded(validationResult) && !validateOnly) {
+                lease.setStatusCode(approvedStatus);
+                getRepository().saveEntity(lease);
+            //}
+        }
+        
         params = new HashMap<String, Object>();
         params.put(CommonSqlProvider.PARAM_WHERE_PART, Rrr.QUERY_WHERE_BYTRANSACTIONID);
         params.put(Rrr.QUERY_PARAMETER_TRANSACTIONID, transactionId);
@@ -699,6 +721,7 @@ public class AdministrativeEJB extends AbstractEJB
     public Dispute getDisputeByNr(String nr) {
         return getRepository().getEntity(Dispute.class, nr);
     }
+
     /**
      * Returns the details for the specified Dispute Party.
      *
@@ -715,7 +738,6 @@ public class AdministrativeEJB extends AbstractEJB
         return result;
     }
 
-
     @Override
     public Dispute getDisputeByUser(String userId) {
         if (userId != null) {
@@ -731,7 +753,7 @@ public class AdministrativeEJB extends AbstractEJB
     @Override
     public Dispute getDispute(String id) {
         if (id != null) {
-            return getRepository().getEntity(Dispute.class,id);
+            return getRepository().getEntity(Dispute.class, id);
         }
         return null;
     }
@@ -745,12 +767,12 @@ public class AdministrativeEJB extends AbstractEJB
         if (dispute == null) {
             return null;
         }
-        
+
         if (dispute.getLodgementDate() == null) {
             dispute.setLodgementDate(DateUtility.now());
         }
-        
-        if (dispute.getCompletionDate() == null){
+
+        if (dispute.getCompletionDate() == null) {
             dispute.setCompletionDate(DateUtility.now());
         }
         return saveDispute(dispute);
@@ -836,8 +858,8 @@ public class AdministrativeEJB extends AbstractEJB
     public List<OtherAuthorities> getOtherAuthorities(String languageCode) {
         return getRepository().getCodeList(OtherAuthorities.class, languageCode);
     }
-    
-     /**
+
+    /**
      * Saves any updates to Dispute Party.
      */
     @Override
@@ -849,21 +871,103 @@ public class AdministrativeEJB extends AbstractEJB
 
         return getRepository().saveEntity(disputeParty);
     }
-    
+
     @Override
-    public List<DeedType> getDeedTypes(String languageCode){
+    public List<DeedType> getDeedTypes(String languageCode) {
         return getRepository().getCodeList(DeedType.class, languageCode);
     }
 
     @Override
-    public Lease saveLease(Lease lease) {
-        if(lease==null){
+    @RolesAllowed(RolesConstants.ADMINISTRATIVE_PREPARE_LEASE)
+    public Lease saveLease(Lease lease, String serviceId) {
+        if (lease == null) {
             return null;
         }
-        if(lease.getStatusCode()!=null && !lease.getStatusCode().equals("") && 
-                !lease.getStatusCode().equalsIgnoreCase("pending")){
+        if (lease.getStatusCode() != null && !lease.getStatusCode().equals("")
+                && !lease.getStatusCode().equalsIgnoreCase("pending")) {
             throw new SOLAException(ServiceMessage.LEASE_MUST_HAVE_PENDING_STATE, new Object[]{lease.getStatusCode()});
         }
+        if (lease.isNew()) {
+            // Update cadastre object if lease is new and CO exists and has changes.
+            if (lease.getCadastreObject() != null && !lease.getCadastreObject().isNew()
+                    && (lease.getCadastreObject().getEntityAction() == null)) {
+                lease.getCadastreObject().setEntityAction(EntityAction.UPDATE);
+            }
+        }
+        TransactionBasic transaction =
+                transactionEJB.getTransactionByServiceId(serviceId, true, TransactionBasic.class);
+        LocalInfo.setTransactionId(transaction.getId());
+
         return getRepository().saveEntity(lease);
+    }
+
+    @Override
+    public Lease getLease(String leaseId) {
+        return getRepository().getEntity(Lease.class, leaseId);
+    }
+
+    @Override
+    public List<Lease> getLeasesByTransactionId(String transactionId) {
+        Map<String, Object> params = new HashMap<String, Object>();
+        params.put(CommonSqlProvider.PARAM_WHERE_PART, Lease.QUERY_WHERE_BY_TRANSACTION_ID);
+        params.put(Lease.QUERY_PARAMETER_TRANSACTIONID, transactionId);
+        return getRepository().getEntityList(Lease.class, params);
+    }
+
+    /**
+     * Calculation of ground rent is a simplified one; it does not include road
+     * class factor as well as percentage of land usable.
+     *
+     * @param co CadastreObject
+     */
+    @Override
+    public BigDecimal calculateGroundRent(CadastreObject co) {
+        if(co == null){
+            return BigDecimal.ZERO;
+        }
+        
+        String landUseCode="";
+        String landGradeCode="";
+        String valuationZone = "";
+        BigDecimal totalArea = BigDecimal.ZERO;
+        Money groundRent = new Money(BigDecimal.ONE);
+        BigDecimal groundRentRate;
+        BigDecimal groundRentFactor;
+        LandUseGrade landUseGrade;
+        SpatialValueArea spatialValueArea;
+        GroundRentMultiplicationFactor multiplicationFactor;
+        
+        if (co.getLandGradeCode() != null) {
+            landGradeCode = co.getLandGradeCode();
+        }
+        if (co.getLandUseCode() != null) {
+            landUseCode = co.getLandUseCode();
+        }
+        if (co.getValuationZone() != null) {
+            valuationZone = co.getValuationZone();
+        }
+        
+        spatialValueArea = cadastreEJB.getSpatialValueArea(co.getId());
+        if (spatialValueArea != null) {
+            totalArea = spatialValueArea.getCalculatedAreaSize();
+        }
+
+        landUseGrade = cadastreEJB.getLandUseGrade(landUseCode, landGradeCode);
+        multiplicationFactor = cadastreEJB.getMultiplicationFacotr(landUseCode, landGradeCode, valuationZone);
+        
+        if (multiplicationFactor != null) {
+            groundRentFactor = multiplicationFactor.getMultiplicationFactor();
+        } else {
+            groundRentFactor = BigDecimal.ONE;
+        }
+
+        if (landUseGrade != null) {
+            groundRentRate = landUseGrade.getGroundRentRate();
+        } else {
+            groundRentRate = BigDecimal.ONE;
+        }
+
+        groundRent = groundRent.times(totalArea).times(groundRentRate).times(groundRentFactor);
+        return groundRent.getAmount();
     }
 }

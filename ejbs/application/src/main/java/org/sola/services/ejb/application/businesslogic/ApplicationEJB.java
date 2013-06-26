@@ -1221,8 +1221,7 @@ public class ApplicationEJB extends AbstractEJB implements ApplicationEJBLocal {
             transactionEJB.rejectTransaction(serviceId);
         } else if (serviceStatusCode == null || (serviceStatusCode != null && !serviceStatusCode.equalsIgnoreCase(ServiceStatusType.STATUS_CANCELLED))) {
             // Skip validation for cancelled service
-            TransactionBasic transaction =
-                    transactionEJB.getTransactionByServiceId(serviceId, false, TransactionBasic.class);
+            TransactionBasic transaction = transactionEJB.getTransactionByServiceId(serviceId, false, TransactionBasic.class);
             if (transaction != null) {
                 String statusOnApproval = RegistrationStatusType.STATUS_CURRENT;
                 String actionOnRequestType = getRepository().getCode(RequestType.class,

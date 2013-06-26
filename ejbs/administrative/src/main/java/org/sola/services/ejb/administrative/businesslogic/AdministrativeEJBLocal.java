@@ -29,11 +29,14 @@
  */
 package org.sola.services.ejb.administrative.businesslogic;
 
+import java.math.BigDecimal;
 import java.util.List;
 import javax.ejb.Local;
+import org.sola.common.Money;
 import org.sola.services.common.br.ValidationResult;
 import org.sola.services.common.ejbs.AbstractSolaTransactionEJBLocal;
 import org.sola.services.ejb.administrative.repository.entities.*;
+import org.sola.services.ejb.cadastre.repository.entities.CadastreObject;
 
 /**
  * Provides local interface for the {@linkplain AdministrativeEJB}
@@ -277,8 +280,28 @@ public interface AdministrativeEJBLocal extends AbstractSolaTransactionEJBLocal 
     List<DeedType> getDeedTypes(String languageCode);
     
     /**
-     * See {@linkplain AdministrativeEJB#saveLease(org.sola.services.ejb.administrative.repository.entities.Lease)
+     * See {@linkplain AdministrativeEJB#getLease(java.lang.String)
+     * AdministrativeEJB.getLease}
+     */
+    Lease getLease(String leaseId);
+    
+    /**
+     * See {@linkplain AdministrativeEJB#saveLease(
+     * org.sola.services.ejb.administrative.repository.entities.Lease, java.lang.String)
      * AdministrativeEJB.saveLease}
      */
-    Lease saveLease(Lease lease);
+    Lease saveLease(Lease lease, String serviceId);
+    
+    /**
+     * See {@linkplain AdministrativeEJB#getBaUnitsByTransactionId(java.lang.String)
+     * AdministrativeEJB.getBaUnitsByTransactionId}
+     */
+    List<Lease> getLeasesByTransactionId(String transactionId);
+    
+    /**
+     * See {@linkplain AdministrativeEJB#calculateGroundRent(org.sola.services.ejb.cadastre.repository.entities.CadastreObject)
+     * AdministrativeEJB.calculateGroundRent}
+     */
+    BigDecimal calculateGroundRent(CadastreObject co);
+    
 }
