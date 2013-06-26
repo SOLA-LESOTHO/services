@@ -172,7 +172,7 @@ public class DisputeSearchResult extends AbstractReadOnlyEntity {
         return caseType;
     }
 
-    public void setCasetype(String caseType) {
+    public void setCaseType(String caseType) {
         this.caseType = caseType;
     }
 }

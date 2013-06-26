@@ -876,19 +876,10 @@ public class SearchEJB extends AbstractEJB implements SearchEJBLocal {
 
         params.put(DisputeSearchResult.QUERY_PARAM_PLOT_NR,
                 searchParams.getPlotNumber() == null ? "" : searchParams.getPlotNumber());
-
-//        if (searchParams.getNr() != null
-//                && searchParams.getNr().trim().isEmpty()) {
-//            searchParams.setNr(null);
-//        }
-//        if (searchParams.getLeaseNumber() != null
-//                && searchParams.getLeaseNumber().trim().isEmpty()) {
-//            searchParams.setLeaseNumber(null);
-//        }
-//        if (searchParams.getPlotNumber() != null
-//                && searchParams.getPlotNumber().trim().isEmpty()) {
-//            searchParams.setPlotNumber(null);
-//        }
+        
+        params.put(DisputeSearchResult.QUERY_PARAM_CASE_TYPE,
+                searchParams.getCaseType() == null ? "" : searchParams.getCaseType());
+        
         params.put(DisputeSearchResult.QUERY_PARAM_LODGEMENT_DATE_FROM,
                 searchParams.getLodgementDateFrom() == null
                 ? new GregorianCalendar(1, 1, 1).getTime()
