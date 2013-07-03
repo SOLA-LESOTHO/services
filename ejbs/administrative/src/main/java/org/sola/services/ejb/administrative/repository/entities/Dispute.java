@@ -73,7 +73,7 @@ public class Dispute extends AbstractVersionedEntity {
     private String disputeCategoryCode;
     @Column(name = "dispute_type_code")
     private String disputeTypeCode;
-    @Column(name = "status_code", updatable = false)
+    @Column(name = "status_code")
     private String statusCode;
     @Column(name = "rrr_id")
     private String leaseNumber;
@@ -90,8 +90,6 @@ public class Dispute extends AbstractVersionedEntity {
     @ChildEntityList(parentIdField = "disputeNr")
     private List<DisputeComments> disputeCommentsList;
     private List<DisputeParty> disputePartyList;
-    
-   
 
     public Dispute() {
         super();
@@ -202,11 +200,7 @@ public class Dispute extends AbstractVersionedEntity {
     }
 
     public void setStatusCode(String statusCode) {
-        // Prevent changes to the status code if the value has been loaded from the database. 
-        // Updates to the status code are made via the DisputeStatusChanger
-        if (isNew()) {
-            this.statusCode = statusCode;
-        }
+        this.statusCode = statusCode;
     }
 
     public String getId() {
@@ -226,8 +220,8 @@ public class Dispute extends AbstractVersionedEntity {
     public void setDisputeCommentsList(List<DisputeComments> disputeCommentsList) {
         this.disputeCommentsList = disputeCommentsList;
     }
-    
-     public List<DisputeParty> getDisputePartyList() {
+
+    public List<DisputeParty> getDisputePartyList() {
         return disputePartyList;
     }
 

@@ -48,7 +48,7 @@ import org.sola.services.ejb.system.businesslogic.SystemEJBLocal;
  */
 
 @Table(name = "dispute_comments", schema = "administrative")
-@DefaultSorter(sortString="dispute_id, dispute_action")
+@DefaultSorter(sortString="dispute_nr")
 public class DisputeComments extends AbstractVersionedEntity {
 
     @Id
