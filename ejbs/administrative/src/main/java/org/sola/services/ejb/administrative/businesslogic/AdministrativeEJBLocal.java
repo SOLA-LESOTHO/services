@@ -278,26 +278,7 @@ public interface AdministrativeEJBLocal extends AbstractSolaTransactionEJBLocal 
      * AdministrativeEJB.getBaUnitRelTypes}
      */
     List<DeedType> getDeedTypes(String languageCode);
-    
-    /**
-     * See {@linkplain AdministrativeEJB#getLease(java.lang.String)
-     * AdministrativeEJB.getLease}
-     */
-    Lease getLease(String leaseId);
-    
-    /**
-     * See {@linkplain AdministrativeEJB#saveLease(
-     * org.sola.services.ejb.administrative.repository.entities.Lease, java.lang.String)
-     * AdministrativeEJB.saveLease}
-     */
-    Lease saveLease(Lease lease, String serviceId);
-    
-    /**
-     * See {@linkplain AdministrativeEJB#getBaUnitsByTransactionId(java.lang.String)
-     * AdministrativeEJB.getBaUnitsByTransactionId}
-     */
-    List<Lease> getLeasesByTransactionId(String transactionId);
-    
+
     /**
      * See {@linkplain AdministrativeEJB#calculateGroundRent(org.sola.services.ejb.cadastre.repository.entities.CadastreObject)
      * AdministrativeEJB.calculateGroundRent}

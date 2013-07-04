@@ -25,10 +25,6 @@
  * EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  * *********************************************************************************************
  */
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package org.sola.services.ejb.party.repository.entities;
 
 import java.util.ArrayList;
@@ -91,6 +87,9 @@ public class Party extends AbstractVersionedEntity {
     private String typeCode;
     @Column(name = "gender_code")
     private String genderCode;
+    @Column(name = "legal_type")
+    private String legalType;
+    
     @ExternalEJB(ejbLocalClass = AddressEJBLocal.class,
     loadMethod = "getAddress", saveMethod = "saveAddress")
     @ChildEntity(childIdField = "addressId")
@@ -267,5 +266,13 @@ public class Party extends AbstractVersionedEntity {
 
     public void setRightHolder(boolean rightHolder) {
         this.rightHolder = rightHolder;
+    }
+
+    public String getLegalType() {
+        return legalType;
+    }
+
+    public void setLegalType(String legalType) {
+        this.legalType = legalType;
     }
 }

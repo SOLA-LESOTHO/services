@@ -288,20 +288,6 @@ public class AdministrativeEJB extends AbstractEJB
                 getRepository().saveEntity(baUnit);
             }
         }
-
-        // Lease
-        params = new HashMap<String, Object>();
-        params.put(CommonSqlProvider.PARAM_WHERE_PART, Lease.QUERY_WHERE_BY_TRANSACTION_ID);
-        params.put(Lease.QUERY_PARAMETER_TRANSACTIONID, transactionId);
-        params.put("username", getUserName());
-        List<LeaseStatusChanger> leaseStatusChangerList = getRepository().getEntityList(LeaseStatusChanger.class, params);
-        for (LeaseStatusChanger lease : leaseStatusChangerList) {
-            //validationResult.addAll(this.validateRrr(lease, languageCode));
-            //if (systemEJB.validationSucceeded(validationResult) && !validateOnly) {
-                lease.setStatusCode(approvedStatus);
-                getRepository().saveEntity(lease);
-            //}
-        }
         
         params = new HashMap<String, Object>();
         params.put(CommonSqlProvider.PARAM_WHERE_PART, Rrr.QUERY_WHERE_BYTRANSACTIONID);
@@ -879,43 +865,6 @@ public class AdministrativeEJB extends AbstractEJB
     @Override
     public List<DeedType> getDeedTypes(String languageCode) {
         return getRepository().getCodeList(DeedType.class, languageCode);
-    }
-
-    @Override
-    @RolesAllowed(RolesConstants.ADMINISTRATIVE_PREPARE_LEASE)
-    public Lease saveLease(Lease lease, String serviceId) {
-        if (lease == null) {
-            return null;
-        }
-        if (lease.getStatusCode() != null && !lease.getStatusCode().equals("")
-                && !lease.getStatusCode().equalsIgnoreCase("pending")) {
-            throw new SOLAException(ServiceMessage.LEASE_MUST_HAVE_PENDING_STATE, new Object[]{lease.getStatusCode()});
-        }
-        if (lease.isNew()) {
-            // Update cadastre object if lease is new and CO exists and has changes.
-            if (lease.getCadastreObject() != null && !lease.getCadastreObject().isNew()
-                    && (lease.getCadastreObject().getEntityAction() == null)) {
-                lease.getCadastreObject().setEntityAction(EntityAction.UPDATE);
-            }
-        }
-        TransactionBasic transaction =
-                transactionEJB.getTransactionByServiceId(serviceId, true, TransactionBasic.class);
-        LocalInfo.setTransactionId(transaction.getId());
-
-        return getRepository().saveEntity(lease);
-    }
-
-    @Override
-    public Lease getLease(String leaseId) {
-        return getRepository().getEntity(Lease.class, leaseId);
-    }
-
-    @Override
-    public List<Lease> getLeasesByTransactionId(String transactionId) {
-        Map<String, Object> params = new HashMap<String, Object>();
-        params.put(CommonSqlProvider.PARAM_WHERE_PART, Lease.QUERY_WHERE_BY_TRANSACTION_ID);
-        params.put(Lease.QUERY_PARAMETER_TRANSACTIONID, transactionId);
-        return getRepository().getEntityList(Lease.class, params);
     }
 
     /**

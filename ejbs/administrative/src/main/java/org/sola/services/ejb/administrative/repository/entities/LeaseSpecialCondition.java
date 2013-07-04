@@ -12,8 +12,8 @@ public class LeaseSpecialCondition extends AbstractVersionedEntity {
     @Column
     private String id;
     
-    @Column(name="lease_id")
-    private String leaseId;
+    @Column(name="rrr_id")
+    private String rrrId;
 
     @Column(name="condition_text")
     private String conditionText;
@@ -30,12 +30,12 @@ public class LeaseSpecialCondition extends AbstractVersionedEntity {
         this.conditionText = conditionText;
     }
 
-    public String getLeaseId() {
-        return leaseId;
+    public String getRrrId() {
+        return rrrId;
     }
 
-    public void setLeaseId(String leaseId) {
-        this.leaseId = leaseId;
+    public void setRrrId(String rrrId) {
+        this.rrrId = rrrId;
     }
 
     public String getId() {

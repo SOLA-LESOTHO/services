@@ -42,8 +42,6 @@ import javax.persistence.Table;
 import org.sola.services.common.LocalInfo;
 import org.sola.services.common.repository.*;
 import org.sola.services.common.repository.entities.AbstractVersionedEntity;
-import org.sola.services.ejb.cadastre.businesslogic.CadastreEJBLocal;
-import org.sola.services.ejb.cadastre.repository.entities.CadastreObject;
 import org.sola.services.ejb.party.businesslogic.PartyEJBLocal;
 import org.sola.services.ejb.party.repository.entities.Party;
 import org.sola.services.ejb.source.businesslogic.SourceEJBLocal;
@@ -57,7 +55,6 @@ import org.sola.services.ejb.transaction.repository.entities.TransactionStatusTy
 /**
  * Entity representing administrative.rrr table.
  *
- * @author soladev
  */
 @Table(name = "rrr", schema = "administrative")
 @DefaultSorter(sortString = "status_code, nr")
@@ -100,6 +97,22 @@ public class Rrr extends AbstractVersionedEntity {
     private String mortgageTypeCode;
     @Column(name = "registration_number")
     private String registrationNumber;
+    @Column(name = "ground_rent")
+    private BigDecimal groundRent;
+    @Column(name = "start_date")
+    private Date startDate;
+    @Column(name = "execution_date")
+    private Date executionDate;
+    @Column(name = "lease_number")
+    private String leaseNumber;
+    @Column(name = "stamp_duty")
+    private BigDecimal stampDuty;
+    @Column(name = "transfer_duty")
+    private BigDecimal transferDuty;
+    @Column(name = "registration_fee")
+    private BigDecimal registrationFee;
+    @ChildEntityList(parentIdField = "rrrId", cascadeDelete = true)
+    private List<LeaseSpecialCondition> leaseSpecialConditionList;
     @Column(name = "status_change_date", updatable = false, insertable = false)
     private Date statusChangeDate;
     // Child entity fields
@@ -346,7 +359,77 @@ public class Rrr extends AbstractVersionedEntity {
         this.statusChangeDate = statusChangeDate;
     }
 
-    
+    public Date getExecutionDate() {
+        return executionDate;
+    }
+
+    public void setExecutionDate(Date executionDate) {
+        this.executionDate = executionDate;
+    }
+
+    public String getLeaseNumber() {
+        return leaseNumber;
+    }
+
+    public void setLeaseNumber(String leaseNumber) {
+        this.leaseNumber = leaseNumber;
+    }
+
+    public Boolean getLocked() {
+        return locked;
+    }
+
+    public void setLocked(Boolean locked) {
+        this.locked = locked;
+    }
+
+    public List<LeaseSpecialCondition> getLeaseSpecialConditionList() {
+        return leaseSpecialConditionList;
+    }
+
+    public void setLeaseSpecialConditionList(List<LeaseSpecialCondition> leaseSpecialConditionList) {
+        this.leaseSpecialConditionList = leaseSpecialConditionList;
+    }
+
+    public BigDecimal getRegistrationFee() {
+        return registrationFee;
+    }
+
+    public void setRegistrationFee(BigDecimal registrationFee) {
+        this.registrationFee = registrationFee;
+    }
+
+    public BigDecimal getStampDuty() {
+        return stampDuty;
+    }
+
+    public void setStampDuty(BigDecimal stampDuty) {
+        this.stampDuty = stampDuty;
+    }
+
+    public Date getStartDate() {
+        return startDate;
+    }
+
+    public void setStartDate(Date startDate) {
+        this.startDate = startDate;
+    }
+
+    public BigDecimal getTransferDuty() {
+        return transferDuty;
+    }
+
+    public void setTransferDuty(BigDecimal transferDuty) {
+        this.transferDuty = transferDuty;
+    }
+
+    public BigDecimal getGroundRent() {
+        return groundRent;
+    }
+
+    public void setGroundRent(BigDecimal groundRent) {
+        this.groundRent = groundRent;
+    }
 
     @Override
     public void preSave() {

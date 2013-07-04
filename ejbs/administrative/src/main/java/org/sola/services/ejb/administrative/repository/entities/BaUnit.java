@@ -99,8 +99,9 @@ public class BaUnit extends AbstractVersionedEntity {
     @ChildEntityList(parentIdField = "baUnitId", childIdField = "sourceId",
     manyToManyClass = SourceDescribesBaUnit.class)
     private List<Source> sourceList;
-    @ExternalEJB(ejbLocalClass = CadastreEJBLocal.class, loadMethod = "getCadastreObject")
-    @ChildEntity(childIdField = "cadastreObjectId", readOnly=true)
+    @ExternalEJB(ejbLocalClass = CadastreEJBLocal.class, 
+            saveMethod="saveCadastreObject", loadMethod = "getCadastreObject")
+    @ChildEntity(childIdField = "cadastreObjectId")
     private CadastreObject cadastreObject;
     @Column(name = "cadastre_object_id")
     private String cadastreObjectId;
