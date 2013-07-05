@@ -270,9 +270,7 @@ public class ApplicationEJB extends AbstractEJB implements ApplicationEJBLocal {
                 if (cadastre.getLandGradeCode() != null) {
                     landGradeCode = cadastre.getLandGradeCode();
                 }
-                if (cadastre.getLandUseCode() != null) {
-                    landUseCode = cadastre.getLandUseCode();
-                }
+                
                 if (cadastre.getValuationAmount() != null) {
                     totalValue = new Money(cadastre.getValuationAmount().abs());
                 }
@@ -309,8 +307,8 @@ public class ApplicationEJB extends AbstractEJB implements ApplicationEJBLocal {
                             if (RequestType.NEW_LEASE.equals(type.getCode())) {
                                 serviceFee = determineServiceFee(landUseCode, landGradeCode);
                                 //stampDuty = calculateDutyOnTransfer(AdminFeeType.STAMP_DUTY, totalValue);
-                                groundRent = calculateGroundRent(landUseCode, landGradeCode, valuationZone, totalArea);
-                                stampDuty = calculateDutyOnGroundRent( landUseCode, landGradeCode, groundRent);
+                                //groundRent = calculateGroundRent(landUseCode, landGradeCode, valuationZone, totalArea);
+                                //stampDuty = calculateDutyOnGroundRent( landUseCode, landGradeCode, groundRent);
                             }
 
                             break;

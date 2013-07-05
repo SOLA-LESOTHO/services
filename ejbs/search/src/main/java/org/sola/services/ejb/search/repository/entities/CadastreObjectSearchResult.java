@@ -25,8 +25,6 @@ public class CadastreObjectSearchResult extends AbstractVersionedEntity {
     private String nameLastpart;
     @Column(name = "status_code")
     private String statusCode;
-    @Column(name = "land_use_code")
-    private String landUseCode;
     @Column(name = "land_grade_code")
     private String landGradeCode;
     @Column(name = "survey_date")
@@ -45,20 +43,18 @@ public class CadastreObjectSearchResult extends AbstractVersionedEntity {
     private String valuationZone;
     public static final String PARAM_NAME_FIRST_PART = "nameFirstPart";
     public static final String PARAM_NAME_LAST_PART = "nameLastPart";
-    public static final String PARAM_LAND_USE_CODE = "landUseCode";
     public static final String PARAM_ADDRESS = "address";
     public static final String QUERY_SEARCH = ""
             + "SELECT DISTINCT co.id, co.type_code, co.name_firstpart, co.name_lastpart, co.approval_datetime, co.historic_datetime, "
             + "(SELECT size FROM cadastre.spatial_value_area cov WHERE cov.spatial_unit_id = co.id AND type_code='officialArea' LIMIT 1) AS area, "
             + "(SELECT string_agg(ad.description, ', ') FROM address.address ad INNER JOIN cadastre.spatial_unit_address sad "
             + "  ON ad.id = sad.spatial_unit_id WHERE sa.spatial_unit_id = co.id) AS address, "
-            + "co.source_reference, co.land_use_code, co.land_grade_code, co.valuation_amount, co.valuation_zone, "
+            + "co.source_reference, co.land_grade_code, co.valuation_amount, co.valuation_zone, "
             + "co.status_code, co.rowversion, co.change_user, co.rowidentifier "
             + "FROM cadastre.cadastre_object co LEFT JOIN cadastre.spatial_unit_address sa ON co.id = sa.spatial_unit_id "
             + "LEFT JOIN address.address a ON sa.address_id = a.id "
             + "WHERE POSITION(LOWER(#{" + PARAM_NAME_FIRST_PART + "}) IN LOWER(co.name_firstpart)) > 0 AND "
             + "POSITION(LOWER(#{" + PARAM_NAME_LAST_PART + "}) IN LOWER(co.name_lastpart)) > 0 AND "
-            + "POSITION(LOWER(#{" + PARAM_LAND_USE_CODE + "}) IN LOWER(COALESCE(co.land_use_code, ''))) > 0 AND "
             + "POSITION(LOWER(#{" + PARAM_ADDRESS + "}) IN LOWER(COALESCE(a.description, ''))) > 0 "
             + "ORDER BY co.name_firstpart, co.name_lastpart "
             + "LIMIT 100";
@@ -98,15 +94,7 @@ public class CadastreObjectSearchResult extends AbstractVersionedEntity {
     public void setId(String id) {
         this.id = id;
     }
-
-    public String getLandUseCode() {
-        return landUseCode;
-    }
-
-    public void setLandUseCode(String landUseCode) {
-        this.landUseCode = landUseCode;
-    }
-
+    
     public String getLandGradeCode() {
         return landGradeCode;
     }
