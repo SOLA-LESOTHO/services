@@ -57,9 +57,15 @@
         </field>
         <field custom-converter="org.sola.common.mapping.NonCumulativeListConverter"
                custom-converter-param="org.sola.services.ejb.party.repository.entities.Party,
-               org.sola.services.boundary.transferobjects.casemanagement.PartySummaryTO">
+               org.sola.services.boundary.transferobjects.casemanagement.PartyTO">
             <a>rightHolderList</a>
             <b>rightHolderList</b>
+        </field>
+        <field custom-converter="org.sola.common.mapping.NonCumulativeListConverter"
+               custom-converter-param="org.sola.services.ejb.administrative.repository.entities.LeaseSpecialCondition,
+               org.sola.services.boundary.transferobjects.administrative.LeaseSpecialConditionTO">
+            <a>leaseSpecialConditionList</a>
+            <b>leaseSpecialConditionList</b>
         </field>
         <field custom-converter="org.sola.common.mapping.NonCumulativeListConverter"
                custom-converter-param="org.sola.services.ejb.source.repository.entities.Source,
