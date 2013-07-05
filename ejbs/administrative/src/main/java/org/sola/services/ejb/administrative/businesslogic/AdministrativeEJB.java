@@ -893,9 +893,6 @@ public class AdministrativeEJB extends AbstractEJB
         if (co.getLandGradeCode() != null) {
             landGradeCode = co.getLandGradeCode();
         }
-        if (co.getLandUseCode() != null) {
-            landUseCode = co.getLandUseCode();
-        }
         if (co.getValuationZone() != null) {
             valuationZone = co.getValuationZone();
         }

@@ -914,9 +914,6 @@ public class SearchEJB extends AbstractEJB implements SearchEJBLocal {
         if (searchParams.getNameLastPart() == null) {
             searchParams.setNameLastPart("");
         }
-        if (searchParams.getLandUseCode() == null) {
-            searchParams.setLandUseCode("");
-        }
         if (searchParams.getAddress() == null) {
             searchParams.setAddress("");
         }
@@ -925,7 +922,6 @@ public class SearchEJB extends AbstractEJB implements SearchEJBLocal {
         params.put(CommonSqlProvider.PARAM_QUERY, CadastreObjectSearchResult.QUERY_SEARCH);
         params.put(CadastreObjectSearchResult.PARAM_NAME_FIRST_PART, searchParams.getNameFirstPart());
         params.put(CadastreObjectSearchResult.PARAM_NAME_LAST_PART, searchParams.getNameLastPart());
-        params.put(CadastreObjectSearchResult.PARAM_LAND_USE_CODE, searchParams.getLandUseCode());
         params.put(CadastreObjectSearchResult.PARAM_ADDRESS, searchParams.getAddress());
         return getRepository().getEntityList(CadastreObjectSearchResult.class, params);
     }
