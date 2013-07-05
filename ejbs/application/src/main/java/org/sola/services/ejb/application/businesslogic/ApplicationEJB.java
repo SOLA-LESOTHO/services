@@ -270,9 +270,7 @@ public class ApplicationEJB extends AbstractEJB implements ApplicationEJBLocal {
                 if (cadastre.getLandGradeCode() != null) {
                     landGradeCode = cadastre.getLandGradeCode();
                 }
-                if (cadastre.getLandUseCode() != null) {
-                    landUseCode = cadastre.getLandUseCode();
-                }
+
                 if (cadastre.getValuationAmount() != null) {
                     totalValue = new Money(cadastre.getValuationAmount().abs());
                 }

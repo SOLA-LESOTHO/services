@@ -35,10 +35,7 @@ import java.util.*;
 import javax.annotation.security.RolesAllowed;
 import javax.ejb.EJB;
 import javax.ejb.Stateless;
-import org.sola.common.DateUtility;
-import org.sola.common.Money;
-import org.sola.common.RolesConstants;
-import org.sola.common.SOLAException;
+import org.sola.common.*;
 import org.sola.common.messaging.ServiceMessage;
 import org.sola.services.common.EntityAction;
 import org.sola.services.common.LocalInfo;
@@ -230,6 +227,22 @@ public class AdministrativeEJB extends AbstractEJB
         if (baUnit == null) {
             return null;
         }
+        // Check BaUnit status
+//        if (!StringUtility.empty(baUnit.getStatusCode()).equals("")
+//                && !StringUtility.empty(baUnit.getStatusCode()).equalsIgnoreCase("pending")
+//                && baUnit.isModified()) {
+//            throw new SOLAException(ServiceMessage.BA_UNIT_MUST_HAVE_PENDING_STATE);
+//        }
+        
+        // Check RRR status
+//        for (Rrr rrr : baUnit.getRrrList()) {
+//            if (!StringUtility.empty(rrr.getStatusCode()).equals("")
+//                    && !StringUtility.empty(rrr.getStatusCode()).equalsIgnoreCase("pending")
+//                    && rrr.isModified()) {
+//                throw new SOLAException(ServiceMessage.RRR_MUST_HAVE_PENDING_STATE);
+//            }
+//        }
+
         TransactionBasic transaction =
                 transactionEJB.getTransactionByServiceId(serviceId, true, TransactionBasic.class);
         LocalInfo.setTransactionId(transaction.getId());
@@ -288,7 +301,7 @@ public class AdministrativeEJB extends AbstractEJB
                 getRepository().saveEntity(baUnit);
             }
         }
-        
+
         params = new HashMap<String, Object>();
         params.put(CommonSqlProvider.PARAM_WHERE_PART, Rrr.QUERY_WHERE_BYTRANSACTIONID);
         params.put(Rrr.QUERY_PARAMETER_TRANSACTIONID, transactionId);
@@ -740,7 +753,7 @@ public class AdministrativeEJB extends AbstractEJB
     public Dispute getDispute(String id) {
         Dispute result = null;
         if (id != null) {
-            result =  getRepository().getEntity(Dispute.class,id);
+            result = getRepository().getEntity(Dispute.class, id);
         }
         return result;
     }
@@ -775,10 +788,10 @@ public class AdministrativeEJB extends AbstractEJB
             return dispute;
         }
 
-        dispute =  getRepository().saveEntity(dispute);
-        
+        dispute = getRepository().saveEntity(dispute);
+
         return dispute;
-        
+
     }
 
     /**
@@ -875,12 +888,12 @@ public class AdministrativeEJB extends AbstractEJB
      */
     @Override
     public BigDecimal calculateGroundRent(CadastreObject co) {
-        if(co == null){
+        if (co == null) {
             return BigDecimal.ZERO;
         }
-        
-        String landUseCode="";
-        String landGradeCode="";
+
+        String landUseCode = "";
+        String landGradeCode = "";
         String valuationZone = "";
         BigDecimal totalArea = BigDecimal.ZERO;
         Money groundRent = new Money(BigDecimal.ONE);
@@ -889,17 +902,15 @@ public class AdministrativeEJB extends AbstractEJB
         LandUseGrade landUseGrade;
         SpatialValueArea spatialValueArea;
         GroundRentMultiplicationFactor multiplicationFactor;
-        
+
         if (co.getLandGradeCode() != null) {
             landGradeCode = co.getLandGradeCode();
         }
-        if (co.getLandUseCode() != null) {
-            landUseCode = co.getLandUseCode();
-        }
+
         if (co.getValuationZone() != null) {
             valuationZone = co.getValuationZone();
         }
-        
+
         spatialValueArea = cadastreEJB.getSpatialValueArea(co.getId());
         if (spatialValueArea != null) {
             totalArea = spatialValueArea.getCalculatedAreaSize();
@@ -907,7 +918,7 @@ public class AdministrativeEJB extends AbstractEJB
 
         landUseGrade = cadastreEJB.getLandUseGrade(landUseCode, landGradeCode);
         multiplicationFactor = cadastreEJB.getMultiplicationFacotr(landUseCode, landGradeCode, valuationZone);
-        
+
         if (multiplicationFactor != null) {
             groundRentFactor = multiplicationFactor.getMultiplicationFactor();
         } else {

@@ -129,19 +129,11 @@ public class Rrr extends AbstractVersionedEntity {
     @ChildEntityList(parentIdField = "rrrId", childIdField = "partyId",
             manyToManyClass = PartyForRrr.class, readOnly = true)
     private List<Party> rightHolderList;
-    @Column(insertable = false, updatable = false, name = "concatenated_name")
-    @AccessFunctions(onSelect = "administrative.get_concatenated_name(ba_unit_id)")
-    private String concatenatedName;
     @Column(name = "cadastre_object_id")
     private String cadastreObjectId;
-
-    public String getConcatenatedName() {
-        return concatenatedName;
-    }
-
-    public void setConcatenatedName(String concatenatedName) {
-        this.concatenatedName = concatenatedName;
-    }
+    @Column(name = "land_use_code")
+    private String landUseCode;
+    
     // Other fields
     private Boolean locked = null;
 
@@ -429,6 +421,14 @@ public class Rrr extends AbstractVersionedEntity {
 
     public void setGroundRent(BigDecimal groundRent) {
         this.groundRent = groundRent;
+    }
+
+    public String getLandUseCode() {
+        return landUseCode;
+    }
+
+    public void setLandUseCode(String landUseCode) {
+        this.landUseCode = landUseCode;
     }
 
     @Override

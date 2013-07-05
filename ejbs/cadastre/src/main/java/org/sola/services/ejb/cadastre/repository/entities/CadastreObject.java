@@ -124,8 +124,6 @@ public class CadastreObject extends AbstractVersionedEntity {
     private byte[] geomPolygon;
     @ChildEntityList(parentIdField = "spatialUnitId")
     private List<SpatialValueArea> spatialValueAreaList;
-    @Column(name = "land_use_code")
-    private String landUseCode;
     @Column(name = "land_grade_code")
     private String landGradeCode;
     @Column(name="survey_date")
@@ -151,14 +149,6 @@ public class CadastreObject extends AbstractVersionedEntity {
 
     public void setLandGradeCode(String landGradeCode) {
         this.landGradeCode = landGradeCode;
-    }
-    
-    public String getLandUseCode() {
-        return landUseCode;
-    }
-
-    public void setLandUseCode(String landUseCode) {
-        this.landUseCode = landUseCode;
     }
 
     /**
