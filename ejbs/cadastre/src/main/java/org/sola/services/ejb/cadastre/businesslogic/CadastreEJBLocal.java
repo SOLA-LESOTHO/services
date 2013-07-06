@@ -58,11 +58,6 @@ public interface CadastreEJBLocal extends AbstractEJBLocal {
      */
     LandUseGrade getLandUseGrade(String landUseCode, String landGradeCode);
 
-    /**
-     * See {@linkplain CadastreEJB#getLandUseTypes(java.lang.String)
-     * CadastreEJB.getCadastreObjectTypes}.
-     */
-    List<LandUseType> getLandUseTypes(String languageCode);
 
     /**
      * See {@linkplain CadastreEJB#getCadastreObjectTypes(java.lang.String)
@@ -181,10 +176,15 @@ public interface CadastreEJBLocal extends AbstractEJBLocal {
      */
     List<SpatialUnitTemporary> getSpatialUnitTemporaryListByTransaction(
             String transactionId);
-
+    
     /**
      * see {@linkplain CadastreEJB#getSpatialValueArea(java.lang.String)
      * CadastreEJB.getSpatialValueArea}
      */
     public SpatialValueArea getSpatialValueArea(String colist);
+    /*
+     * see {@linkplain CadastreEJB#getRoadClassTypes(java.lang.String)
+     * CadastreEJB.getRoadClassTypes}
+     */
+    List<RoadClassType> getRoadClassTypes(String languageCode);
 }

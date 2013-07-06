@@ -307,8 +307,8 @@ public class ApplicationEJB extends AbstractEJB implements ApplicationEJBLocal {
                             if (RequestType.NEW_LEASE.equals(type.getCode())) {
                                 serviceFee = determineServiceFee(landUseCode, landGradeCode);
                                 //stampDuty = calculateDutyOnTransfer(AdminFeeType.STAMP_DUTY, totalValue);
-                                groundRent = calculateGroundRent(landUseCode, landGradeCode, valuationZone, totalArea);
-                                stampDuty = calculateDutyOnGroundRent( landUseCode, landGradeCode, groundRent);
+                                //groundRent = calculateGroundRent(landUseCode, landGradeCode, valuationZone, totalArea);
+                                //stampDuty = calculateDutyOnGroundRent( landUseCode, landGradeCode, groundRent);
                             }
 
                             break;

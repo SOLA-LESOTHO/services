@@ -47,17 +47,7 @@ import org.sola.services.ejb.cadastre.repository.entities.*;
 @EJB(name = "java:global/SOLA/CadastreEJBLocal", beanInterface = CadastreEJBLocal.class)
 public class CadastreEJB extends AbstractEJB implements CadastreEJBLocal {
 
-    /**
-     * Retrieves all cadastre.land_use_type code values.
-     *
-     * @param languageCode The language code to use for localization of display
-     * values.
-     */
-    @Override
-    public List<LandUseType> getLandUseTypes(String languageCode) {
-        return getRepository().getCodeList(LandUseType.class, languageCode);
-    }
-
+    
     /**
      * Retrieves all cadastre.cadastre_object_type code values.
      *
@@ -485,5 +475,9 @@ public class CadastreEJB extends AbstractEJB implements CadastreEJBLocal {
     @Override
     public List<LandGradeType> getLandGradeTypes(String languageCode) {
         return getRepository().getCodeList(LandGradeType.class, languageCode);
+    }
+    @Override
+    public List<RoadClassType> getRoadClassTypes(String langugageCode){
+        return getRepository().getCodeList(RoadClassType.class, langugageCode); 
     }
 }
