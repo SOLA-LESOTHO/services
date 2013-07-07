@@ -227,6 +227,10 @@ public class AdministrativeEJB extends AbstractEJB
         if (baUnit == null) {
             return null;
         }
+        if(baUnit.isNew() && baUnit.getCadastreObject()!=null){
+            // Force cadastre object update
+            baUnit.getCadastreObject().setEntityAction(EntityAction.UPDATE);
+        }
         // Check BaUnit status
 //        if (!StringUtility.empty(baUnit.getStatusCode()).equals("")
 //                && !StringUtility.empty(baUnit.getStatusCode()).equalsIgnoreCase("pending")
