@@ -133,6 +133,10 @@ public class Rrr extends AbstractVersionedEntity {
     private String cadastreObjectId;
     @Column(name = "land_use_code")
     private String landUseCode;
+    @Column(name = "land_usable")
+    private BigDecimal landUsable;
+    @Column(name = "personal_levy")
+    private BigDecimal personalLevy;
     
     // Other fields
     private Boolean locked = null;
@@ -429,6 +433,22 @@ public class Rrr extends AbstractVersionedEntity {
 
     public void setLandUseCode(String landUseCode) {
         this.landUseCode = landUseCode;
+    }
+
+    public BigDecimal getLandUsable() {
+        return landUsable;
+    }
+
+    public void setLandUsable(BigDecimal landUsable) {
+        this.landUsable = landUsable;
+    }
+
+    public BigDecimal getPersonalLevy() {
+        return personalLevy;
+    }
+
+    public void setPersonalLevy(BigDecimal personalLevy) {
+        this.personalLevy = personalLevy;
     }
 
     @Override
