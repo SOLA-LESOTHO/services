@@ -94,6 +94,14 @@ public interface CadastreEJBLocal extends AbstractEJBLocal {
      */
     CadastreObject saveCadastreObject(CadastreObject cadastreObject);
 
+    
+    /**
+     * Terminates cadastre object.
+     * @param transactionId Transaction id, calling termination
+     * @param cadastreObjectId ID of cadastre object to terminate
+     */
+    boolean terminateCadastreObject(String transactionId, String cadastreObjectId);
+    
     /**
      * See {@linkplain CadastreEJB#getCadastreObjectByPoint(double, double, int)
      * CadastreEJB.getCadastreObjectByPoint}.

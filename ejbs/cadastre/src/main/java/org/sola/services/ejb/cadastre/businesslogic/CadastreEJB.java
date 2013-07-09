@@ -153,6 +153,40 @@ public class CadastreEJB extends AbstractEJB implements CadastreEJBLocal {
         return getRepository().saveEntity(cadastreObject);
     }
 
+    @Override
+    public boolean terminateCadastreObject(String transactionId, String cadastreObjectId){
+        if(cadastreObjectId==null || transactionId == null){
+            return false;
+        }
+        
+        List<CadastreObjectTarget> targets = getCadastreObjectTargetsByTransaction(transactionId);
+        boolean targetFound = false;
+        
+        if(targets!=null && targets.size()>0){
+            for(CadastreObjectTarget target : targets){
+                if(target.getCadastreObjectId().equals(cadastreObjectId)){
+                    targetFound = true;
+                    break;
+                }
+            }
+        }
+        
+        if(!targetFound){
+            // Create target cadastre object
+            CadastreObjectTarget newTarget = new CadastreObjectTarget();
+            newTarget.setCadastreObjectId(cadastreObjectId);
+            newTarget.setTransactionId(transactionId);
+            getRepository().saveEntity(newTarget);
+        }
+        
+        // Make cadastre object as historic
+        CadastreObjectStatusChanger coChanger = getRepository().getEntity(
+                CadastreObjectStatusChanger.class, cadastreObjectId);
+        coChanger.setStatusCode("historic");
+        getRepository().saveEntity(coChanger);
+        return true;
+    }
+    
     /**
      * Retrieves all cadastre objects linked to the specified BA Unit.
      *

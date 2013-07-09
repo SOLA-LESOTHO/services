@@ -52,7 +52,7 @@ public interface TransactionEJBLocal extends AbstractEJBLocal {
             String serviceId,
             boolean createIfNotFound,
             Class<T> transactionClass);
-
+    
     /**
      * See {@linkplain TransactionEJB#getTransactionById(java.lang.String, java.lang.Class)
      * TransactionEJB.getTransactionById}.

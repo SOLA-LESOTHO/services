@@ -43,7 +43,9 @@ import org.sola.services.common.repository.entities.AbstractCodeEntity;
 @Table(name = "rrr_type", schema = "administrative")
 @DefaultSorter(sortString="display_value")
 public class RrrType extends AbstractCodeEntity {
-
+    
+    public static final String CODE_LEASE = "lease";
+    
     @Column(name = "rrr_group_type_code")
     private String rrrGroupTypeCode;
     @Column(name = "is_primary")

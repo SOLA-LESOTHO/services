@@ -227,7 +227,7 @@ public class AdministrativeEJB extends AbstractEJB
         if (baUnit == null) {
             return null;
         }
-        if(baUnit.isNew() && baUnit.getCadastreObject()!=null){
+        if (baUnit.isNew() && baUnit.getCadastreObject() != null) {
             // Force cadastre object update
             baUnit.getCadastreObject().setEntityAction(EntityAction.UPDATE);
         }
@@ -237,7 +237,7 @@ public class AdministrativeEJB extends AbstractEJB
 //                && baUnit.isModified()) {
 //            throw new SOLAException(ServiceMessage.BA_UNIT_MUST_HAVE_PENDING_STATE);
 //        }
-        
+
         // Check RRR status
 //        for (Rrr rrr : baUnit.getRrrList()) {
 //            if (!StringUtility.empty(rrr.getStatusCode()).equals("")
@@ -310,15 +310,35 @@ public class AdministrativeEJB extends AbstractEJB
         params.put(CommonSqlProvider.PARAM_WHERE_PART, Rrr.QUERY_WHERE_BYTRANSACTIONID);
         params.put(Rrr.QUERY_PARAMETER_TRANSACTIONID, transactionId);
         params.put("username", getUserName());
-        List<RrrStatusChanger> rrrStatusChangerList =
-                getRepository().getEntityList(RrrStatusChanger.class, params);
+
+        List<RrrStatusChanger> rrrStatusChangerList = getRepository().getEntityList(RrrStatusChanger.class, params);
+
         for (RrrStatusChanger rrr : rrrStatusChangerList) {
-            validationResult.addAll(this.validateRrr(rrr, languageCode));
+            validationResult.addAll(this.validateRrr(rrr, approvedStatus, languageCode));
             if (systemEJB.validationSucceeded(validationResult) && !validateOnly) {
+
+                // If lease termination, terminate related cadastre object and ba_unit
+                if (approvedStatus.equalsIgnoreCase(RegistrationStatusType.STATUS_HISTORIC)
+                        && rrr.getTypeCode().equalsIgnoreCase(RrrType.CODE_LEASE)) {
+                    
+                    // Terminate cadastre object
+                    BaUnit tmpBaUnit = getRepository().getEntity(BaUnit.class, rrr.getBaUnitId());
+                    if(tmpBaUnit!=null && tmpBaUnit.getCadastreObjectId()!=null){
+                        cadastreEJB.terminateCadastreObject(transactionId, tmpBaUnit.getCadastreObjectId());
+                    }
+                    
+                    // Terminate BaUnit
+                    terminateBaUnit(rrr.getBaUnitId(), transactionId);
+                    BaUnitStatusChanger baUnitTmp = getRepository().getEntity(BaUnitStatusChanger.class, rrr.getBaUnitId());
+                    baUnitTmp.setStatusCode(approvedStatus);
+                    getRepository().saveEntity(baUnitTmp);
+                }
+
                 rrr.setStatusCode(approvedStatus);
                 getRepository().saveEntity(rrr);
             }
         }
+
         if (!validateOnly) {
             params = new HashMap<String, Object>();
             params.put(CommonSqlProvider.PARAM_WHERE_PART, BaUnitNotation.QUERY_WHERE_BYTRANSACTIONID);
@@ -364,9 +384,9 @@ public class AdministrativeEJB extends AbstractEJB
      * @return The list of validation results.
      */
     private List<ValidationResult> validateRrr(
-            RrrStatusChanger rrr, String languageCode) {
+            RrrStatusChanger rrr, String statusCode, String languageCode) {
         List<BrValidation> brValidationList = this.systemEJB.getBrForValidatingRrr(
-                RegistrationStatusType.STATUS_CURRENT, rrr.getTypeCode());
+                statusCode, rrr.getTypeCode());
         HashMap<String, Serializable> params = new HashMap<String, Serializable>();
         params.put("id", rrr.getId());
         params.put("username", getUserName());
@@ -409,23 +429,14 @@ public class AdministrativeEJB extends AbstractEJB
      * role.</p>
      *
      * @param baUnitId The identifier of the BA Unit to be canceled / terminated
-     * @param serviceId The identifier of the service that is canceling /
-     * terminating the BA Unit
+     * @param transaction Transaction object that is canceling / terminating the
+     * BA Unit
      * @return The BA Unit that will be canceled / terminated.
      * @see #cancelBaUnitTermination(java.lang.String) cancelBaUnitTermination
      */
-    @Override
-    @RolesAllowed(RolesConstants.ADMINISTRATIVE_BA_UNIT_SAVE)
-    public BaUnit terminateBaUnit(String baUnitId, String serviceId) {
-        if (baUnitId == null || serviceId == null) {
-            return null;
-        }
-
-        // Check transaction to exist and have pending status
-        Transaction transaction = transactionEJB.getTransactionByServiceId(
-                serviceId, true, Transaction.class);
-        if (transaction == null || !transaction.getStatusCode().equals(RegistrationStatusType.STATUS_PENDING)) {
-            return null;
+    private void terminateBaUnit(String baUnitId, String transactionId) {
+        if (baUnitId == null || transactionId == null) {
+            return;
         }
 
         //TODO: Put BR check to have only one pending transaction for the BaUnit and BaUnit to be with "current" status.
@@ -433,10 +444,8 @@ public class AdministrativeEJB extends AbstractEJB
 
         BaUnitTarget baUnitTarget = new BaUnitTarget();
         baUnitTarget.setBaUnitId(baUnitId);
-        baUnitTarget.setTransactionId(transaction.getId());
+        baUnitTarget.setTransactionId(transactionId);
         getRepository().saveEntity(baUnitTarget);
-
-        return getBaUnitById(baUnitId);
     }
 
     /**
@@ -449,9 +458,7 @@ public class AdministrativeEJB extends AbstractEJB
      * for.
      * @return The details of the BA Unit that has had its termination canceled.
      */
-    @Override
-    @RolesAllowed(RolesConstants.ADMINISTRATIVE_BA_UNIT_SAVE)
-    public BaUnit cancelBaUnitTermination(String baUnitId) {
+    private BaUnit cancelBaUnitTermination(String baUnitId) {
         if (baUnitId == null) {
             return null;
         }

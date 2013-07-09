@@ -44,7 +44,9 @@ public class RrrStatusChanger extends AbstractStatusChangerEntity {
 
     @Column(name = "type_code", updatable = false, insertable = false)
     private String typeCode;
-
+    @Column(name="ba_unit_id", updatable = false, insertable = false)
+    private String baUnitId;
+    
     public RrrStatusChanger() {
         super();
     }
@@ -55,5 +57,13 @@ public class RrrStatusChanger extends AbstractStatusChangerEntity {
 
     public void setTypeCode(String typeCode) {
         this.typeCode = typeCode;
+    }
+
+    public String getBaUnitId() {
+        return baUnitId;
+    }
+
+    public void setBaUnitId(String baUnitId) {
+        this.baUnitId = baUnitId;
     }
 }
