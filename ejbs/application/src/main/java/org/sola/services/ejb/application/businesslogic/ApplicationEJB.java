@@ -317,8 +317,7 @@ public class ApplicationEJB extends AbstractEJB implements ApplicationEJBLocal {
                 }
                 ser.setBaseFee(baseFee.getAmount());
                 ser.setServiceFee(serviceFee.getAmount());
-                ser.setStampDuty(stampDuty.getAmount());
-
+                
                 servicesFeeTotal = servicesFeeTotal.plus(serviceFee);
                 registrationFeeTotal = registrationFeeTotal.plus(baseFee);
                 stampDutyTotal = stampDutyTotal.plus(stampDuty);
@@ -330,14 +329,8 @@ public class ApplicationEJB extends AbstractEJB implements ApplicationEJBLocal {
         totalFee = servicesFeeTotal.plus(registrationFeeTotal).plus(stampDutyTotal).plus(groundRent);
 
         application.setServicesFee(servicesFeeTotal.getAmount());
-
-        application.setRegistrationFee(registrationFeeTotal.getAmount());
-
-        application.setStampDuty(stampDutyTotal.getAmount());
-
+                
         application.setTotalFee(totalFee.getAmount());
-
-        application.setGroundRent(groundRent.getAmount());
 
         if (application.getTotalAmountPaid() == null) {
             application.setTotalAmountPaid(BigDecimal.ZERO);
@@ -1360,7 +1353,13 @@ public class ApplicationEJB extends AbstractEJB implements ApplicationEJBLocal {
         LandUseGrade landUseGrade;
 
         landUseGrade = cadastreEJB.getLandUseGrade(landUse, landGrade);
-        serviceFee = new Money(landUseGrade.getAdminFee().abs());
+        
+        if (landUseGrade != null){
+              serviceFee = new Money(landUseGrade.getAdminFee().abs());
+        }else
+        {
+           serviceFee = new Money(BigDecimal.ZERO);
+        }
 
         return serviceFee;
     }

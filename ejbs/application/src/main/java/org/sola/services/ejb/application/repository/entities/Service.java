@@ -81,12 +81,6 @@ public class Service extends AbstractVersionedEntity {
     private String concatenatedName;
     @Column(name = "service_fee")
     private BigDecimal serviceFee;
-    @Column(name = "stamp_duty")
-    private BigDecimal stampDuty;
-    @Column(name = "ground_rent")
-    private BigDecimal groundRent;
-    @Column(name = "transfer_duty")
-    private BigDecimal transferDuty;
 
     public Service() {
         super();
@@ -197,14 +191,6 @@ public class Service extends AbstractVersionedEntity {
         this.concatenatedName = concatenatedName;
     }
 
-    public BigDecimal getGroundRent() {
-        return groundRent;
-    }
-
-    public void setGroundRent(BigDecimal groundRent) {
-        this.groundRent = groundRent;
-    }
-
     public BigDecimal getServiceFee() {
         return serviceFee;
     }
@@ -212,20 +198,4 @@ public class Service extends AbstractVersionedEntity {
     public void setServiceFee(BigDecimal serviceFee) {
         this.serviceFee = serviceFee;
     }
-
-    public BigDecimal getStampDuty() {
-        return stampDuty;
-    }
-
-    public void setStampDuty(BigDecimal stampDuty) {
-        this.stampDuty = stampDuty;
-    }
-
-    public BigDecimal getTransferDuty() {
-        return transferDuty;
-    }
-
-    public void setTransferDuty(BigDecimal transferDuty) {
-        this.transferDuty = transferDuty;
-    }  
 }
