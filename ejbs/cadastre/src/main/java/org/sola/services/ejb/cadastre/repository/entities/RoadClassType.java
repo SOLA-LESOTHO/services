@@ -27,6 +27,8 @@
  */
 package org.sola.services.ejb.cadastre.repository.entities;
 
+import java.math.BigDecimal;
+import javax.persistence.Column;
 import javax.persistence.Table;
 import org.sola.services.common.repository.DefaultSorter;
 import org.sola.services.common.repository.entities.AbstractCodeEntity;
@@ -38,6 +40,17 @@ public class RoadClassType  extends AbstractCodeEntity {
     
     public RoadClassType(){
         super();
+    }
+    
+    @Column(name = "road_factor")
+    private BigDecimal roadFactor;
+
+    public BigDecimal getRoadFactor() {
+        return roadFactor;
+    }
+
+    public void setRoadFactor(BigDecimal roadFactor) {
+        this.roadFactor = roadFactor;
     }
     
 }

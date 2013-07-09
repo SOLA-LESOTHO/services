@@ -126,14 +126,6 @@ public class Application extends AbstractVersionedEntity {
     @ChildEntityList(parentIdField = "applicationId", childIdField = "spatialUnitId",
     manyToManyClass = ApplicationSpatialUnit.class)
     private List<CadastreObject> cadastreObjectList;
-    @Column(name = "registration_fee")
-    private BigDecimal registrationFee;
-    @Column(name = "transfer_duty")
-    private BigDecimal transferDuty;
-    @Column(name = "stamp_duty")
-    private BigDecimal stampDuty;
-    @Column(name = "ground_rent")
-    private BigDecimal groundRent;
 
     public Application() {
         super();
@@ -361,37 +353,5 @@ public class Application extends AbstractVersionedEntity {
         }
 
         super.preSave();
-    }
-
-    public BigDecimal getGroundRent() {
-        return groundRent;
-    }
-
-    public void setGroundRent(BigDecimal groundRent) {
-        this.groundRent = groundRent;
-    }
-
-    public BigDecimal getRegistrationFee() {
-        return registrationFee;
-    }
-
-    public void setRegistrationFee(BigDecimal registrationFee) {
-        this.registrationFee = registrationFee;
-    }
-
-    public BigDecimal getStampDuty() {
-        return stampDuty;
-    }
-
-    public void setStampDuty(BigDecimal stampDuty) {
-        this.stampDuty = stampDuty;
-    }
-
-    public BigDecimal getTransferDuty() {
-        return transferDuty;
-    }
-
-    public void setTransferDuty(BigDecimal transferDuty) {
-        this.transferDuty = transferDuty;
     }
 }

@@ -29,6 +29,7 @@
  */
 package org.sola.services.ejb.cadastre.businesslogic;
 
+import java.math.BigDecimal;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -523,5 +524,25 @@ public class CadastreEJB extends AbstractEJB implements CadastreEJBLocal {
     @Override
     public List<LandUseType> getLandUseTypes(String languageCode) {
         return getRepository().getCodeList(LandUseType.class, languageCode);
+    }
+    
+    @Override
+    public BigDecimal getRoadClassFactor(String roadClassCode, String languageCode) {
+        if (roadClassCode != null){
+            HashMap params = new HashMap();
+             params.put("code", roadClassCode);
+             RoadClassType roadClassType = getRepository().getCode(
+                           RoadClassType.class, roadClassCode, languageCode);
+             if (roadClassType != null) {
+                 return roadClassType.getRoadFactor();
+             }else
+             {
+                return BigDecimal.ONE;
+             }
+        }else
+        {
+            return BigDecimal.ONE;
+        }
+        
     }
 }

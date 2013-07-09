@@ -898,51 +898,63 @@ public class AdministrativeEJB extends AbstractEJB
      * @param co CadastreObject
      */
     @Override
-    public BigDecimal calculateGroundRent(CadastreObject co) {
+    public BigDecimal calculateGroundRent(CadastreObject co, BigDecimal personalLevy, BigDecimal landUsable) {
         if (co == null) {
-            return BigDecimal.ZERO;
-        }
+		return BigDecimal.ZERO;
+	}
 
-        String landUseCode = "";
-        String landGradeCode = "";
-        String valuationZone = "";
-        BigDecimal totalArea = BigDecimal.ZERO;
-        Money groundRent = new Money(BigDecimal.ONE);
-        BigDecimal groundRentRate;
-        BigDecimal groundRentFactor;
-        LandUseGrade landUseGrade;
-        SpatialValueArea spatialValueArea;
-        GroundRentMultiplicationFactor multiplicationFactor;
+	String landUseCode = "";
+	String landGradeCode = "";
+	String valuationZone = "";
+	String roadClassCode = "";
+	BigDecimal totalArea = BigDecimal.ZERO;
+	Money groundRent = new Money(BigDecimal.ONE);
+	BigDecimal groundRentRate;
+	BigDecimal groundRentFactor;
+	BigDecimal roadClassFactor;
+        BigDecimal landUsableFactor;
+	LandUseGrade landUseGrade;
+	SpatialValueArea spatialValueArea;
+	GroundRentMultiplicationFactor multiplicationFactor;
 
-        if (co.getLandGradeCode() != null) {
-            landGradeCode = co.getLandGradeCode();
-        }
+	if (co.getLandGradeCode() != null) {
+		landGradeCode = co.getLandGradeCode();
+	}
 
-        if (co.getValuationZone() != null) {
-            valuationZone = co.getValuationZone();
-        }
+	if (co.getValuationZone() != null) {
+		valuationZone = co.getValuationZone();
+	}
+	
+	if (co.getRoadClassCode() != null){
+		roadClassCode = co.getRoadClassCode();
+	}
 
-        spatialValueArea = cadastreEJB.getSpatialValueArea(co.getId());
-        if (spatialValueArea != null) {
-            totalArea = spatialValueArea.getCalculatedAreaSize();
-        }
+	spatialValueArea = cadastreEJB.getSpatialValueArea(co.getId());
+	if (spatialValueArea != null) {
+		totalArea = spatialValueArea.getCalculatedAreaSize();
+	}
 
-        landUseGrade = cadastreEJB.getLandUseGrade(landUseCode, landGradeCode);
-        multiplicationFactor = cadastreEJB.getMultiplicationFacotr(landUseCode, landGradeCode, valuationZone);
+	landUseGrade = cadastreEJB.getLandUseGrade(landUseCode, landGradeCode);
+	multiplicationFactor = cadastreEJB.getMultiplicationFacotr(landUseCode, landGradeCode, valuationZone);
+	roadClassFactor = cadastreEJB.getRoadClassFactor(roadClassCode, "en");
+	
+	if (multiplicationFactor != null) {
+		groundRentFactor = multiplicationFactor.getMultiplicationFactor();
+	} else {
+		groundRentFactor = BigDecimal.ONE;
+	}
 
-        if (multiplicationFactor != null) {
-            groundRentFactor = multiplicationFactor.getMultiplicationFactor();
-        } else {
-            groundRentFactor = BigDecimal.ONE;
-        }
+	if (landUseGrade != null) {
+		groundRentRate = landUseGrade.getGroundRentRate();
+	} else {
+		groundRentRate = BigDecimal.ONE;
+	}
+        
+        landUsable = landUsable.divide(new BigDecimal("100"));
+        
+        landUsableFactor = landUsable.add(BigDecimal.ONE).divide(new BigDecimal("2"));
 
-        if (landUseGrade != null) {
-            groundRentRate = landUseGrade.getGroundRentRate();
-        } else {
-            groundRentRate = BigDecimal.ONE;
-        }
-
-        groundRent = groundRent.times(totalArea).times(groundRentRate).times(groundRentFactor);
-        return groundRent.getAmount();
+	groundRent = groundRent.times(totalArea).times(groundRentRate).times(groundRentFactor).times(roadClassFactor).times(personalLevy).times(landUsableFactor);
+	return groundRent.getAmount();
     }
 }

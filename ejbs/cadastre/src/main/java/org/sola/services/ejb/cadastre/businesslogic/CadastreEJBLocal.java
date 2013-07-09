@@ -29,6 +29,7 @@
  */
 package org.sola.services.ejb.cadastre.businesslogic;
 
+import java.math.BigDecimal;
 import java.util.List;
 import javax.ejb.Local;
 import org.sola.services.common.ejbs.AbstractEJBLocal;
@@ -201,4 +202,10 @@ public interface CadastreEJBLocal extends AbstractEJBLocal {
      * CadastreEJB.getCadastreObjectTypes}.
      */
     List<LandUseType> getLandUseTypes(String languageCode);
+    
+    /**
+     * See {@linkplain CadastreEJB#getRoadClassType(java.lang.String)
+     * CadastreEJB.getCadastreObjectTypes}.
+     */
+    BigDecimal getRoadClassFactor(String roadClassCode, String languageCode);
 }
