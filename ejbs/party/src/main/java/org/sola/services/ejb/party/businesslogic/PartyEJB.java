@@ -172,8 +172,28 @@ public class PartyEJB extends AbstractEJB implements PartyEJBLocal {
         return getRepository().getCodeList(PartyRoleType.class, languageCode);
     }
 
+
     @Override
     public List<LegalType> getLegalTypes(String languageCode) {
         return getRepository().getCodeList(LegalType.class, languageCode);
+    }
+        
+    /**
+     * Returns all parties that have the certifiedSurveyor party role. Note that the address and party
+     * role details for each surveyor are not loaded. <p>No role is required to execute this
+     * method.</p>
+     */    
+    @Override
+    public List<Party> getCertifiedSurveyors(){
+        Map params = new HashMap<String, Object>();
+        params.put(CommonSqlProvider.PARAM_WHERE_PART, Party.QUERY_WHERE_CERTIFIED_SURVEYOR);
+
+        // Don't load Address or PartyRole as these are not required for the agents list. 
+        getRepository().setLoadInhibitors(new Class<?>[]{PartyRole.class, Address.class});
+        List<Party> surveyors = getRepository().getEntityList(Party.class, params);
+        getRepository().clearLoadInhibitors();
+
+        return surveyors;        
+
     }
 }

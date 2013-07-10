@@ -95,4 +95,10 @@ public interface PartyEJBLocal extends AbstractEJBLocal {
      * PartyEJB.getAgents}.
      */
     List<Party> getAgents();
+    
+    /**
+     * See {@linkplain PartyEJB#getCertifiedSurveyors()
+     * PartyEJB.getCertifiedSurveyors}.
+     */
+    List<Party> getCertifiedSurveyors();
 }
