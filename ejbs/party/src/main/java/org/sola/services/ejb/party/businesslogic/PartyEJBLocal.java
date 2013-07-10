@@ -83,6 +83,12 @@ public interface PartyEJBLocal extends AbstractEJBLocal {
      * PartyEJB.getGenderTypes}.
      */
     List<GenderType> getGenderTypes(String languageCode);
+    
+    /**
+     * See {@linkplain PartyEJB#getLegalTypes(java.lang.String)
+     * PartyEJB.getLegalTypes}.
+     */
+    List<LegalType> getLegalTypes(String languageCode);
 
     /**
      * See {@linkplain PartyEJB#getAgents()
