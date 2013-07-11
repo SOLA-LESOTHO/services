@@ -12,8 +12,10 @@ public class RightsExportResult extends AbstractReadOnlyEntity {
     public static final String PARAM_RIGHT_TYPE = "rightType";
     public static final String SEARCH_QUERY =
             "SELECT DISTINCT b.id AS ba_unit_id, r.status_code AS right_status, r.status_change_date AS right_status_date, "
-            + "r.id AS right_id, r.type_code AS right_type, r.registration_date, r.expiration_date, r.amount, r.registration_number, "
-            + "r.nr AS right_tracking_number, (SELECT string_agg(COALESCE(p.name, '') || ' ' || COALESCE(p.last_name, ''), ',') "
+            + "r.id AS right_id, r.type_code AS right_type, r.registration_date, r.registration_number, r.expiration_date, "
+            + "r.nr AS right_tracking_number, r.ground_rent, r.land_use_code, r.lease_number, r.start_date, r.execution_date, "
+            + "r.land_usable, r.personal_levy, r.stamp_duty, r.transfer_duty, r.registration_fee,"
+            + "(SELECT string_agg(COALESCE(p.name, '') || ' ' || COALESCE(p.last_name, ''), ',') "
             + "FROM administrative.party_for_rrr pr INNER JOIN party.party p ON pr.party_id = p.id WHERE pr.rrr_id = r.id) AS owners, "
             + "payee.payee_id, payee.payee_name, payee.payee_last_name, payee.payee_address, payee.payee_phone, payee.payee_mobile, "
             + "payee.payee_email, payee.payee_id_number, payee.payee_id_type_code, payee.payee_birth_date, payee.payee_gender, "
@@ -34,9 +36,8 @@ public class RightsExportResult extends AbstractReadOnlyEntity {
             + "   ON b.id = r.ba_unit_id) "
             + "   WHERE (r.type_code = #{" + PARAM_RIGHT_TYPE + "} OR #{" + PARAM_RIGHT_TYPE + "} = '') "
             + "   AND b.status_code != 'pending' AND (r.status_code = 'current' OR r.status_code = 'historic') "
-            + "   AND r.status_change_date BETWEEN #{" + PARAM_DATE_FROM + "} AND #{" + PARAM_DATE_TO + "} "
-            + "   ORDER BY r.status_change_date";
-    
+            + "   AND r.registration_date BETWEEN #{" + PARAM_DATE_FROM + "} AND #{" + PARAM_DATE_TO + "} "
+            + "   ORDER BY r.registration_date";
     @Column(name = "ba_unit_id")
     private String baUnitId;
     @Column(name = "right_status")
@@ -51,13 +52,31 @@ public class RightsExportResult extends AbstractReadOnlyEntity {
     private String rightType;
     @Column(name = "registration_date")
     private Date rightRegistrationDate;
+    @Column(name = "start_date")
+    private Date startDate;
+    @Column(name = "execution_date")
+    private Date executionDate;
+    @Column(name = "registration_number")
+    private String rightRegistrationNumber;
     @Column(name = "expiration_date")
     private Date rightExpirationDate;
-    @Column(name = "amount")
-    private BigDecimal paymentAmount;
-    @Column(name="registration_number")
-    private String rightRegistrationNumber;
-    @Column(name="right_tracking_number")
+    @Column(name = "ground_rent")
+    private BigDecimal groundRent;
+    @Column(name = "stamp_duty")
+    private BigDecimal stampDuty;
+    @Column(name = "transfer_duty")
+    private BigDecimal transferDuty;
+    @Column(name = "registration_fee")
+    private BigDecimal registrationFee;
+    @Column(name = "personal_levy")
+    private BigDecimal personalLevy;
+    @Column(name = "land_usable")
+    private BigDecimal landUsable;
+    @Column(name = "land_use_code")
+    private String landUseCode;
+    @Column(name = "lease_number")
+    private String leaseNumber;
+    @Column(name = "right_tracking_number")
     private String rightTrackingNumber;
     @Column(name = "owners")
     private String rightHolders;
@@ -81,23 +100,95 @@ public class RightsExportResult extends AbstractReadOnlyEntity {
     private String payeeIdNumber;
     @Column(name = "payee_id_type_code")
     private String payeeIdTypeCode;
-    @Column(name="payee_birth_date")
+    @Column(name = "payee_birth_date")
     private Date payeeBirthDate;
-    @Column(name="parcel_number")
+    @Column(name = "parcel_number")
     private String parcelNumber;
-    
+
     public RightsExportResult() {
         super();
     }
 
-    public BigDecimal getPaymentAmount() {
-        return paymentAmount;
+    public Date getExecutionDate() {
+        return executionDate;
     }
 
-    public void setPaymentAmount(BigDecimal paymentAmount) {
-        this.paymentAmount = paymentAmount;
+    public void setExecutionDate(Date executionDate) {
+        this.executionDate = executionDate;
     }
 
+    public BigDecimal getGroundRent() {
+        return groundRent;
+    }
+
+    public void setGroundRent(BigDecimal groundRent) {
+        this.groundRent = groundRent;
+    }
+
+    public BigDecimal getLandUsable() {
+        return landUsable;
+    }
+
+    public void setLandUsable(BigDecimal landUsable) {
+        this.landUsable = landUsable;
+    }
+
+    public String getLandUseCode() {
+        return landUseCode;
+    }
+
+    public void setLandUseCode(String landUseCode) {
+        this.landUseCode = landUseCode;
+    }
+
+    public String getLeaseNumber() {
+        return leaseNumber;
+    }
+
+    public void setLeaseNumber(String leaseNumber) {
+        this.leaseNumber = leaseNumber;
+    }
+
+    public BigDecimal getPersonalLevy() {
+        return personalLevy;
+    }
+
+    public void setPersonalLevy(BigDecimal personalLevy) {
+        this.personalLevy = personalLevy;
+    }
+
+    public BigDecimal getRegistrationFee() {
+        return registrationFee;
+    }
+
+    public void setRegistrationFee(BigDecimal registrationFee) {
+        this.registrationFee = registrationFee;
+    }
+
+    public BigDecimal getStampDuty() {
+        return stampDuty;
+    }
+
+    public void setStampDuty(BigDecimal stampDuty) {
+        this.stampDuty = stampDuty;
+    }
+
+    public Date getStartDate() {
+        return startDate;
+    }
+
+    public void setStartDate(Date startDate) {
+        this.startDate = startDate;
+    }
+
+    public BigDecimal getTransferDuty() {
+        return transferDuty;
+    }
+
+    public void setTransferDuty(BigDecimal transferDuty) {
+        this.transferDuty = transferDuty;
+    }
+    
     public String getBaUnitId() {
         return baUnitId;
     }
