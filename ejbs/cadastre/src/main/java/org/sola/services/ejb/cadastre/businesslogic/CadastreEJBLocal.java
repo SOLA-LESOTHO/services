@@ -208,4 +208,8 @@ public interface CadastreEJBLocal extends AbstractEJBLocal {
      * CadastreEJB.getCadastreObjectTypes}.
      */
     BigDecimal getRoadClassFactor(String roadClassCode, String languageCode);
+    
+    public boolean isCalculationPerPlot(String landUseCode);
+    
+    public boolean isCalculationPerHectare(String landUseCode);
 }

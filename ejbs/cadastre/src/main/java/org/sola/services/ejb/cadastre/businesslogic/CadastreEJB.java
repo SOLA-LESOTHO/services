@@ -545,4 +545,35 @@ public class CadastreEJB extends AbstractEJB implements CadastreEJBLocal {
         }
         
     }
+    
+    public boolean isCalculationPerPlot(String landUseCode){
+        
+       boolean calculationPerPlot = false;
+       
+       if ((landUseCode.equals(LandUseType.CODE_HOSPITAL)) ||
+               (landUseCode.equals(LandUseType.CODE_CHARITABLE)) ||
+               (landUseCode.equals(LandUseType.CODE_RECREATIONAL)) ||
+               (landUseCode.equals(LandUseType.CODE_EDUCATIONAL)) ||
+               (landUseCode.equals(LandUseType.CODE_INSTITUTIONAL)) ||
+               (landUseCode.equals(LandUseType.CODE_RELIGIOUS)))
+       {
+           calculationPerPlot = true;
+       }
+       
+       return calculationPerPlot;
+        
+    }
+    
+    public boolean isCalculationPerHectare(String landUseCode){
+        if ((landUseCode.equals(LandUseType.CODE_AGRIC_IRRIGATED)) ||
+               (landUseCode.equals(LandUseType.CODE_AGRIC_NON_IRRIGATED)) ||
+               (landUseCode.equals(LandUseType.CODE_AGRIC_RANGE_GRAZING)) ||
+               (landUseCode.equals(LandUseType.CODE_AGRIC_OTHER)) ||
+               (landUseCode.equals(LandUseType.CODE_AGRIC_LIVESTOCK))){
+            return true;
+        }else
+        {
+            return false;
+        }
+    }
 }

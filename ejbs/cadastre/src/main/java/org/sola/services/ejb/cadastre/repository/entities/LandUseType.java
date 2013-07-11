@@ -42,6 +42,18 @@ import org.sola.services.common.repository.entities.AbstractCodeEntity;
 @DefaultSorter(sortString = "display_value")
 public class LandUseType extends AbstractCodeEntity {
 
+    public static final String CODE_HOSPITAL = "hospital";
+    public static final String CODE_CHARITABLE = "charitable";
+    public static final String CODE_RECREATIONAL = "recreational";
+    public static final String CODE_EDUCATIONAL = "educational";
+    public static final String CODE_INSTITUTIONAL = "institutional";
+    public static final String CODE_RELIGIOUS = "religious";
+    public static final String CODE_AGRIC_IRRIGATED = "agricIrrigated";
+    public static final String CODE_AGRIC_NON_IRRIGATED = "agricNonIrrigated";
+    public static final String CODE_AGRIC_RANGE_GRAZING = "agricRangeGrazing";
+    public static final String CODE_AGRIC_OTHER = "agricOther";
+    public static final String CODE_AGRIC_LIVESTOCK = "agricIntensive";
+    
     public LandUseType() {
         super();
     }
