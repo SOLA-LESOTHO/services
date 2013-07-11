@@ -546,6 +546,7 @@ public class CadastreEJB extends AbstractEJB implements CadastreEJBLocal {
         
     }
     
+    @Override
     public boolean isCalculationPerPlot(String landUseCode){
         
        boolean calculationPerPlot = false;
@@ -564,6 +565,7 @@ public class CadastreEJB extends AbstractEJB implements CadastreEJBLocal {
         
     }
     
+    @Override
     public boolean isCalculationPerHectare(String landUseCode){
         if ((landUseCode.equals(LandUseType.CODE_AGRIC_IRRIGATED)) ||
                (landUseCode.equals(LandUseType.CODE_AGRIC_NON_IRRIGATED)) ||
