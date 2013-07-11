@@ -891,12 +891,12 @@ public class AdministrativeEJB extends AbstractEJB
      * @param co CadastreObject
      */
     @Override
-    public BigDecimal calculateGroundRent(CadastreObject co, BigDecimal personalLevy, BigDecimal landUsable) {
+    public BigDecimal calculateGroundRent(CadastreObject co, BigDecimal personalLevy, 
+                                          BigDecimal landUsable, String landUseCode) {
         if (co == null) {
 		return BigDecimal.ZERO;
 	}
 
-	String landUseCode = "";
 	String landGradeCode = "";
 	String valuationZone = "";
 	String roadClassCode = "";
@@ -943,11 +943,31 @@ public class AdministrativeEJB extends AbstractEJB
 		groundRentRate = BigDecimal.ONE;
 	}
         
+        if (cadastreEJB.isCalculationPerPlot(landUseCode)){
+             if (groundRentRate.compareTo(BigDecimal.ONE) > 0){
+                 return groundRentRate;
+             }else
+             {
+                 return BigDecimal.ZERO;
+             }
+        }
+        
+        if (cadastreEJB.isCalculationPerHectare(landUseCode)){
+            // if rate was not found
+            if (groundRentRate.compareTo(BigDecimal.ONE) == 0){
+                return BigDecimal.ZERO;
+            }else
+            {
+                return groundRentRate.multiply(totalArea).divide(BigDecimal.valueOf(10000));
+            }
+        }
+        
         landUsable = landUsable.divide(new BigDecimal("100"));
         
         landUsableFactor = landUsable.add(BigDecimal.ONE).divide(new BigDecimal("2"));
 
 	groundRent = groundRent.times(totalArea).times(groundRentRate).times(groundRentFactor).times(roadClassFactor).times(personalLevy).times(landUsableFactor);
-	return groundRent.getAmount();
+	
+        return groundRent.getAmount();
     }
 }
