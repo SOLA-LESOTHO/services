@@ -274,4 +274,6 @@ public interface AdministrativeEJBLocal extends AbstractSolaTransactionEJBLocal 
      */
     BigDecimal calculateGroundRent(CadastreObject co, BigDecimal personalLevy, BigDecimal landUsable, String landUseCode);
     
+    BigDecimal calculateDutyOnGroundRent(CadastreObject co, Rrr leaseRight);
+    
 }

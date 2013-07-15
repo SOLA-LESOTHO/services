@@ -31,6 +31,7 @@ package org.sola.services.ejb.administrative.businesslogic;
 
 import java.io.Serializable;
 import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.util.*;
 import javax.annotation.security.RolesAllowed;
 import javax.ejb.EJB;
@@ -55,6 +56,7 @@ import org.sola.services.ejb.transaction.businesslogic.TransactionEJBLocal;
 import org.sola.services.ejb.transaction.repository.entities.RegistrationStatusType;
 import org.sola.services.ejb.transaction.repository.entities.Transaction;
 import org.sola.services.ejb.transaction.repository.entities.TransactionBasic;
+import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
 /**
  * EJB to manage data in the administrative schema. Supports retrieving and
@@ -976,5 +978,60 @@ public class AdministrativeEJB extends AbstractEJB
 	groundRent = groundRent.times(totalArea).times(groundRentRate).times(groundRentFactor).times(roadClassFactor).times(personalLevy).times(landUsableFactor);
 	
         return groundRent.getAmount();
+    }
+    
+    @Override
+    public BigDecimal calculateDutyOnGroundRent(CadastreObject cadastreObject, Rrr leaseRight){
+        
+        String landUse = ""; 
+        String landGrade = "";
+        
+        BigDecimal groundRent = BigDecimal.ZERO;
+        BigDecimal dutyOnGroundRent = BigDecimal.ZERO;
+        
+        BigInteger dutyOnGroundRentFactor = BigInteger.ZERO;
+        BigInteger groundRentDivisor = BigInteger.valueOf(100);
+        
+        BigInteger groundRentDivident = BigInteger.ZERO;
+        BigInteger groundRentModulo = BigInteger.ZERO;
+        
+        LandUseGrade landUseGrade;
+        
+        if (leaseRight.getGroundRent() != null){
+            groundRent = leaseRight.getGroundRent();
+        }
+        
+        if (leaseRight.getLandUseCode() != null){
+            landUse = leaseRight.getLandUseCode();
+        }
+        
+        if (cadastreObject.getLandGradeCode() != null){
+            landGrade = cadastreObject.getLandGradeCode();
+        }
+        
+        if (groundRent.compareTo(BigDecimal.ZERO) == 0){
+            return BigDecimal.ZERO;
+        }
+        
+        groundRentDivident = groundRent.toBigInteger();
+        
+        if (groundRentDivident.compareTo(groundRentDivisor) == 1) {
+            groundRentModulo = groundRentDivident.mod(groundRentDivisor);
+            groundRentModulo = groundRentModulo.add(groundRentDivident.divide(groundRentDivisor)); 
+        }
+        else{
+            groundRentModulo = BigInteger.ONE;
+        }
+        
+        landUseGrade = cadastreEJB.getLandUseGrade(landUse, landGrade);
+        
+        if (landUseGrade != null){
+            dutyOnGroundRentFactor = landUseGrade.getDutyOnGroundRent().toBigInteger();
+        }
+        
+        //modulo/qotient * factor
+        dutyOnGroundRent = dutyOnGroundRent.multiply(BigDecimal.valueOf(dutyOnGroundRentFactor.doubleValue())).multiply(BigDecimal.valueOf(groundRentModulo.doubleValue()));
+        
+        return dutyOnGroundRent;
     }
 }
