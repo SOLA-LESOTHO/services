@@ -118,8 +118,8 @@ public class Rrr extends AbstractVersionedEntity {
     // Child entity fields
     @ChildEntity(insertBeforeParent = false, parentIdField = "rrrId")
     private BaUnitNotation notation;
-    @ChildEntityList(parentIdField = "rrrId", cascadeDelete = true)
-    private List<RrrShare> rrrShareList;
+//    @ChildEntityList(parentIdField = "rrrId", cascadeDelete = true)
+//    private List<RrrShare> rrrShareList;
     @ExternalEJB(ejbLocalClass = SourceEJBLocal.class,
             loadMethod = "getSources", saveMethod = "saveSource")
     @ChildEntityList(parentIdField = "rrrId", childIdField = "sourceId",
@@ -127,7 +127,7 @@ public class Rrr extends AbstractVersionedEntity {
     private List<Source> sourceList;
     @ExternalEJB(ejbLocalClass = PartyEJBLocal.class, loadMethod = "getParties")
     @ChildEntityList(parentIdField = "rrrId", childIdField = "partyId",
-            manyToManyClass = PartyForRrr.class, readOnly = true)
+            manyToManyClass = PartyForRrr.class)
     private List<Party> rightHolderList;
     @Column(name = "cadastre_object_id")
     private String cadastreObjectId;
@@ -296,11 +296,12 @@ public class Rrr extends AbstractVersionedEntity {
     }
 
     public List<RrrShare> getRrrShareList() {
-        return rrrShareList;
+        //return rrrShareList;
+        return null;
     }
 
     public void setRrrShareList(List<RrrShare> rrrShareList) {
-        this.rrrShareList = rrrShareList;
+        //this.rrrShareList = rrrShareList;
     }
 
     public List<Source> getSourceList() {

@@ -117,7 +117,7 @@ public class AdministrativeEJBIT extends AbstractEJBTest {
             assertNotNull(result);
             System.out.println("Succeeded.");
             System.out.println("Update ba unit. Adding a new rrrShare to existing rrr");
-            result.getRrrList().get(1).getRrrShareList().add(this.getRrrShare("1002"));
+            //result.getRrrList().get(1).getRrrShareList().add(this.getRrrShare("1002"));
             result = instance.saveBaUnit(null, result);
             assertNotNull(result);
             System.out.println("Succeeded.");
@@ -157,8 +157,8 @@ public class AdministrativeEJBIT extends AbstractEJBTest {
         if (type.equals("ownership")) {
             RrrShare rrrShare = this.getRrrShare("1000");
 
-            rrr.setRrrShareList(new ArrayList<RrrShare>());
-            rrr.getRrrShareList().add(rrrShare);
+//            rrr.setRrrShareList(new ArrayList<RrrShare>());
+//            rrr.getRrrShareList().add(rrrShare);
         } else {
 
 
@@ -322,14 +322,14 @@ public class AdministrativeEJBIT extends AbstractEJBTest {
                                 party.getId(), party.getName()));
                     }
                 }
-                System.out.println("Nr of shares in rrr:" + rrr.getRrrShareList().size());
-                if (rrr.getRrrShareList().size() > 0) {
-                    System.out.println("Print party information related with the first Share");
-                    for (Party party : rrr.getRrrShareList().get(0).getRightHolderList()) {
-                        System.out.println(String.format("Party information id:%s and name: %s",
-                                party.getId(), party.getName()));
-                    }
-                }
+//                System.out.println("Nr of shares in rrr:" + rrr.getRrrShareList().size());
+//                if (rrr.getRrrShareList().size() > 0) {
+//                    System.out.println("Print party information related with the first Share");
+//                    for (Party party : rrr.getRrrShareList().get(0).getRightHolderList()) {
+//                        System.out.println(String.format("Party information id:%s and name: %s",
+//                                party.getId(), party.getName()));
+//                    }
+//                }
                 
                 System.out.println("Deleting the first rrr in the list.");
                 //LocalInfo.setUserName("test4");

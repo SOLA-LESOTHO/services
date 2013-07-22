@@ -159,8 +159,8 @@ public class Development extends AbstractEJBTest {
         if (type.equals("ownership")) {
             RrrShare rrrShare = this.getRrrShare("1000");
 
-            rrr.setRrrShareList(new ArrayList<RrrShare>());
-            rrr.getRrrShareList().add(rrrShare);
+//            rrr.setRrrShareList(new ArrayList<RrrShare>());
+//            rrr.getRrrShareList().add(rrrShare);
         } else {
             Party party = this.getParty("1001");
             rrr.setRightHolderList(new ArrayList<Party>());
