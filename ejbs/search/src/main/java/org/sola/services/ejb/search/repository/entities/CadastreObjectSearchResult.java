@@ -31,6 +31,8 @@ public class CadastreObjectSearchResult extends AbstractVersionedEntity {
     private Date surveyDate;
     @Column(name = "survey_fee")
     private BigDecimal surveyFee;
+    @Column(name = "surveyor_id")
+    private String surveyorId;
     @Column(name = "surveyor")
     private String surveyor;
     @Column(name = "remarks")
@@ -181,6 +183,14 @@ public class CadastreObjectSearchResult extends AbstractVersionedEntity {
 
     public void setSurveyDate(Date surveyDate) {
         this.surveyDate = surveyDate;
+    }
+
+    public String getSurveyorId() {
+        return surveyorId;
+    }
+
+    public void setSurveyorId(String surveyorId) {
+        this.surveyorId = surveyorId;
     }
 
     public String getSurveyor() {
