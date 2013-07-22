@@ -126,6 +126,9 @@ public class CadastreObject extends AbstractVersionedEntity {
     @AccessFunctions(onSelect = "st_asewkb(geom_polygon)",
     onChange = "get_geometry_with_srid(#{geomPolygon})")
     private byte[] geomPolygon;
+    @Column(name = "has_lease", insertable=false, updatable=false)
+    @AccessFunctions(onSelect = "(SELECT COUNT(1)>0 FROM administrative.ba_unit where cadastre_object_id = #{id} AND status_code!='historic')")
+    private boolean hasLease;
     @ChildEntityList(parentIdField = "spatialUnitId")
     private List<SpatialValueArea> spatialValueAreaList;
     @Column(name = "land_grade_code")
@@ -247,7 +250,15 @@ public class CadastreObject extends AbstractVersionedEntity {
     public void setTypeCode(String typeCode) {
         this.typeCode = typeCode;
     }
+    
+    public boolean isHasLease() {
+        return hasLease;
+    }
 
+    public void setHasLease(boolean hasLease) {
+        this.hasLease = hasLease;
+    }
+    
     public BigDecimal getValuationAmount() {
         return valuationAmount;
     }

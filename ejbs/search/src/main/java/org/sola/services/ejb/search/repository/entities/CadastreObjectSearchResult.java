@@ -43,6 +43,9 @@ public class CadastreObjectSearchResult extends AbstractVersionedEntity {
     private BigDecimal area;
     @Column(name = "valuation_zone")
     private String valuationZone;
+    @Column(name = "has_lease")
+    private boolean hasLease;
+    
     public static final String PARAM_NAME_FIRST_PART = "nameFirstPart";
     public static final String PARAM_NAME_LAST_PART = "nameLastPart";
     public static final String PARAM_ADDRESS = "address";
@@ -52,6 +55,7 @@ public class CadastreObjectSearchResult extends AbstractVersionedEntity {
             + "(SELECT string_agg(ad.description, ', ') FROM address.address ad INNER JOIN cadastre.spatial_unit_address sad "
             + "  ON ad.id = sad.spatial_unit_id WHERE sa.spatial_unit_id = co.id) AS address, "
             + "co.source_reference, co.land_grade_code, co.valuation_amount, co.valuation_zone, "
+            + "(SELECT COUNT(1)>0 FROM administrative.ba_unit where cadastre_object_id = co.id AND status_code!='historic') AS has_lease,"
             + "co.status_code, co.rowversion, co.change_user, co.rowidentifier "
             + "FROM cadastre.cadastre_object co LEFT JOIN cadastre.spatial_unit_address sa ON co.id = sa.spatial_unit_id "
             + "LEFT JOIN address.address a ON sa.address_id = a.id "
@@ -155,6 +159,14 @@ public class CadastreObjectSearchResult extends AbstractVersionedEntity {
 
     public BigDecimal getSurveyFee() {
         return surveyFee;
+    }
+
+    public boolean isHasLease() {
+        return hasLease;
+    }
+
+    public void setHasLease(boolean hasLease) {
+        this.hasLease = hasLease;
     }
 
     public void setSurveyFee(BigDecimal surveyFee) {
