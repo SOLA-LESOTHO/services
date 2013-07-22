@@ -23,7 +23,7 @@ public class RightsExportResult extends AbstractReadOnlyEntity {
             + "(SELECT size FROM cadastre.spatial_value_area WHERE spatial_unit_id = b.cadastre_object_id AND type_code='officialArea' LIMIT 1) AS area "
             + "FROM (administrative.ba_unit b INNER JOIN "
             + "(administrative.rrr r LEFT JOIN "
-            + "  (administrative.party_for_rrr prrr LEFT JOIN "
+            + "  (administrative.party_for_rrr prrr INNER JOIN "
             + "       ("
             + "    SELECT p.id AS payee_id, p.name AS payee_name, p.last_name AS payee_last_name, p.birth_date as payee_birth_date, "
             + "    ad.description AS payee_address, p.phone AS payee_phone, p.mobile AS payee_mobile, p.gender_code AS payee_gender, "
@@ -35,7 +35,7 @@ public class RightsExportResult extends AbstractReadOnlyEntity {
             + "     ON r.id = prrr.rrr_id) "
             + "   ON b.id = r.ba_unit_id) "
             + "   WHERE (r.type_code = #{" + PARAM_RIGHT_TYPE + "} OR #{" + PARAM_RIGHT_TYPE + "} = '') "
-            + "   AND b.status_code != 'pending' AND (r.status_code = 'current' OR r.status_code = 'historic') "
+            + "   AND b.status_code != 'pending' AND r.status_code IN ('current', 'historic', 'previous') "
             + "   AND r.registration_date BETWEEN #{" + PARAM_DATE_FROM + "} AND #{" + PARAM_DATE_TO + "} "
             + "   ORDER BY r.registration_date";
     @Column(name = "ba_unit_id")
