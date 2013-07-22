@@ -221,6 +221,11 @@ public interface AdministrativeEJBLocal extends AbstractSolaTransactionEJBLocal 
      * AdministrativeEJB.getOtherAuthorities}
      */
     List<OtherAuthorities> getOtherAuthorities(String languageCode);
+    /**
+     * see {@linkplain AdministrativeEJB#getDisputeReports(java.lang.String)
+     * AdministrativeEJB.getDisputeReports}
+     */
+    List<DisputeReports> getDisputeReports(String languageCode);
 
     /**
      * see {@linkplain AdministrativeEJB#getDisputeCommentsById(java.lang.String)
