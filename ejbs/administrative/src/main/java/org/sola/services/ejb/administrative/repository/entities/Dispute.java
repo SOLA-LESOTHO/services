@@ -71,6 +71,8 @@ public class Dispute extends AbstractVersionedEntity {
     private Date completionDate;
     @Column(name = "dispute_category_code")
     private String disputeCategoryCode;
+    @Column (name  = "dispute_description")
+    private String disputeDescription;
     @Column(name = "dispute_type_code")
     private String disputeTypeCode;
     @Column(name = "status_code")
@@ -105,6 +107,14 @@ public class Dispute extends AbstractVersionedEntity {
             }
         }
         return result;
+    }
+
+    public String getDisputeDescription() {
+        return disputeDescription;
+    }
+
+    public void setDisputeDescription(String disputeDescription) {
+        this.disputeDescription = disputeDescription;
     }
 
     public String getCaseType() {

@@ -49,8 +49,8 @@ public class DisputeSearchResult extends AbstractReadOnlyEntity {
     public static final String QUERY_PARAM_COMPLETION_DATE_TO = "completionDateTo";
     public static final String QUERY_PARAM_CASE_TYPE = "casetype";
     public static final String QUERY_ORDER_BY = "disp.nr";
-    public static final String SELECT_PART = "SELECT disp.id, disp.nr, disp.lodgement_date, disp.completion_date, "
-            + "disp.rrr_id, disp.cadastre_object_id, disp.dispute_category_code, disp.dispute_type_code, disp.status_code, disp.plot_location, disp.casetype ";
+    public static final String SELECT_PART = "SELECT disp.id, disp.nr, disp.lodgement_date, disp.completion_date, disp.dispute_description, "
+            + "disp.rrr_id, disp.cadastre_object_id, disp.dispute_category_code, disp.dispute_type_code, disp.status_code, disp.plot_location, disp.casetype, disp.primary_respondent ";
            
     public static final String FROM_PART = " FROM administrative.dispute disp ";
     
@@ -79,6 +79,8 @@ public class DisputeSearchResult extends AbstractReadOnlyEntity {
     private String plotNumber;
     @Column(name = "dispute_category_code")
     private String disputeCategoryCode;
+    @Column (name  = "dispute_description")
+    private String disputeDescription;
     @Column(name = "dispute_type_code")
     private String disputeTypeCode;
     @Column(name = "status_code")
@@ -87,6 +89,8 @@ public class DisputeSearchResult extends AbstractReadOnlyEntity {
     private String plotLocation;
     @Column(name = "casetype")
     private String caseType;
+    @Column(name = "primary_respondent")
+    private boolean primaryRespondent;
 
     public Date getCompletiondate() {
         return completiondate;
@@ -175,4 +179,21 @@ public class DisputeSearchResult extends AbstractReadOnlyEntity {
     public void setCaseType(String caseType) {
         this.caseType = caseType;
     }
+
+    public String getDisputeDescription() {
+        return disputeDescription;
+    }
+
+    public void setDisputeDescription(String disputeDescription) {
+        this.disputeDescription = disputeDescription;
+    }
+
+    public boolean isPrimaryRespondent() {
+        return primaryRespondent;
+    }
+
+    public void setPrimaryRespondent(boolean primaryRespondent) {
+        this.primaryRespondent = primaryRespondent;
+    }
+    
 }
