@@ -37,11 +37,15 @@ import javax.persistence.Id;
 import javax.persistence.Table;
 import org.sola.services.common.LocalInfo;
 import org.sola.services.common.repository.AccessFunctions;
+import org.sola.services.common.repository.ChildEntity;
 import org.sola.services.common.repository.ChildEntityList;
 import org.sola.services.common.repository.ExternalEJB;
 import org.sola.services.common.repository.entities.AbstractVersionedEntity;
 import org.sola.services.ejb.address.businesslogic.AddressEJBLocal;
 import org.sola.services.ejb.address.repository.entities.Address;
+import org.sola.services.ejb.party.businesslogic.PartyEJBLocal;
+import org.sola.services.ejb.party.repository.entities.Party;
+
 
 /**
  * Entity representing the cadastre.cadastre_object table.
@@ -93,8 +97,8 @@ public class CadastreObject extends AbstractVersionedEntity {
             + "ST_DWithin(st_transform(geom_polygon, #{srid}), st_transform(#{geom}, #{srid}), "
             + "system.get_setting('map-tolerance')::double precision)";
     /**
-     * ORDER BY clause used to order search results for the Search by parts queries. 
-     * Uses regex to order cadastre objects by lot number. 
+     * ORDER BY clause used to order search results for the Search by parts
+     * queries. Uses regex to order cadastre objects by lot number.
      */
     public static final String QUERY_ORDER_BY_SEARCHBYPARTS =
             "lpad(regexp_replace(name_firstpart, '\\D*', '', 'g'), 5, '0') "
@@ -126,21 +130,24 @@ public class CadastreObject extends AbstractVersionedEntity {
     private List<SpatialValueArea> spatialValueAreaList;
     @Column(name = "land_grade_code")
     private String landGradeCode;
-    @Column(name="survey_date")
+    @Column(name = "survey_date")
     private Date surveyDate;
-    @Column(name="surveyor")
-    private String surveyor;
-    @Column(name="remarks")
+    @Column(name="surveyor_id")
+    private String surveyorId;
+    @ExternalEJB(ejbLocalClass = PartyEJBLocal.class, loadMethod = "getParty")
+    @ChildEntity(childIdField = "surveyorId", readOnly = true)
+    private Party surveyor;
+    @Column(name = "remarks")
     private String remarks;
-    @Column(name="valuation_amount")
+    @Column(name = "valuation_amount")
     private BigDecimal valuationAmount;
-    @Column(name="survey_fee")
+    @Column(name = "survey_fee")
     private BigDecimal surveyFee;
-    @Column(name="valuation_zone")
+    @Column(name = "valuation_zone")
     private String valuationZone;
-    @Column(name="road_class_code")
+    @Column(name = "road_class_code")
     private String roadClassCode;
-    @ExternalEJB(ejbLocalClass = AddressEJBLocal.class, loadMethod = "getAddresses", saveMethod="saveAddress")
+    @ExternalEJB(ejbLocalClass = AddressEJBLocal.class, loadMethod = "getAddresses", saveMethod = "saveAddress")
     @ChildEntityList(parentIdField = "cadastreObjectId", childIdField = "addressId",
     manyToManyClass = AddressForCadastreObject.class)
     private List<Address> addressList;
@@ -265,12 +272,23 @@ public class CadastreObject extends AbstractVersionedEntity {
         this.surveyDate = surveyDate;
     }
 
-    public String getSurveyor() {
+    public String getSurveyorId() {
+        return surveyorId;
+    }
+
+    public void setSurveyorId(String surveyorId) {
+        this.surveyorId = surveyorId;
+    }
+    
+    public Party getSurveyor() {
         return surveyor;
     }
 
-    public void setSurveyor(String surveyor) {
+    public void setSurveyor(Party surveyor) {
         this.surveyor = surveyor;
+        if (surveyor != null){
+            this.setSurveyorId(surveyor.getId());
+        }
     }
 
     public BigDecimal getSurveyFee() {
@@ -313,6 +331,7 @@ public class CadastreObject extends AbstractVersionedEntity {
     public void setRoadClassCode(String roadClassCode) {
         this.roadClassCode = roadClassCode;
     }
+
     /**
      * Sets the transaction Id on the entity prior to save.
      */
