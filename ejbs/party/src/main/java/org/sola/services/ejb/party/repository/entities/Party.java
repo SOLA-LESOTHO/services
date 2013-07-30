@@ -103,6 +103,14 @@ public class Party extends AbstractVersionedEntity {
     public Party() {
         super();
     }
+    
+    public String getLegalType() {
+        return legalType;
+    }
+
+    public void setLegalType(String legalType) {
+        this.legalType = legalType;
+    }
 
     public String getId() {
         id = id == null ? generateId() : id;
@@ -269,11 +277,5 @@ public class Party extends AbstractVersionedEntity {
         this.rightHolder = rightHolder;
     }
 
-    public String getLegalType() {
-        return legalType;
-    }
-
-    public void setLegalType(String legalType) {
-        this.legalType = legalType;
-    }
+    
 }
