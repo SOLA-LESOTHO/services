@@ -14,7 +14,7 @@ public class RightsExportResult extends AbstractReadOnlyEntity {
             "SELECT DISTINCT b.id AS ba_unit_id, r.status_code AS right_status, r.status_change_date AS right_status_date, "
             + "r.id AS right_id, r.type_code AS right_type, r.registration_date, r.registration_number, r.expiration_date, "
             + "r.nr AS right_tracking_number, r.ground_rent, r.land_use_code, r.lease_number, r.start_date, r.execution_date, "
-            + "r.land_usable, r.personal_levy, r.stamp_duty, r.transfer_duty, r.registration_fee,"
+            + "r.land_usable, r.personal_levy, r.stamp_duty, r.transfer_duty, r.registration_fee, s.service_fee, "
             + "(SELECT string_agg(COALESCE(p.name, '') || ' ' || COALESCE(p.last_name, ''), ',') "
             + "FROM administrative.party_for_rrr pr INNER JOIN party.party p ON pr.party_id = p.id WHERE pr.rrr_id = r.id) AS owners, "
             + "payee.payee_id, payee.payee_name, payee.payee_last_name, payee.payee_address, payee.payee_phone, payee.payee_mobile, "
@@ -22,7 +22,7 @@ public class RightsExportResult extends AbstractReadOnlyEntity {
             + "(SELECT name_firstpart || '-' || name_lastpart FROM cadastre.cadastre_object WHERE id = b.cadastre_object_id LIMIT 1) AS parcel_number, "
             + "(SELECT size FROM cadastre.spatial_value_area WHERE spatial_unit_id = b.cadastre_object_id AND type_code='officialArea' LIMIT 1) AS area "
             + "FROM (administrative.ba_unit b INNER JOIN "
-            + "(administrative.rrr r LEFT JOIN "
+            + "((administrative.rrr r LEFT JOIN "
             + "  (administrative.party_for_rrr prrr INNER JOIN "
             + "       ("
             + "    SELECT p.id AS payee_id, p.name AS payee_name, p.last_name AS payee_last_name, p.birth_date as payee_birth_date, "
@@ -32,10 +32,11 @@ public class RightsExportResult extends AbstractReadOnlyEntity {
             + "    LEFT JOIN address.address ad ON p.address_id = ad.id "
             + "	    WHERE pr.type_code = 'accountHolder' "
             + "	    ) AS payee ON payee.payee_id = prrr.party_id) "
-            + "     ON r.id = prrr.rrr_id) "
+            + "     ON r.id = prrr.rrr_id) INNER JOIN "
+            + "     (transaction.transaction t LEFT JOIN application.service s ON t.from_service_id = s.id) ON r.transaction_id = t.id) "
             + "   ON b.id = r.ba_unit_id) "
             + "   WHERE (r.type_code = #{" + PARAM_RIGHT_TYPE + "} OR #{" + PARAM_RIGHT_TYPE + "} = '') "
-            + "   AND b.status_code != 'pending' AND r.status_code IN ('current', 'historic', 'previous') "
+            + "   AND b.status_code != 'pending' AND r.status_code IN ('current', 'historic') "
             + "   AND r.registration_date BETWEEN #{" + PARAM_DATE_FROM + "} AND #{" + PARAM_DATE_TO + "} "
             + "   ORDER BY r.registration_date";
     @Column(name = "ba_unit_id")
@@ -64,6 +65,8 @@ public class RightsExportResult extends AbstractReadOnlyEntity {
     private BigDecimal groundRent;
     @Column(name = "stamp_duty")
     private BigDecimal stampDuty;
+    @Column(name = "service_fee")
+    private BigDecimal serviceFee;
     @Column(name = "transfer_duty")
     private BigDecimal transferDuty;
     @Column(name = "registration_fee")
@@ -171,6 +174,14 @@ public class RightsExportResult extends AbstractReadOnlyEntity {
 
     public void setStampDuty(BigDecimal stampDuty) {
         this.stampDuty = stampDuty;
+    }
+
+    public BigDecimal getServiceFee() {
+        return serviceFee;
+    }
+
+    public void setServiceFee(BigDecimal serviceFee) {
+        this.serviceFee = serviceFee;
     }
 
     public Date getStartDate() {
