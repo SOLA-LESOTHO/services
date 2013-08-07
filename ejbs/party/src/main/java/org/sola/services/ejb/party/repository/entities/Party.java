@@ -32,6 +32,7 @@ import java.util.List;
 import javax.persistence.Column;
 import javax.persistence.Id;
 import javax.persistence.Table;
+import org.sola.services.common.repository.AccessFunctions;
 import org.sola.services.common.repository.ChildEntity;
 import org.sola.services.common.repository.ChildEntityList;
 import org.sola.services.common.repository.DefaultSorter;
@@ -97,7 +98,8 @@ public class Party extends AbstractVersionedEntity {
     private Address address;
     @ChildEntityList(parentIdField = "partyId")
     private List<PartyRole> roleList;
-    @Column(name = "party.is_rightholder(id) AS is_rightholder", insertable=false, updatable=false)
+    @Column(name = "rightholder", insertable=false, updatable=false)
+    @AccessFunctions(onSelect="party.is_rightholder(id)")
     private boolean rightHolder;
     
     public Party() {
