@@ -33,8 +33,12 @@ import java.math.BigDecimal;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import javax.annotation.security.RolesAllowed;
 import javax.ejb.EJB;
 import javax.ejb.Stateless;
+import org.sola.common.RolesConstants;
+import org.sola.common.SOLAException;
+import org.sola.common.messaging.ServiceMessage;
 import org.sola.services.common.ejbs.AbstractEJB;
 import org.sola.services.common.repository.CommonSqlProvider;
 import org.sola.services.ejb.cadastre.repository.entities.*;
@@ -150,36 +154,38 @@ public class CadastreEJB extends AbstractEJB implements CadastreEJBLocal {
      * @return The cadastre object after the save is completed.
      */
     @Override
+    @RolesAllowed({RolesConstants.CADASTRE_PARCEL_SAVE, RolesConstants.ADMINISTRATIVE_BA_UNIT_SAVE})
     public CadastreObject saveCadastreObject(CadastreObject cadastreObject) {
         return getRepository().saveEntity(cadastreObject);
     }
 
     @Override
-    public boolean terminateCadastreObject(String transactionId, String cadastreObjectId){
-        if(cadastreObjectId==null || transactionId == null){
+    @RolesAllowed(RolesConstants.CADASTRE_PARCEL_SAVE)
+    public boolean terminateCadastreObject(String transactionId, String cadastreObjectId) {
+        if (cadastreObjectId == null || transactionId == null) {
             return false;
         }
-        
+
         List<CadastreObjectTarget> targets = getCadastreObjectTargetsByTransaction(transactionId);
         boolean targetFound = false;
-        
-        if(targets!=null && targets.size()>0){
-            for(CadastreObjectTarget target : targets){
-                if(target.getCadastreObjectId().equals(cadastreObjectId)){
+
+        if (targets != null && targets.size() > 0) {
+            for (CadastreObjectTarget target : targets) {
+                if (target.getCadastreObjectId().equals(cadastreObjectId)) {
                     targetFound = true;
                     break;
                 }
             }
         }
-        
-        if(!targetFound){
+
+        if (!targetFound) {
             // Create target cadastre object
             CadastreObjectTarget newTarget = new CadastreObjectTarget();
             newTarget.setCadastreObjectId(cadastreObjectId);
             newTarget.setTransactionId(transactionId);
             getRepository().saveEntity(newTarget);
         }
-        
+
         // Make cadastre object as historic
         CadastreObjectStatusChanger coChanger = getRepository().getEntity(
                 CadastreObjectStatusChanger.class, cadastreObjectId);
@@ -187,7 +193,7 @@ public class CadastreEJB extends AbstractEJB implements CadastreEJBLocal {
         getRepository().saveEntity(coChanger);
         return true;
     }
-    
+
     /**
      * Retrieves all cadastre objects linked to the specified BA Unit.
      *
@@ -223,14 +229,23 @@ public class CadastreEJB extends AbstractEJB implements CadastreEJBLocal {
      * @param transactionId Identifier of the transaction associated to the
      * cadastre objects to be updated
      * @param filter The where clause to use when retrieving the cadastre
-     * objects. Must be {@linkplain CadastreObjectStatusChanger#QUERY_WHERE_SEARCHBYTRANSACTION_PENDING}
-     * or {@linkplain CadastreObjectStatusChanger#QUERY_WHERE_SEARCHBYTRANSACTION_TARGET}.
+     * objects. Must be
+     * {@linkplain CadastreObjectStatusChanger#QUERY_WHERE_SEARCHBYTRANSACTION_PENDING}
+     * or
+     * {@linkplain CadastreObjectStatusChanger#QUERY_WHERE_SEARCHBYTRANSACTION_TARGET}.
      * @param statusCode The status code to set on the selected cadastre
      * objects.
      */
     @Override
+    @RolesAllowed({RolesConstants.APPLICATION_APPROVE, RolesConstants.APPLICATION_SERVICE_COMPLETE})
     public void ChangeStatusOfCadastreObjects(
             String transactionId, String filter, String statusCode) {
+        
+        if (!this.isInRole(RolesConstants.CADASTRE_PARCEL_SAVE)) {
+            // The user must be able to save parcels before they can complete this method
+            throw new SOLAException(ServiceMessage.EXCEPTION_INSUFFICIENT_RIGHTS);
+        }
+        
         HashMap params = new HashMap();
         params.put("transaction_id", transactionId);
         List<CadastreObjectStatusChanger> involvedCoList =
@@ -294,9 +309,10 @@ public class CadastreEJB extends AbstractEJB implements CadastreEJBLocal {
     /**
      * Retrieves all node points from the underlying cadastre objects that
      * intersect the specified bounding box coordinates. All of the node points
-     * within the bounding box are used to create a single geometry - {@linkplain CadastreObjectNode#geom}.
-     * The cadastre objects used as the source of the node points are also
-     * captured in the {@linkplain CadastreObjectNode#cadastreObjectList}.
+     * within the bounding box are used to create a single geometry -
+     * {@linkplain CadastreObjectNode#geom}. The cadastre objects used as the
+     * source of the node points are also captured in the
+     * {@linkplain CadastreObjectNode#cadastreObjectList}.
      *
      * @param xMin The xMin ordinate of the bounding box
      * @param yMin The yMin ordinate of the bounding box
@@ -418,7 +434,14 @@ public class CadastreEJB extends AbstractEJB implements CadastreEJBLocal {
      * @param transactionId The identifier of the transaction
      */
     @Override
+    @RolesAllowed({RolesConstants.APPLICATION_APPROVE, RolesConstants.APPLICATION_SERVICE_COMPLETE})
     public void approveCadastreRedefinition(String transactionId) {
+
+        if (!this.isInRole(RolesConstants.CADASTRE_PARCEL_SAVE)) {
+            // The user must be able to save parcels before they can complete this method
+            throw new SOLAException(ServiceMessage.EXCEPTION_INSUFFICIENT_RIGHTS);
+        }
+
         List<CadastreObjectTargetRedefinition> targetObjectList =
                 this.getCadastreObjectRedefinitionTargetsByTransaction(transactionId);
         for (CadastreObjectTargetRedefinition targetObject : targetObjectList) {
@@ -517,7 +540,7 @@ public class CadastreEJB extends AbstractEJB implements CadastreEJBLocal {
 
     /**
      * Retrieves all cadastre.land_use_type code values.
-     *     
+     *
      * @param languageCode The language code to use for localization of display
      * values.
      */
@@ -525,56 +548,52 @@ public class CadastreEJB extends AbstractEJB implements CadastreEJBLocal {
     public List<LandUseType> getLandUseTypes(String languageCode) {
         return getRepository().getCodeList(LandUseType.class, languageCode);
     }
-    
+
     @Override
     public BigDecimal getRoadClassFactor(String roadClassCode, String languageCode) {
-        if (roadClassCode != null){
+        if (roadClassCode != null) {
             HashMap params = new HashMap();
-             params.put("code", roadClassCode);
-             RoadClassType roadClassType = getRepository().getCode(
-                           RoadClassType.class, roadClassCode, languageCode);
-             if (roadClassType != null) {
-                 return roadClassType.getRoadFactor();
-             }else
-             {
+            params.put("code", roadClassCode);
+            RoadClassType roadClassType = getRepository().getCode(
+                    RoadClassType.class, roadClassCode, languageCode);
+            if (roadClassType != null) {
+                return roadClassType.getRoadFactor();
+            } else {
                 return BigDecimal.ONE;
-             }
-        }else
-        {
+            }
+        } else {
             return BigDecimal.ONE;
         }
-        
+
     }
-    
+
     @Override
-    public boolean isCalculationPerPlot(String landUseCode){
-        
-       boolean calculationPerPlot = false;
-       
-       if ((landUseCode.equals(LandUseType.CODE_HOSPITAL)) ||
-               (landUseCode.equals(LandUseType.CODE_CHARITABLE)) ||
-               (landUseCode.equals(LandUseType.CODE_RECREATIONAL)) ||
-               (landUseCode.equals(LandUseType.CODE_EDUCATIONAL)) ||
-               (landUseCode.equals(LandUseType.CODE_INSTITUTIONAL)) ||
-               (landUseCode.equals(LandUseType.CODE_RELIGIOUS)))
-       {
-           calculationPerPlot = true;
-       }
-       
-       return calculationPerPlot;
-        
+    public boolean isCalculationPerPlot(String landUseCode) {
+
+        boolean calculationPerPlot = false;
+
+        if ((landUseCode.equals(LandUseType.CODE_HOSPITAL))
+                || (landUseCode.equals(LandUseType.CODE_CHARITABLE))
+                || (landUseCode.equals(LandUseType.CODE_RECREATIONAL))
+                || (landUseCode.equals(LandUseType.CODE_EDUCATIONAL))
+                || (landUseCode.equals(LandUseType.CODE_INSTITUTIONAL))
+                || (landUseCode.equals(LandUseType.CODE_RELIGIOUS))) {
+            calculationPerPlot = true;
+        }
+
+        return calculationPerPlot;
+
     }
-    
+
     @Override
-    public boolean isCalculationPerHectare(String landUseCode){
-        if ((landUseCode.equals(LandUseType.CODE_AGRIC_IRRIGATED)) ||
-               (landUseCode.equals(LandUseType.CODE_AGRIC_NON_IRRIGATED)) ||
-               (landUseCode.equals(LandUseType.CODE_AGRIC_RANGE_GRAZING)) ||
-               (landUseCode.equals(LandUseType.CODE_AGRIC_OTHER)) ||
-               (landUseCode.equals(LandUseType.CODE_AGRIC_LIVESTOCK))){
+    public boolean isCalculationPerHectare(String landUseCode) {
+        if ((landUseCode.equals(LandUseType.CODE_AGRIC_IRRIGATED))
+                || (landUseCode.equals(LandUseType.CODE_AGRIC_NON_IRRIGATED))
+                || (landUseCode.equals(LandUseType.CODE_AGRIC_RANGE_GRAZING))
+                || (landUseCode.equals(LandUseType.CODE_AGRIC_OTHER))
+                || (landUseCode.equals(LandUseType.CODE_AGRIC_LIVESTOCK))) {
             return true;
-        }else
-        {
+        } else {
             return false;
         }
     }

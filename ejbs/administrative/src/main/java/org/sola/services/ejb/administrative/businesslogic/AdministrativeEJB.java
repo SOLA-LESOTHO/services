@@ -207,8 +207,7 @@ public class AdministrativeEJB extends AbstractEJB
     /**
      * Saves any updates to an existing BA Unit. Can also be used to create a
      * new BA Unit, however this method does not set any default values on the
-     * BA Unit like
-     * {@linkplain #createBaUnit(java.lang.String, org.sola.services.ejb.administrative.repository.entities.BaUnit)
+     * BA Unit like      {@linkplain #createBaUnit(java.lang.String, org.sola.services.ejb.administrative.repository.entities.BaUnit)
      * createBaUnit}. Will also create a new Transaction record for the BA Unit
      * if the Service is not already associated to a Transaction.
      *
@@ -286,10 +285,17 @@ public class AdministrativeEJB extends AbstractEJB
      * @return A list of validation results.
      */
     @Override
+    @RolesAllowed({RolesConstants.APPLICATION_APPROVE, RolesConstants.APPLICATION_SERVICE_COMPLETE,
+        RolesConstants.APPLICATION_VALIDATE})
     public List<ValidationResult> approveTransaction(
             String transactionId, String approvedStatus,
             boolean validateOnly, String languageCode) {
         List<ValidationResult> validationResult = new ArrayList<ValidationResult>();
+
+        if (!this.isInRole(RolesConstants.APPLICATION_APPROVE)) {
+            // Only allow validation if the user does not have the Approve role. 
+            validateOnly = true;
+        }
 
         //Change the status of BA Units that are involved in a transaction directly
         Map<String, Object> params = new HashMap<String, Object>();
@@ -322,13 +328,13 @@ public class AdministrativeEJB extends AbstractEJB
                 // If lease termination, terminate related cadastre object and ba_unit
                 if (approvedStatus.equalsIgnoreCase(RegistrationStatusType.STATUS_HISTORIC)
                         && rrr.getTypeCode().equalsIgnoreCase(RrrType.CODE_LEASE)) {
-                    
+
                     // Terminate cadastre object
                     BaUnit tmpBaUnit = getRepository().getEntity(BaUnit.class, rrr.getBaUnitId());
-                    if(tmpBaUnit!=null && tmpBaUnit.getCadastreObjectId()!=null){
+                    if (tmpBaUnit != null && tmpBaUnit.getCadastreObjectId() != null) {
                         cadastreEJB.terminateCadastreObject(transactionId, tmpBaUnit.getCadastreObjectId());
                     }
-                    
+
                     // Terminate BaUnit
                     terminateBaUnit(rrr.getBaUnitId(), transactionId);
                     BaUnitStatusChanger baUnitTmp = getRepository().getEntity(BaUnitStatusChanger.class, rrr.getBaUnitId());
@@ -452,7 +458,8 @@ public class AdministrativeEJB extends AbstractEJB
 
     /**
      * Reverses the cancellation / termination of a BA Unit by removing the BA
-     * Unit Target created by {@linkplain #terminateBaUnit(java.lang.String, java.lang.String) terminateBaUnit}.
+     * Unit Target created by
+     * {@linkplain #terminateBaUnit(java.lang.String, java.lang.String) terminateBaUnit}.
      * <p>Requires the {@linkplain RolesConstants#ADMINISTRATIVE_BA_UNIT_SAVE}
      * role.</p>
      *
@@ -510,8 +517,8 @@ public class AdministrativeEJB extends AbstractEJB
     }
 
     /**
-     * Creates a new BA Unit Area <p>Requires the {@linkplain RolesConstants#ADMINISTRATIVE_BA_UNIT_SAVE}
-     * role.</p>
+     * Creates a new BA Unit Area <p>Requires the
+     * {@linkplain RolesConstants#ADMINISTRATIVE_BA_UNIT_SAVE} role.</p>
      *
      * @param baUnitId The identifier of the area the BA Unit is being created
      * as part of
@@ -874,7 +881,7 @@ public class AdministrativeEJB extends AbstractEJB
     public List<OtherAuthorities> getOtherAuthorities(String languageCode) {
         return getRepository().getCodeList(OtherAuthorities.class, languageCode);
     }
-    
+
     /**
      * Retrieves all administrative.dispute_report code values.
      *
@@ -911,138 +918,135 @@ public class AdministrativeEJB extends AbstractEJB
      * @param co CadastreObject
      */
     @Override
-    public BigDecimal calculateGroundRent(CadastreObject co, BigDecimal personalLevy, 
-                                          BigDecimal landUsable, String landUseCode) {
+    public BigDecimal calculateGroundRent(CadastreObject co, BigDecimal personalLevy,
+            BigDecimal landUsable, String landUseCode) {
         if (co == null) {
-		return BigDecimal.ZERO;
-	}
-
-	String landGradeCode = "";
-	String valuationZone = "";
-	String roadClassCode = "";
-	BigDecimal totalArea = BigDecimal.ZERO;
-	Money groundRent = new Money(BigDecimal.ONE);
-	BigDecimal groundRentRate;
-	BigDecimal groundRentFactor;
-	BigDecimal roadClassFactor;
-        BigDecimal landUsableFactor;
-	LandUseGrade landUseGrade;
-	SpatialValueArea spatialValueArea;
-	GroundRentMultiplicationFactor multiplicationFactor;
-
-	if (co.getLandGradeCode() != null) {
-		landGradeCode = co.getLandGradeCode();
-	}
-
-	if (co.getValuationZone() != null) {
-		valuationZone = co.getValuationZone();
-	}
-	
-	if (co.getRoadClassCode() != null){
-		roadClassCode = co.getRoadClassCode();
-	}
-
-	spatialValueArea = cadastreEJB.getSpatialValueArea(co.getId());
-	if (spatialValueArea != null) {
-		totalArea = spatialValueArea.getCalculatedAreaSize();
-	}
-
-	landUseGrade = cadastreEJB.getLandUseGrade(landUseCode, landGradeCode);
-	multiplicationFactor = cadastreEJB.getMultiplicationFacotr(landUseCode, landGradeCode, valuationZone);
-	roadClassFactor = cadastreEJB.getRoadClassFactor(roadClassCode, "en");
-	
-	if (multiplicationFactor != null) {
-		groundRentFactor = multiplicationFactor.getMultiplicationFactor();
-	} else {
-		groundRentFactor = BigDecimal.ONE;
-	}
-
-	if (landUseGrade != null) {
-		groundRentRate = landUseGrade.getGroundRentRate();
-	} else {
-		groundRentRate = BigDecimal.ONE;
-	}
-        
-        if (cadastreEJB.isCalculationPerPlot(landUseCode)){
-             if (groundRentRate.compareTo(BigDecimal.ONE) > 0){
-                 return groundRentRate;
-             }else
-             {
-                 return BigDecimal.ZERO;
-             }
+            return BigDecimal.ZERO;
         }
-        
-        if (cadastreEJB.isCalculationPerHectare(landUseCode)){
-            // if rate was not found
-            if (groundRentRate.compareTo(BigDecimal.ONE) == 0){
+
+        String landGradeCode = "";
+        String valuationZone = "";
+        String roadClassCode = "";
+        BigDecimal totalArea = BigDecimal.ZERO;
+        Money groundRent = new Money(BigDecimal.ONE);
+        BigDecimal groundRentRate;
+        BigDecimal groundRentFactor;
+        BigDecimal roadClassFactor;
+        BigDecimal landUsableFactor;
+        LandUseGrade landUseGrade;
+        SpatialValueArea spatialValueArea;
+        GroundRentMultiplicationFactor multiplicationFactor;
+
+        if (co.getLandGradeCode() != null) {
+            landGradeCode = co.getLandGradeCode();
+        }
+
+        if (co.getValuationZone() != null) {
+            valuationZone = co.getValuationZone();
+        }
+
+        if (co.getRoadClassCode() != null) {
+            roadClassCode = co.getRoadClassCode();
+        }
+
+        spatialValueArea = cadastreEJB.getSpatialValueArea(co.getId());
+        if (spatialValueArea != null) {
+            totalArea = spatialValueArea.getCalculatedAreaSize();
+        }
+
+        landUseGrade = cadastreEJB.getLandUseGrade(landUseCode, landGradeCode);
+        multiplicationFactor = cadastreEJB.getMultiplicationFacotr(landUseCode, landGradeCode, valuationZone);
+        roadClassFactor = cadastreEJB.getRoadClassFactor(roadClassCode, "en");
+
+        if (multiplicationFactor != null) {
+            groundRentFactor = multiplicationFactor.getMultiplicationFactor();
+        } else {
+            groundRentFactor = BigDecimal.ONE;
+        }
+
+        if (landUseGrade != null) {
+            groundRentRate = landUseGrade.getGroundRentRate();
+        } else {
+            groundRentRate = BigDecimal.ONE;
+        }
+
+        if (cadastreEJB.isCalculationPerPlot(landUseCode)) {
+            if (groundRentRate.compareTo(BigDecimal.ONE) > 0) {
+                return groundRentRate;
+            } else {
                 return BigDecimal.ZERO;
-            }else
-            {
+            }
+        }
+
+        if (cadastreEJB.isCalculationPerHectare(landUseCode)) {
+            // if rate was not found
+            if (groundRentRate.compareTo(BigDecimal.ONE) == 0) {
+                return BigDecimal.ZERO;
+            } else {
                 return groundRentRate.multiply(totalArea).divide(BigDecimal.valueOf(10000));
             }
         }
-        
+
         landUsable = landUsable.divide(new BigDecimal("100"));
-        
+
         landUsableFactor = landUsable.add(BigDecimal.ONE).divide(new BigDecimal("2"));
 
-	groundRent = groundRent.times(totalArea).times(groundRentRate).times(groundRentFactor).times(roadClassFactor).times(personalLevy).times(landUsableFactor);
-	
+        groundRent = groundRent.times(totalArea).times(groundRentRate).times(groundRentFactor).times(roadClassFactor).times(personalLevy).times(landUsableFactor);
+
         return groundRent.getAmount();
     }
-    
+
     @Override
-    public BigDecimal calculateDutyOnGroundRent(CadastreObject cadastreObject, Rrr leaseRight){
-        
-        String landUse = ""; 
+    public BigDecimal calculateDutyOnGroundRent(CadastreObject cadastreObject, Rrr leaseRight) {
+
+        String landUse = "";
         String landGrade = "";
-        
+
         BigDecimal groundRent = BigDecimal.ZERO;
         BigDecimal dutyOnGroundRent = BigDecimal.ZERO;
-        
+
         BigInteger dutyOnGroundRentFactor = BigInteger.ZERO;
         BigInteger groundRentDivisor = BigInteger.valueOf(100);
-        
+
         BigInteger groundRentDivident = BigInteger.ZERO;
         BigInteger groundRentModulo = BigInteger.ZERO;
-        
+
         LandUseGrade landUseGrade;
-        
-        if (leaseRight.getGroundRent() != null){
+
+        if (leaseRight.getGroundRent() != null) {
             groundRent = leaseRight.getGroundRent();
         }
-        
-        if (leaseRight.getLandUseCode() != null){
+
+        if (leaseRight.getLandUseCode() != null) {
             landUse = leaseRight.getLandUseCode();
         }
-        
-        if (cadastreObject.getLandGradeCode() != null){
+
+        if (cadastreObject.getLandGradeCode() != null) {
             landGrade = cadastreObject.getLandGradeCode();
         }
-        
-        if (groundRent.compareTo(BigDecimal.ZERO) == 0){
+
+        if (groundRent.compareTo(BigDecimal.ZERO) == 0) {
             return BigDecimal.ZERO;
         }
-        
+
         groundRentDivident = groundRent.toBigInteger();
-        
+
         if (groundRentDivident.compareTo(groundRentDivisor) == 1) {
             groundRentModulo = groundRentDivident.mod(groundRentDivisor);
-            groundRentModulo = groundRentModulo.add(groundRentDivident.divide(groundRentDivisor)); 
-        }
-        else{
+            groundRentModulo = groundRentModulo.add(groundRentDivident.divide(groundRentDivisor));
+        } else {
             groundRentModulo = BigInteger.ONE;
         }
-        
+
         landUseGrade = cadastreEJB.getLandUseGrade(landUse, landGrade);
-        
-        if (landUseGrade != null){
+
+        if (landUseGrade != null) {
             dutyOnGroundRentFactor = landUseGrade.getDutyOnGroundRent().toBigInteger();
         }
-        
+
         //modulo/qotient * factor
         dutyOnGroundRent = dutyOnGroundRent.multiply(BigDecimal.valueOf(dutyOnGroundRentFactor.doubleValue())).multiply(BigDecimal.valueOf(groundRentModulo.doubleValue()));
-        
+
         return dutyOnGroundRent;
     }
 }

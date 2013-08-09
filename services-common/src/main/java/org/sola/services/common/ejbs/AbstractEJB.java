@@ -46,9 +46,9 @@ import org.sola.services.common.repository.DatabaseConnectionManager;
 import org.sola.services.common.repository.entities.AbstractEntity;
 
 @DeclareRoles({
+    RolesConstants.USER_CHANGE_PASSWORD,
     RolesConstants.DASHBOARD_VIEW_ASSIGNED_APPS,
     RolesConstants.DASHBOARD_VIEW_UNASSIGNED_APPS,
-    RolesConstants.DASHBOARD_VIEW_OWN_APPS,
     RolesConstants.APPLICATION_VIEW_APPS,
     RolesConstants.APPLICATION_CREATE_APPS,
     RolesConstants.APPLICATION_EDIT_APPS,
@@ -70,9 +70,6 @@ import org.sola.services.common.repository.entities.AbstractEntity;
     RolesConstants.APPLICATION_DISPATCH,
     RolesConstants.APPLICATION_ARCHIVE,
     RolesConstants.ADMINISTRATIVE_BA_UNIT_SAVE,
-    RolesConstants.ADMINISTRATIVE_RRR_SAVE,
-    RolesConstants.ADMINISTRATIVE_PARCEL_SAVE,
-    RolesConstants.ADMINISTRATIVE_NOTATION_SAVE,
     RolesConstants.ADMINISTRATIVE_BA_UNIT_PRINT_CERT,
     RolesConstants.ADMINISTRATIVE_BA_UNIT_SEARCH,
     RolesConstants.SOURCE_TRANSACTIONAL,
@@ -85,11 +82,15 @@ import org.sola.services.common.repository.entities.AbstractEntity;
     RolesConstants.PARTY_SAVE,
     RolesConstants.PARTY_RIGHTHOLDERS_SAVE,
     RolesConstants.REPORTS_VIEW,
-    RolesConstants.ARCHIVE_ARCHIVE_APPS,
     RolesConstants.ADMIN_MANAGE_SECURITY,
     RolesConstants.ADMIN_MANAGE_REFDATA,
     RolesConstants.ADMIN_MANAGE_SETTINGS,
-    RolesConstants.ADMINISTRATIVE_SYSTEMATIC_REGISTRATION
+    RolesConstants.ADMINISTRATIVE_SYSTEMATIC_REGISTRATION,
+    RolesConstants.ADMINISTRATIVE_DISPUTE_SEARCH,
+    RolesConstants.ADMINISTRATIVE_DISPUTE_COMMENTS_SAVE,
+    RolesConstants.ADMINISTRATIVE_DISPUTE_PARTY_SAVE,
+    RolesConstants.ADMINISTRATIVE_DISPUTE_SAVE,
+    RolesConstants.ADMIN_MANAGE_BR
 })
 public abstract class AbstractEJB implements AbstractEJBLocal {
 

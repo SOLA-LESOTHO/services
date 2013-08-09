@@ -143,7 +143,7 @@ public interface CadastreEJBLocal extends AbstractEJBLocal {
      * See {@linkplain CadastreEJB#ChangeStatusOfCadastreObjects(java.lang.String, java.lang.String, java.lang.String)
      * CadastreEJB.ChangeStatusOfCadastreObjects}.
      */
-    void ChangeStatusOfCadastreObjects(String transactionId, String filter, String statusCode);
+   void ChangeStatusOfCadastreObjects(String transactionId, String filter, String statusCode);
 
     /**
      * See {@linkplain CadastreEJB#getCadastreObjectNode(double, double, double, double, int)
