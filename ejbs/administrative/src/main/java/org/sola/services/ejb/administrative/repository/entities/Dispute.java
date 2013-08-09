@@ -45,6 +45,8 @@ import org.sola.services.common.repository.ExternalEJB;
 import org.sola.services.common.repository.RepositoryUtility;
 import org.sola.services.common.repository.entities.AbstractVersionedEntity;
 import org.sola.services.ejb.cadastre.businesslogic.CadastreEJBLocal;
+import org.sola.services.ejb.source.businesslogic.SourceEJBLocal;
+import org.sola.services.ejb.source.repository.entities.Source;
 import org.sola.services.ejb.system.br.Result;
 import org.sola.services.ejb.system.businesslogic.SystemEJBLocal;
 
@@ -91,7 +93,13 @@ public class Dispute extends AbstractVersionedEntity {
     private String actionRequired;
     @ChildEntityList(parentIdField = "disputeNr")
     private List<DisputeComments> disputeCommentsList;
+    @ChildEntityList(parentIdField = "disputeNr")
     private List<DisputeParty> disputePartyList;
+    @ExternalEJB(ejbLocalClass = SourceEJBLocal.class,
+    loadMethod = "getSources", saveMethod = "saveSource")
+    @ChildEntityList(parentIdField = "disputeId", childIdField = "sourceId",
+    manyToManyClass = DisputeSource.class)
+    private List<Source> sourceList;
 
     public Dispute() {
         super();
@@ -232,6 +240,7 @@ public class Dispute extends AbstractVersionedEntity {
     }
 
     public List<DisputeParty> getDisputePartyList() {
+        disputePartyList = disputePartyList == null ? new ArrayList<DisputeParty>() : disputePartyList;
         return disputePartyList;
     }
 
@@ -239,10 +248,18 @@ public class Dispute extends AbstractVersionedEntity {
         this.disputePartyList = disputePartyList;
     }
 
+    public List<Source> getSourceList() {
+        sourceList = sourceList == null ? new ArrayList<Source>() : sourceList;
+        return sourceList;
+    }
+
+    public void setSourceList(List<Source> sourceList) {
+        this.sourceList = sourceList;
+    }
+   
     @Override
     public void preSave() {
-
-        if (isNew() && getNr() == null) {
+        if (this.isNew() && this.getNr() == null) {
             setNr(generateDisputeNumber());
         }
         super.preSave();
