@@ -233,13 +233,13 @@ public class DigitalArchiveEJB extends AbstractEJB implements DigitalArchiveEJBL
 
         if (numPart != null) {
             // Prefix with 0 to get a 4 digit number.
-            while (numPart.length() < 4) {
+            while (numPart.length() < 8) {
                 numPart = "0" + numPart;
             }
-            if (numPart.length() > 4) {
-                numPart = numPart.substring(numPart.length() - 4);
+            if (numPart.length() > 8) {
+                numPart = numPart.substring(numPart.length() - 8);
             }
-            datePart = DateUtility.simpleFormat("yyMM");
+            //datePart = DateUtility.simpleFormat("yyMM");
         } else {
             // Use the current datetime
             numPart = DateUtility.simpleFormat("yyMMddHHmmss");
