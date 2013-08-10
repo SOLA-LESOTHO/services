@@ -59,6 +59,8 @@ public class DisputeParty extends AbstractVersionedEntity {
     private String disputeNr;
     @Column(name=  "party_role")
     private String partyRole;
+    @Column(name=  "party_name")
+    private String partyName;
     @Column(name=  "party_id")
     private String partyId;
     
@@ -86,6 +88,14 @@ public class DisputeParty extends AbstractVersionedEntity {
 
     public String getPartyRole() {
         return partyRole;
+    }
+
+    public String getPartyName() {
+        return partyName;
+    }
+
+    public void setPartyName(String partyName) {
+        this.partyName = partyName;
     }
 
     public void setPartyRole(String partyRole) {
