@@ -52,6 +52,8 @@ import org.sola.services.ejb.cadastre.repository.entities.CadastreObject;
 import org.sola.services.ejb.cadastre.repository.entities.GroundRentMultiplicationFactor;
 import org.sola.services.ejb.cadastre.repository.entities.LandUseGrade;
 import org.sola.services.ejb.cadastre.repository.entities.SpatialValueArea;
+import org.sola.services.ejb.source.businesslogic.SourceEJBLocal;
+import org.sola.services.ejb.source.repository.entities.Source;
 import org.sola.services.ejb.system.businesslogic.SystemEJBLocal;
 import org.sola.services.ejb.system.repository.entities.BrValidation;
 import org.sola.services.ejb.transaction.businesslogic.TransactionEJBLocal;
@@ -66,8 +68,7 @@ import org.sola.services.ejb.transaction.repository.entities.TransactionBasic;
  */
 @Stateless
 @EJB(name = "java:global/SOLA/AdministrativeEJBLocal", beanInterface = AdministrativeEJBLocal.class)
-public class AdministrativeEJB extends AbstractEJB
-        implements AdministrativeEJBLocal {
+public class AdministrativeEJB extends AbstractEJB implements AdministrativeEJBLocal {
 
     @EJB
     private SystemEJBLocal systemEJB;
@@ -75,6 +76,8 @@ public class AdministrativeEJB extends AbstractEJB
     private TransactionEJBLocal transactionEJB;
     @EJB
     private CadastreEJBLocal cadastreEJB;
+    @EJB
+    private SourceEJBLocal sourceEJB;
 
     /**
      * Sets the entity package for the EJB to
@@ -93,7 +96,6 @@ public class AdministrativeEJB extends AbstractEJB
     protected void postConstruct() {
         setEntityPackage(BaUnit.class.getPackage().getName());
     }
-
     /**
      * Retrieves all administrative.change_status_type code values.
      *
@@ -730,6 +732,22 @@ public class AdministrativeEJB extends AbstractEJB
      *
      */
 
+     /**
+     * Clears the LaNr on all new source records associated with the
+     * Dispute.
+     *
+     * @param Dispute The dispute to check.
+     */
+    private void treatDisputeSources(Dispute dispute) {
+        if (dispute.getSourceList() != null) {
+            for (Source source : dispute.getSourceList()) {
+                if (source.isNew()) {
+                    source.setLaNr(null);
+                }
+            }
+        }
+    }
+   
     /*
      * Retrieves the DisputeComments matching the supplied identifier.
      *
@@ -823,6 +841,8 @@ public class AdministrativeEJB extends AbstractEJB
         if (dispute.getCompletionDate() == null) {
             dispute.setCompletionDate(DateUtility.now());
         }
+        treatDisputeSources(dispute);
+        
         return saveDispute(dispute);
     }
 
@@ -835,7 +855,8 @@ public class AdministrativeEJB extends AbstractEJB
         if (dispute == null) {
             return dispute;
         }
-
+        
+        treatDisputeSources(dispute);
         dispute = getRepository().saveEntity(dispute);
 
         return dispute;
