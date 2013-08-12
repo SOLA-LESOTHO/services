@@ -43,6 +43,7 @@ import org.sola.services.common.EntityAction;
 import org.sola.services.common.LocalInfo;
 import org.sola.services.common.br.ValidationResult;
 import org.sola.services.common.ejbs.AbstractEJB;
+import org.sola.services.common.faults.FaultUtility;
 import org.sola.services.common.faults.SOLAValidationException;
 import org.sola.services.common.repository.CommonSqlProvider;
 import org.sola.services.ejb.administrative.repository.entities.*;
@@ -57,7 +58,6 @@ import org.sola.services.ejb.transaction.businesslogic.TransactionEJBLocal;
 import org.sola.services.ejb.transaction.repository.entities.RegistrationStatusType;
 import org.sola.services.ejb.transaction.repository.entities.Transaction;
 import org.sola.services.ejb.transaction.repository.entities.TransactionBasic;
-import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
 /**
  * EJB to manage data in the administrative schema. Supports retrieving and
@@ -208,7 +208,7 @@ public class AdministrativeEJB extends AbstractEJB
     /**
      * Saves any updates to an existing BA Unit. Can also be used to create a
      * new BA Unit, however this method does not set any default values on the
-     * BA Unit like null null null null null     {@linkplain #createBaUnit(java.lang.String, org.sola.services.ejb.administrative.repository.entities.BaUnit)
+     * BA Unit like null null null null null null null     {@linkplain #createBaUnit(java.lang.String, org.sola.services.ejb.administrative.repository.entities.BaUnit)
      * createBaUnit}. Will also create a new Transaction record for the BA Unit
      * if the Service is not already associated to a Transaction.
      *
@@ -233,6 +233,8 @@ public class AdministrativeEJB extends AbstractEJB
             // Force cadastre object update
             baUnit.getCadastreObject().setEntityAction(EntityAction.UPDATE);
         }
+
+
         // Check BaUnit status
 //        if (!StringUtility.empty(baUnit.getStatusCode()).equals("")
 //                && !StringUtility.empty(baUnit.getStatusCode()).equalsIgnoreCase("pending")
@@ -252,7 +254,18 @@ public class AdministrativeEJB extends AbstractEJB
         TransactionBasic transaction =
                 transactionEJB.getTransactionByServiceId(serviceId, true, TransactionBasic.class);
         LocalInfo.setTransactionId(transaction.getId());
-        return getRepository().saveEntity(baUnit);
+        BaUnit result = null;
+        try {
+            result = getRepository().saveEntity(baUnit);
+        } catch (RuntimeException e) {
+            if (FaultUtility.getStackTraceAsString(e).contains("ba_unit_unique_name_parts")) {
+                throw new SOLAException(ServiceMessage.EXCEPTION_BAUNIT_HAS_DUPLICATE_NAME,
+                        new String[]{baUnit.getName()}, e);
+            } else {
+                throw e;
+            }
+        }
+        return result;
     }
 
     /**
