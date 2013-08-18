@@ -73,21 +73,32 @@ public class NetworkFolder {
     }
 
     /**
-     * Use this constructor to present a file on a network file share. You
+     * Use this constructor to connect to a network file share. You
      * should use limited privilege user accounts to connect to the file share.
      * AVOID USING DOMAIN OR COMPUTER ADMINISTRATOR ACCOUNTS.
      *
-     * @param folderLocation The network file share. Should be <Server>/<share>
+     * @param folderLocation The network file share in the form //<Server>/<share>
+     * This method will ensure the path location is consistent with Samba File 
+     * share requirements. See SmbFile class. 
      * @param domain The domain or computer name for the user account.
      * @param user The user account to connect to the file share with
      * @param pword The password to use to connect to the file share.
      */
     public NetworkFolder(String folderLocation, String domain, String user, String pword) {
-        if (folderLocation != null && !folderLocation.startsWith(SAMBA_PREFIX)) {
-            folderLocation = SAMBA_PREFIX + folderLocation;
-        }
-        if (folderLocation != null && !folderLocation.endsWith(File.separator)) {
-            folderLocation = folderLocation + File.separator;
+        isNetworkFolder = true;
+        if (folderLocation != null) {
+            // Samba share, so make sure all of the path separators are / instead of \
+            folderLocation = folderLocation.replaceAll("\\\\", "/");
+            if (folderLocation.startsWith("//")) {
+                folderLocation = folderLocation.substring(2);
+            }
+            if (!folderLocation.startsWith(SAMBA_PREFIX)) {
+                folderLocation = SAMBA_PREFIX + folderLocation;
+            }
+            // Samba requires a folder to have a trailing /
+            if (!folderLocation.endsWith("/")) {
+                folderLocation = folderLocation + "/";
+            }
         }
         folder = folderLocation;
         LogUtility.log("Network Folder Location = " + folder);
@@ -151,7 +162,7 @@ public class NetworkFolder {
      */
     public boolean fileExists(String fileName) {
         boolean result = false;
-        fileName = fileName.replaceAll(File.pathSeparator, "\\\\");
+        fileName = fileName.replaceAll(File.pathSeparator, "/");
         if (isNetworkFolder) {
             try {
                 SmbFile file = new SmbFile(folder + fileName, networkAuth);
@@ -172,7 +183,7 @@ public class NetworkFolder {
      * @param fileName Name of the file to delete
      */
     public void deleteFile(String fileName) {
-        fileName = fileName.replaceAll(File.pathSeparator, "\\\\");
+        fileName = fileName.replaceAll(File.pathSeparator, "/");
         if (fileExists(fileName)) {
             if (isNetworkFolder) {
                 try {
@@ -217,7 +228,7 @@ public class NetworkFolder {
      */
     public boolean copyFileToLocal(String fileName, File destination) {
         boolean result = false;
-        fileName = fileName.replaceAll(File.pathSeparator, "\\\\");
+        fileName = fileName.replaceAll(File.pathSeparator, "/");
         if (fileExists(fileName) && !destination.exists()) {
             result = true;
             if (isNetworkFolder) {
@@ -267,7 +278,8 @@ public class NetworkFolder {
                         NetworkFolder subFolder = getSubFolder(f.getName());
                         List<FileInfo> temp = subFolder.getAllFiles(fileNameFilter);
                         for (FileInfo fi : temp) {
-                            fi.setName(f.getName() + File.pathSeparator + fi.getName());
+                            // Samba directories have a trailing /, so replace this with ;
+                            fi.setName(f.getName().replaceAll("/", File.pathSeparator) + fi.getName());
                         }
                         result.addAll(temp);
                     }

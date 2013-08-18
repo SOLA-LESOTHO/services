@@ -97,8 +97,10 @@ public class DigitalArchiveEJB extends AbstractEJB implements DigitalArchiveEJBL
         localCacheFolder.createFolder();
         thumbFolder = localCacheFolder.getSubFolder("thumb");
 
-        thumbWidth = 225;
-        thumbHeight = 322;
+        // Increse the size of the "thumbnail" so there is more information 
+        // in the picture when the user resizes the file dialog. 
+        thumbWidth = 500;
+        thumbHeight = 707;
 
         // Set some cache values for the server documents cache. 
         String maxCacheSizeMB = systemEJB.getSetting(ConfigConstants.SERVER_DOCUMENT_CACHE_MAX_SIZE, "500");
