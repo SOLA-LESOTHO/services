@@ -119,7 +119,7 @@ public class ApplicationSearchResult extends AbstractReadOnlyEntity {
     @AccessFunctions(onSelect = "(SELECT string_agg(tmp.display_value, ',') FROM "
     + " (SELECT get_translation(display_value, #{" + CommonSqlProvider.PARAM_LANGUAGE_CODE + "}) as display_value "
     + "  FROM application.service aps INNER JOIN application.request_type rt ON aps.request_type_code = rt.code "
-    + "  WHERE aps.application_id = a.id ORDER BY aps.service_order) tmp) ")
+    + "  WHERE aps.application_id = a.id AND aps.status_code NOT IN ('cancelled') ORDER BY aps.service_order) tmp) ")
     @Column(name = "service_list")
     private String serviceList;
     @Column(name = "fee_paid")
