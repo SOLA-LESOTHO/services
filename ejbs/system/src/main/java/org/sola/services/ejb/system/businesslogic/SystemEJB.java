@@ -100,8 +100,8 @@ public class SystemEJB extends AbstractEJB implements SystemEJBLocal {
 
     /**
      * Retrieves the value for the named setting. Constants for each setting are available in
-     * {@linkplain  ConfigConstants}. If the setting does not exist, the default value for the
-     * setting is returned.
+     * {@linkplain  ConfigConstants}. If the setting does not exist, or the setting is not
+     * active, the default value for the setting is returned.
      *
      * @param name The name of the setting to retrieve
      * @param defaultValue The default value for the setting if it no override value is recorded in
@@ -112,7 +112,7 @@ public class SystemEJB extends AbstractEJB implements SystemEJBLocal {
     public String getSetting(String name, String defaultValue) {
         String result = defaultValue;
         Setting config = getRepository().getEntity(Setting.class, name);
-        if (config != null && config.getValue() != null) {
+        if (config != null && config.getValue() != null && config.isActive()) {
             result = config.getValue();
         }
         return result;
