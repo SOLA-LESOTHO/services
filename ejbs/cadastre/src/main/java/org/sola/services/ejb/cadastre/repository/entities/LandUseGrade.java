@@ -57,6 +57,8 @@ public class LandUseGrade extends AbstractEntity {
     BigDecimal groundRentRate;
     @Column(name = "duty_on_ground_rent")
     BigDecimal dutyOnGroundRent;
+    @Column(name = "registration_fee")
+    BigDecimal registrationFee;
 
     public LandUseGrade() {
         super();
@@ -101,4 +103,13 @@ public class LandUseGrade extends AbstractEntity {
     public void setDutyOnGroundRent(BigDecimal dutyOnGroundRent) {
         this.dutyOnGroundRent = dutyOnGroundRent;
     }
+
+    public BigDecimal getRegistrationFee() {
+        return registrationFee;
+    }
+
+    public void setRegistrationFee(BigDecimal registrationFee) {
+        this.registrationFee = registrationFee;
+    }
+    
 }

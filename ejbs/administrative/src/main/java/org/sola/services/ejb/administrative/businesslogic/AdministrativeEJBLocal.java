@@ -280,4 +280,6 @@ public interface AdministrativeEJBLocal extends AbstractSolaTransactionEJBLocal 
     
     BigDecimal calculateDutyOnGroundRent(CadastreObject co, Rrr leaseRight);
     
+    LeaseFee  calculateLeaseFees(CadastreObject co, Rrr leaseRight);
+    
 }
