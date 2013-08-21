@@ -26,59 +26,32 @@
  * EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  * *********************************************************************************************
  */
-package org.sola.services.ejb.application.repository.entities;
+/*
+ * To change this template, choose Tools | Templates
+ * and open the template in the editor.
+ */
+package org.sola.services.ejb.administrative.repository.entities;
 
-import java.math.BigDecimal;
-import javax.persistence.Column;
-import javax.persistence.Id;
 import javax.persistence.Table;
-import org.sola.services.common.repository.entities.AbstractEntity;
+import org.sola.services.common.repository.DefaultSorter;
+import org.sola.services.common.repository.entities.AbstractCodeEntity;
 
 /**
- * Entity representing the cadastre.land_use_grade table.
+ * Entity representing the application.administrative rate code table. This code
+ * entity includes some additional field beyond the standard code, description,
+ * display_value and status used for most code entities.
+ *
+ * @author soladev
  */
-@Table(name = "admin_fee_rate", schema = "application")
-public class AdminFeeRate extends AbstractEntity {
+@Table(name = "admin_rate_type", schema = "application")
+@DefaultSorter(sortString = "display_value")
+public class AdminRateType extends AbstractCodeEntity {
 
-    /**
-     * WHERE clause to return current CO's intersecting the specified point
-     */
-    public static final String QUERY_WHERE_SEARCHBYFEEANDRATE = "fee_code= #{fee_code} "
-            + "and rate_code= #{rate_code}";
-    @Id
-    @Column(name = "fee_code")
-    private String feeCode;
-    @Id
-    @Column(name = "rate_code")
-    private String rateCode;
-    @Column(name = "rate_value")
-    BigDecimal rateValue;
+    public static final String LOWER_RATE = "lowerRate";
+    public static final String UPPER_RATE = "upperRate";
+    public static final String THRESHOLD_VALUE = "thresholdValue";
 
-    public AdminFeeRate() {
+    public AdminRateType() {
         super();
-    }
-
-    public String getFeeCode() {
-        return feeCode;
-    }
-
-    public void setFeeCode(String feeCode) {
-        this.feeCode = feeCode;
-    }
-
-    public String getRateCode() {
-        return rateCode;
-    }
-
-    public void setRateCode(String rateCode) {
-        this.rateCode = rateCode;
-    }
-
-    public BigDecimal getRateValue() {
-        return rateValue;
-    }
-
-    public void setRateValue(BigDecimal rateValue) {
-        this.rateValue = rateValue;
     }
 }

@@ -1098,4 +1098,39 @@ public class AdministrativeEJB extends AbstractEJB implements AdministrativeEJBL
 
         return dutyOnGroundRent;
     }
+    
+    @Override
+    public  LeaseFee  calculateLeaseFees(CadastreObject co, Rrr leaseRight){
+        
+        LeaseFee leaseFees = new LeaseFee();
+        LeaseFeeUtility leaseUtility = new LeaseFeeUtility();
+        
+        String landUse; 
+        String landGrade;
+                
+        Money groundRent;
+        Money registrationFee;
+        Money serviceFee;
+        Money stampDuty;
+        
+        landUse = leaseRight.getLandUseCode();
+        
+        landGrade = co.getLandGradeCode();
+        
+        groundRent = leaseUtility.calculateGroundRent(co, leaseRight);
+        
+        leaseRight.setGroundRent(groundRent.getAmount());
+        
+        stampDuty = leaseUtility.calculateDutyOnGroundRent(co, leaseRight);
+        registrationFee = leaseUtility.determineRegistrationFee(landUse, landGrade);
+        serviceFee = leaseUtility.determineServiceFee(landUse, landGrade);
+        
+        leaseFees.setGroundRent(groundRent.getAmount());
+        leaseFees.setServiceFee(serviceFee.getAmount());
+        leaseFees.setStampDuty(stampDuty.getAmount());
+        leaseFees.setRegistrationFee(registrationFee.getAmount());
+        
+        return leaseFees;
+        
+    }
 }

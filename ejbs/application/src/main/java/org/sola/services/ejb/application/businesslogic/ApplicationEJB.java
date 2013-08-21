@@ -243,14 +243,6 @@ public class ApplicationEJB extends AbstractEJB implements ApplicationEJBLocal {
      */
     private void calculateLodgementFees(Application application) {
 
-        String landGradeCode = "";
-        String landUseCode = "";
-        String valuationZone = "";
-
-        BigDecimal totalArea = BigDecimal.ZERO;
-
-        Money totalValue = new Money(BigDecimal.ZERO);
-
         Money totalFee;
 
         Money registrationFeeTotal = new Money(BigDecimal.ZERO);
@@ -261,29 +253,7 @@ public class ApplicationEJB extends AbstractEJB implements ApplicationEJBLocal {
 
         Money groundRent = new Money(BigDecimal.ZERO);
 
-        SpatialValueArea spatialValueArea;
-
-        //Get land use, land grade, and the total value of the property
-        if (application.getCadastreObjectList() != null) {
-            for (CadastreObject cadastre : application.getCadastreObjectList()) {
-                if (cadastre.getLandGradeCode() != null) {
-                    landGradeCode = cadastre.getLandGradeCode();
-                }
-
-                if (cadastre.getValuationAmount() != null) {
-                    totalValue = new Money(cadastre.getValuationAmount().abs());
-                }
-                if (cadastre.getValuationZone() != null) {
-                    valuationZone = cadastre.getValuationZone();
-                }
-                spatialValueArea = cadastreEJB.getSpatialValueArea(cadastre.getId());
-                if (spatialValueArea != null) {
-                    totalArea = spatialValueArea.getCalculatedAreaSize();
-                }
-            }
-        }
-
-
+ 
         // Calculate the fee for each service and the total services fee for the application.
         // Uses the money type to ensure all calculations yeild consisent results. Note that the
         // Money type applies Bankers Rounding to all calculations. 
@@ -301,13 +271,6 @@ public class ApplicationEJB extends AbstractEJB implements ApplicationEJBLocal {
                         if (ser.getRequestTypeCode().equals(type.getCode())) {
                             if (type.getBaseFee() != null) {
                                 baseFee = new Money(type.getBaseFee().abs());
-                            }
-
-                            if (RequestType.NEW_LEASE.equals(type.getCode())) {
-                                serviceFee = determineServiceFee(landUseCode, landGradeCode);
-                                //stampDuty = calculateDutyOnTransfer(AdminFeeType.STAMP_DUTY, totalValue);
-                                //groundRent = calculateGroundRent(landUseCode, landGradeCode, valuationZone, totalArea);
-                                //stampDuty = calculateDutyOnGroundRent( landUseCode, landGradeCode, groundRent);
                             }
 
                             break;
@@ -1319,173 +1282,6 @@ public class ApplicationEJB extends AbstractEJB implements ApplicationEJBLocal {
     @Override
     public List<ApplicationForm> getApplicationForms(String lang) {
         return getRepository().getCodeList(ApplicationForm.class, lang);
-    }
-
-    private List<AdminFeeType> getAdminFeeTypes(String languageCode) {
-        return getRepository().getCodeList(AdminFeeType.class, languageCode);
-    }
-
-    private List<AdminRateType> getAdminRateTypes(String languageCode) {
-        return getRepository().getCodeList(AdminRateType.class, languageCode);
-    }
-
-    private AdminFeeRate getAdminFeeRate(String feeCode, String rateCode) {
-
-        if ((feeCode != null) && (rateCode != null)) {
-            HashMap params = new HashMap();
-            params.put("fee_code", feeCode);
-            params.put("rate_code", rateCode);
-
-            return getRepository().getEntity(AdminFeeRate.class,
-                    AdminFeeRate.QUERY_WHERE_SEARCHBYFEEANDRATE, params);
-        } else {
-            return null;
-        }
-    }
-
-    /**
-     * Determines service fee based on grade and land use
-     */
-    private Money determineServiceFee(String landUse, String landGrade) {
-
-        Money serviceFee;
-        LandUseGrade landUseGrade;
-
-        landUseGrade = cadastreEJB.getLandUseGrade(landUse, landGrade);
-        
-        if (landUseGrade != null){
-              serviceFee = new Money(landUseGrade.getAdminFee().abs());
-        }else
-        {
-           serviceFee = new Money(BigDecimal.ZERO);
-        }
-
-        return serviceFee;
-    }
-
-    /*
-     * Calculates stamp duty or transfer duty. @param feeType the fee Code used
-     * for determining whether it is stamp duty or transfer duty calculation.
-     * @param valuationAmount is the value of the parcel/property
-     */
-    private Money calculateDutyOnTransfer(String feeType, Money valuationAmount) {
-
-        BigDecimal lowerRate;
-
-        BigDecimal upperRate;
-
-        Money thresholdValue;
-
-        Money surplusValue;
-
-        Money duty;
-
-
-        lowerRate = getRateValue(feeType, AdminRateType.LOWER_RATE);
-
-        upperRate = getRateValue(feeType, AdminRateType.UPPER_RATE);
-
-        thresholdValue = new Money(getRateValue(feeType, AdminRateType.THRESHOLD_VALUE));
-
-        if (valuationAmount.compareTo(thresholdValue) == 1) {
-            surplusValue = valuationAmount.minus(thresholdValue);
-            duty = surplusValue.times(upperRate).plus(thresholdValue.times(lowerRate));
-        } else {
-            duty = valuationAmount.times(lowerRate);
-        }
-
-        return duty;
-
-    }
-
-    private BigDecimal getRateValue(String feeCode, String rateCode) {
-
-        BigDecimal rateValue = BigDecimal.ZERO;
-
-        AdminFeeRate adminFeeRate;
-
-        adminFeeRate = this.getAdminFeeRate(feeCode, rateCode);
-
-        if (adminFeeRate != null) {
-            rateValue = adminFeeRate.getRateValue();
-        }
-
-        return rateValue;
-    }
-
-    /*
-     * Calculation of ground rent is a simplified one; it does not include road
-     * class factor as well as percentage of land usable
-     */
-    private Money calculateGroundRent(String landUse, String landGrade, String valuationZoneCode, BigDecimal totalArea) {
-
-        Money groundRent = new Money(BigDecimal.ONE);
-
-        BigDecimal groundRentRate;
-
-        BigDecimal groundRentFactor;
-
-        LandUseGrade landUseGrade;
-
-        GroundRentMultiplicationFactor multiplicationFactor;
-
-        landUseGrade = cadastreEJB.getLandUseGrade(landUse, landGrade);
-
-        multiplicationFactor = cadastreEJB.getMultiplicationFacotr(landUse, landGrade, valuationZoneCode);
-
-        if (multiplicationFactor != null) {
-            groundRentFactor = multiplicationFactor.getMultiplicationFactor();
-        } else {
-            groundRentFactor = BigDecimal.ONE;
-        }
-
-        if (landUseGrade != null) {
-            groundRentRate = landUseGrade.getGroundRentRate();
-        } else {
-            groundRentRate = BigDecimal.ONE;
-        }
-
-
-        groundRent = groundRent.times(totalArea).times(groundRentRate).times(groundRentFactor);
-
-        return groundRent;
-    }
-    
-    private Money calculateDutyOnGroundRent(String landUse, String landGrade, Money groundRent){
-       
-        Money dutyOnGroundRent = new Money(BigDecimal.ONE);
-
-        LandUseGrade landUseGrade;
-        
-        BigInteger dutyOnGroundRentFactor = BigInteger.ZERO;
-        
-        // take ground rent find modulo of 100
-        BigInteger groundRentDivident = groundRent.getAmount().toBigInteger();
-        
-        BigInteger groundRentDivisor = BigInteger.valueOf(100);
-        
-        BigInteger groundRentModulo;
-        
-        if (groundRentDivident.compareTo(groundRentDivisor) == 1) {
-            groundRentModulo = groundRentDivident.mod(groundRentDivisor);
-            groundRentModulo = groundRentModulo.add(groundRentDivident.divide(groundRentDivisor)); 
-        }
-        else{
-            groundRentModulo = BigInteger.ONE;
-        }
-        
-       
-                
-        landUseGrade = cadastreEJB.getLandUseGrade(landUse, landGrade);
-        
-        if (landUseGrade != null){
-            dutyOnGroundRentFactor = landUseGrade.getDutyOnGroundRent().toBigInteger();
-        }
-        
-        //modulo/qotient * factor
-        dutyOnGroundRent = dutyOnGroundRent.times(dutyOnGroundRentFactor.intValue()).times(groundRentModulo.intValue());
-        
-        return dutyOnGroundRent;
     }
 
     @Override
