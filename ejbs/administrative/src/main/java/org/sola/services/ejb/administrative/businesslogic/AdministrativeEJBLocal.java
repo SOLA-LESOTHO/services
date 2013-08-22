@@ -271,14 +271,6 @@ public interface AdministrativeEJBLocal extends AbstractSolaTransactionEJBLocal 
      */
     List<DeedType> getDeedTypes(String languageCode);
 
-    /**
-     * See {@linkplain AdministrativeEJB#calculateGroundRent(org.sola.services.ejb.cadastre.repository.entities.CadastreObject, 
-     *                                                       java.math.BigDecimal, java.math.BigDecimal, java.lang.String)
-     * AdministrativeEJB.calculateGroundRent}
-     */
-    BigDecimal calculateGroundRent(CadastreObject co, BigDecimal personalLevy, BigDecimal landUsable, String landUseCode);
-    
-    BigDecimal calculateDutyOnGroundRent(CadastreObject co, Rrr leaseRight);
     
     LeaseFee  calculateLeaseFees(CadastreObject co, Rrr leaseRight);
     

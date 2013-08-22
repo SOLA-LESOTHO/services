@@ -21,13 +21,17 @@ import org.sola.services.ejb.cadastre.repository.entities.GroundRentMultiplicati
 import org.sola.services.ejb.cadastre.repository.entities.LandUseGrade;
 import org.sola.services.ejb.cadastre.repository.entities.SpatialValueArea;
 
-
+ 
 public class LeaseFeeUtility extends AbstractEJB{
     
  
     
     @EJB
     private CadastreEJBLocal cadastreEJB;
+    
+    public void setCadastreEJB(CadastreEJBLocal cadastreEJB){
+        this.cadastreEJB = cadastreEJB;
+    }
     
     private List<AdminFeeType> getAdminFeeTypes(String languageCode) {
         return getRepository().getCodeList(AdminFeeType.class, languageCode);
@@ -303,8 +307,9 @@ public class LeaseFeeUtility extends AbstractEJB{
         String landGrade = "";
         
         BigDecimal groundRent = BigDecimal.ZERO;
-        BigDecimal dutyOnGroundRent = BigDecimal.ZERO;
+        BigDecimal dutyOnGroundRentValue = BigDecimal.ZERO;
         
+        BigInteger dutyOnGroundRent = BigInteger.ZERO;
         BigInteger dutyOnGroundRentFactor = BigInteger.ZERO;
         BigInteger groundRentModulo;
         
@@ -331,12 +336,12 @@ public class LeaseFeeUtility extends AbstractEJB{
         if (landUseGrade != null) {
             dutyOnGroundRentFactor = landUseGrade.getDutyOnGroundRent().toBigInteger();
         }
-
-        //modulo/qotient * factor
-        dutyOnGroundRent = dutyOnGroundRent.multiply(BigDecimal.valueOf(dutyOnGroundRentFactor.doubleValue()))
-                                           .multiply(BigDecimal.valueOf(groundRentModulo.doubleValue()));
         
-        return new Money(dutyOnGroundRent);        
+        dutyOnGroundRent = dutyOnGroundRentFactor.multiply(groundRentModulo);
+        
+        dutyOnGroundRentValue = new BigDecimal(dutyOnGroundRent);
+        
+        return new Money(dutyOnGroundRentValue);        
     }
    
     public Money calculateDutyOnTransfer(Money valuationAmount) {

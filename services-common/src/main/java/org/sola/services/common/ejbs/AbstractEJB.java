@@ -42,10 +42,10 @@ import org.sola.common.RolesConstants;
 import org.sola.common.SOLAException;
 import org.sola.common.messaging.ServiceMessage;
 import org.sola.services.common.LocalInfo;
-import org.sola.services.common.repository.entities.AbstractCodeEntity;
 import org.sola.services.common.repository.CommonRepository;
 import org.sola.services.common.repository.CommonRepositoryImpl;
 import org.sola.services.common.repository.DatabaseConnectionManager;
+import org.sola.services.common.repository.entities.AbstractCodeEntity;
 import org.sola.services.common.repository.entities.AbstractEntity;
 
 @DeclareRoles({
