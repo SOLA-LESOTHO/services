@@ -73,6 +73,8 @@ public class CadastreObjectSearchResult extends AbstractVersionedEntity {
     private String valuationZone;
     @Column(name = "has_lease")
     private boolean hasLease;
+    @Column(name = "has_dispute")
+    private boolean hasDispute;
     
     public static final String PARAM_NAME_FIRST_PART = "nameFirstPart";
     public static final String PARAM_NAME_LAST_PART = "nameLastPart";
@@ -84,6 +86,7 @@ public class CadastreObjectSearchResult extends AbstractVersionedEntity {
             + "  ON ad.id = sad.spatial_unit_id WHERE sa.spatial_unit_id = co.id) AS address, "
             + "co.source_reference, co.land_grade_code, co.valuation_amount, co.valuation_zone, "
             + "(SELECT COUNT(1)>0 FROM administrative.ba_unit where cadastre_object_id = co.id AND status_code!='historic') AS has_lease,"
+            + "(SELECT COUNT(1)>0 FROM administrative.dispute where cadastre_object_id = (name_firstpart||'-'||name_lastpart) AND status_code!='Resolved') AS has_dispute,"
             + "co.status_code, co.rowversion, co.change_user, co.rowidentifier "
             + "FROM cadastre.cadastre_object co LEFT JOIN cadastre.spatial_unit_address sa ON co.id = sa.spatial_unit_id "
             + "LEFT JOIN address.address a ON sa.address_id = a.id "
@@ -247,5 +250,13 @@ public class CadastreObjectSearchResult extends AbstractVersionedEntity {
 
     public void setValuationZone(String valuationZone) {
         this.valuationZone = valuationZone;
+    }
+
+    public boolean isHasDispute() {
+        return hasDispute;
+    }
+
+    public void setHasDispute(boolean hasDispute) {
+        this.hasDispute = hasDispute;
     }
 }

@@ -128,6 +128,9 @@ public class CadastreObject extends AbstractVersionedEntity {
     @Column(name = "has_lease", insertable=false, updatable=false)
     @AccessFunctions(onSelect = "(SELECT COUNT(1)>0 FROM administrative.ba_unit where cadastre_object_id = #{id} AND status_code!='historic')")
     private boolean hasLease;
+    @Column(name = "has_dispute", insertable=false, updatable=false)
+    @AccessFunctions(onSelect = "(SELECT COUNT(1)>0 FROM administrative.dispute where cadastre_object_id = #{nameFirstpart||'-'||nameLastpart} AND status_code!='Resolved')")
+    private boolean hasDispute;
     @ChildEntityList(parentIdField = "spatialUnitId")
     private List<SpatialValueArea> spatialValueAreaList;
     @Column(name = "land_grade_code")
@@ -340,6 +343,14 @@ public class CadastreObject extends AbstractVersionedEntity {
 
     public void setRoadClassCode(String roadClassCode) {
         this.roadClassCode = roadClassCode;
+    }
+
+    public boolean isHasDispute() {
+        return hasDispute;
+    }
+
+    public void setHasDispute(boolean hasDispute) {
+        this.hasDispute = hasDispute;
     }
 
     /**
