@@ -41,6 +41,7 @@ public class ApplicationSearchParams extends AbstractReadOnlyEntity {
     private String contactPerson;
     private String documentNumber;
     private String documentReference;
+    private String leaseNumber;
 
     public ApplicationSearchParams() {
     }
@@ -108,5 +109,12 @@ public class ApplicationSearchParams extends AbstractReadOnlyEntity {
     public void setDocumentReference(String documentReference) {
         this.documentReference = documentReference;
     }
-      
+
+    public String getLeaseNumber() {
+        return leaseNumber;
+    }
+
+    public void setLeaseNumber(String leaseNumber) {
+        this.leaseNumber = leaseNumber;
+    }
 }
