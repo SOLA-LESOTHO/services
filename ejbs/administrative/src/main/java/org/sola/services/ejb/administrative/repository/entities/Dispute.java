@@ -68,7 +68,7 @@ public class Dispute extends AbstractVersionedEntity {
     private String nr;
     @Column(name = "lodgement_date", updatable = false, insertable = false)
     private Date lodgementDate;
-    @Column(name = "completion_date", updatable = false, insertable = false)
+    @Column(name = "completion_date")
     private Date completionDate;
     @Column(name = "dispute_category_code")
     private String disputeCategoryCode;
