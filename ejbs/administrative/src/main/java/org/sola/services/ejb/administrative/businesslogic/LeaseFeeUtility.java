@@ -30,6 +30,8 @@ package org.sola.services.ejb.administrative.businesslogic;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.math.MathContext;
+import java.math.RoundingMode;
 import java.util.HashMap;
 import java.util.List;
 import org.sola.common.Money;
@@ -237,6 +239,8 @@ public class LeaseFeeUtility extends AbstractEJB {
         BigInteger groundRentDivident;
         BigInteger stampDutyFactor;
 
+        groundRent = roundGroundRentAmount(groundRent);
+        
         groundRentDivident = groundRent.toBigInteger();
 
         //check if ground rent is greater than 100
@@ -259,6 +263,14 @@ public class LeaseFeeUtility extends AbstractEJB {
         
         return stampDutyFactor;
         
+    }
+    
+    private static BigDecimal roundGroundRentAmount(BigDecimal groundRent){
+        BigDecimal groundRentValue;
+        //MathContext mc = new MathContext(groundRent.toBigInteger().toString().length(), RoundingMode.UP);
+        //groundRentValue = groundRent.round(mc);
+        groundRentValue = groundRent.setScale(0, RoundingMode.UP);
+        return groundRentValue;
     }
 
     public Money calculateGroundRent(CadastreObject co, Rrr leaseRight) {

@@ -47,6 +47,8 @@ public class LandUseType extends AbstractCodeEntity {
     public static final String CODE_EDUCATIONAL = "educational";
     public static final String CODE_INSTITUTIONAL = "institutional";
     public static final String CODE_RELIGIOUS = "religious";
+    public static final String CODE_BENOVOLENT = "benovelent";
+    public static final String CODE_DEVOTIONAL = "devotional";
     public static final String CODE_AGRIC_IRRIGATED = "agricIrrigated";
     public static final String CODE_AGRIC_NON_IRRIGATED = "agricNonIrrigated";
     public static final String CODE_AGRIC_RANGE_GRAZING = "agricRangeGrazing";

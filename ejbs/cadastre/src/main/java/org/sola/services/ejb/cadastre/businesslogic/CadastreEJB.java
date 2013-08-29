@@ -576,6 +576,8 @@ public class CadastreEJB extends AbstractEJB implements CadastreEJBLocal {
                 || (landUseCode.equals(LandUseType.CODE_RECREATIONAL))
                 || (landUseCode.equals(LandUseType.CODE_EDUCATIONAL))
                 || (landUseCode.equals(LandUseType.CODE_INSTITUTIONAL))
+                || (landUseCode.equals(LandUseType.CODE_BENOVOLENT))
+                || (landUseCode.equals(LandUseType.CODE_DEVOTIONAL))
                 || (landUseCode.equals(LandUseType.CODE_RELIGIOUS))) {
             calculationPerPlot = true;
         }
