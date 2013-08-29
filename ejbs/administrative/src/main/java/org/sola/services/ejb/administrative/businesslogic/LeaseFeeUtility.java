@@ -267,8 +267,6 @@ public class LeaseFeeUtility extends AbstractEJB {
     
     private static BigDecimal roundGroundRentAmount(BigDecimal groundRent){
         BigDecimal groundRentValue;
-        //MathContext mc = new MathContext(groundRent.toBigInteger().toString().length(), RoundingMode.UP);
-        //groundRentValue = groundRent.round(mc);
         groundRentValue = groundRent.setScale(0, RoundingMode.UP);
         return groundRentValue;
     }
