@@ -247,6 +247,9 @@ public class LeaseFeeUtility extends AbstractEJB {
                groundRentDivident = groundRentDivident.add(groundRentDivisor).subtract(stampDutyFactor);
                stampDutyFactor = groundRentDivident.divide(groundRentDivisor);
            }
+           else{
+               stampDutyFactor = groundRentDivident.divide(groundRentDivisor);
+           }
         }
         else if (groundRentDivident.compareTo(BigInteger.ZERO) == 0){
             stampDutyFactor = BigInteger.ZERO;
