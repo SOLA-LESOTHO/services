@@ -131,10 +131,9 @@ public class ApplicationSearchResult extends AbstractReadOnlyEntity {
     + "  WHERE aps.application_id = a.id AND aps.status_code NOT IN ('cancelled') ORDER BY aps.service_order) tmp) ")
     @Column(name = "service_list")
     private String serviceList;
-    @AccessFunctions(onSelect = "(select string_agg(distinct r.lease_number, ', ') from administrative.rrr r "
-    + "where r.ba_unit_id in (select r2.ba_unit_id from administrative.rrr r2 inner join (transaction.transaction t "
-    + "inner join application.service s on t.from_service_id = s.id) on r.transaction_id=t.id where s.application_id = a.id) "
-    + "and r.status_code <> 'previous' and r.lease_number is not null and r.lease_number <> '')")
+    @AccessFunctions(onSelect = "(select string_agg(DISTINCT application.get_concatenated_name (s.id), ',') "
+            + " FROM application.service s"
+            + " WHERE s.application_id = a.id)")
     @Column(name = "affected_lease_numbers")
     private String affectedLeaseNumbers;
     @Column(name = "fee_paid")
