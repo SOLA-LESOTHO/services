@@ -147,6 +147,8 @@ public class ApplicationSearchResult extends AbstractReadOnlyEntity {
     @Column(name = "rowidentifier")
     @AccessFunctions(onSelect = "a.rowidentifier")
     private String rowId;
+    @Column(name = "action_notes")
+    private String actionNotes;
 
     public ApplicationSearchResult() {
         super();
@@ -295,4 +297,13 @@ public class ApplicationSearchResult extends AbstractReadOnlyEntity {
     public void setRowVersion(int rowVersion) {
         this.rowVersion = rowVersion;
     }
+
+    public String getActionNotes() {
+        return actionNotes;
+    }
+
+    public void setActionNotes(String actionNotes) {
+        this.actionNotes = actionNotes;
+    }
+    
 }
