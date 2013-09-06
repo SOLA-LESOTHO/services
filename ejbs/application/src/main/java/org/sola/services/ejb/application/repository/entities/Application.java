@@ -106,7 +106,7 @@ public class Application extends AbstractVersionedEntity {
     @Column(name = "receipt_reference")
     private String receiptRef;
     @Column(name = "receipt_date")
-    private String receiptDate;
+    private Date receiptDate;
     @ExternalEJB(ejbLocalClass = PartyEJBLocal.class,
     loadMethod = "getParty", saveMethod = "saveParty")
     @ChildEntity(childIdField = "contactPersonId")
@@ -291,11 +291,11 @@ public class Application extends AbstractVersionedEntity {
         this.receiptRef = receiptRef;
     }
 
-    public String getReceiptDate() {
+    public Date getReceiptDate() {
         return receiptDate;
     }
 
-    public void setReceiptDate(String receiptDate) {
+    public void setReceiptDate(Date receiptDate) {
         this.receiptDate = receiptDate;
     }
 
