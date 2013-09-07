@@ -162,7 +162,7 @@ public class LeaseFeeUtility extends AbstractEJB {
 
     }
 
-    private BigDecimal getLandUsableValue(Rrr leaseRight) {
+    private static BigDecimal getLandUsableValue(Rrr leaseRight) {
 
         BigDecimal landUsable = BigDecimal.ZERO;
 
@@ -173,7 +173,7 @@ public class LeaseFeeUtility extends AbstractEJB {
         return landUsable;
     }
 
-    private BigDecimal getPersonalLevy(Rrr leaseRight) {
+    private static BigDecimal getPersonalLevy(Rrr leaseRight) {
 
         BigDecimal personalLevy = BigDecimal.ZERO;
 
@@ -184,40 +184,40 @@ public class LeaseFeeUtility extends AbstractEJB {
         return personalLevy;
     }
 
-    private BigDecimal getLandUsableFactor(BigDecimal usableLand) {
+    private static BigDecimal getLandUsableFactor(final BigDecimal usableLand) {
 
-        BigDecimal landUsableFactor;
+        BigDecimal landUsableValue = usableLand.divide(new BigDecimal("100"));
 
-        usableLand = usableLand.divide(new BigDecimal("100"));
-
-        landUsableFactor = usableLand.add(BigDecimal.ONE).divide(new BigDecimal("2"));
+        BigDecimal landUsableFactor = landUsableValue.add(BigDecimal.ONE).divide(new BigDecimal("2"));
 
         return landUsableFactor;
 
     }
 
-    private BigDecimal calculatePerPlot(BigDecimal groundRentRate) {
+    private static Money calculatePerPlot(BigDecimal groundRentRate) {
 
         if (groundRentRate.compareTo(BigDecimal.ONE) > 0) {
-            return groundRentRate;
+            return new Money(groundRentRate);
         } else {
-            return BigDecimal.ZERO;
+            return new Money(BigDecimal.ZERO);
         }
 
     }
 
-    private BigDecimal CalculatePerHectare(BigDecimal groundRentRate, BigDecimal totalArea) {
-        // if rate was not found
+    private static Money CalculatePerHectare(BigDecimal groundRentRate, BigDecimal totalArea) {
+        Money groundRent = new Money(BigDecimal.ONE);
         if (groundRentRate.compareTo(BigDecimal.ONE) == 0) {
-            return BigDecimal.ZERO;
+            groundRent = new Money(BigDecimal.ZERO);
         } else {
-            return groundRentRate.multiply(totalArea).divide(BigDecimal.valueOf(10000));
+            groundRent = groundRent.times(groundRentRate).times(totalArea).div(BigDecimal.valueOf(10000));
+            
         }
+        return groundRent;
     }
 
-    private BigDecimal calculatePerArea(BigDecimal groundRentRate, BigDecimal multiplicationFactor,
-            BigDecimal roadClassFactor, BigDecimal totalArea,
-            BigDecimal personalLevy, BigDecimal landUsableFactor) {
+    private static Money calculatePerArea(BigDecimal groundRentRate, BigDecimal multiplicationFactor,
+                                   BigDecimal roadClassFactor, BigDecimal totalArea,
+                                   BigDecimal personalLevy, BigDecimal landUsableFactor) {
 
         Money groundRent = new Money(BigDecimal.ONE);
 
@@ -227,47 +227,41 @@ public class LeaseFeeUtility extends AbstractEJB {
                 times(roadClassFactor).
                 times(personalLevy).
                 times(landUsableFactor);
-
-        return groundRent.getAmount();
-
+        return groundRent;
     }
     
-    private BigInteger getStampDutyFactor(BigDecimal groundRent){
+    private static BigDecimal getStampDutyFactor(BigDecimal groundRent){
         
        
-        BigInteger groundRentDivisor = BigInteger.valueOf(100);
-        BigInteger groundRentDivident;
-        BigInteger stampDutyFactor;
+        int groundRentDivisor = Integer.valueOf(100);
+        int groundRentDivident;
+        int stampDutyFactor;
 
-        groundRent = roundGroundRentAmount(groundRent);
+         BigDecimal groundRentValue = roundDecimalValue(groundRent, 0, RoundingMode.UP);
         
-        groundRentDivident = groundRent.toBigInteger();
+        groundRentDivident = groundRentValue.intValue();
 
-        //check if ground rent is greater than 100
-        if (groundRentDivident.compareTo(groundRentDivisor) == 1) {
-           stampDutyFactor = groundRentDivident.mod(groundRentDivisor);
-           //if value is greater than zero round to next (not nearest) hundred
-           if (stampDutyFactor.compareTo(BigInteger.ZERO) == 1){
-               groundRentDivident = groundRentDivident.add(groundRentDivisor).subtract(stampDutyFactor);
-               stampDutyFactor = groundRentDivident.divide(groundRentDivisor);
-           }
-           else{
-               stampDutyFactor = groundRentDivident.divide(groundRentDivisor);
-           }
+        if (groundRentDivident > groundRentDivisor){
+            stampDutyFactor = groundRentDivident % groundRentDivisor;
+            
+            if (stampDutyFactor > 0){
+                groundRentDivident = groundRentDivident + groundRentDivisor - stampDutyFactor;
+                stampDutyFactor = groundRentDivident/groundRentDivisor;
+            }else{
+                stampDutyFactor = groundRentDivident/groundRentDivisor;
+            }
+        }else if (groundRentDivident > 0){
+            stampDutyFactor = Integer.valueOf(1);
+        } else{
+            stampDutyFactor = Integer.valueOf(0);
         }
-        else if (groundRentDivident.compareTo(BigInteger.ZERO) == 0){
-            stampDutyFactor = BigInteger.ZERO;
-        }else{
-             stampDutyFactor = BigInteger.ONE;
-        }
-        
-        return stampDutyFactor;
+       
+        return new BigDecimal(stampDutyFactor);
         
     }
     
-    private static BigDecimal roundGroundRentAmount(BigDecimal groundRent){
-        BigDecimal groundRentValue;
-        groundRentValue = groundRent.setScale(0, RoundingMode.UP);
+    private static BigDecimal roundDecimalValue(BigDecimal groundRent, int scale, RoundingMode roundingMode){
+        BigDecimal groundRentValue = groundRent.setScale(scale, roundingMode);
         return groundRentValue;
     }
 
@@ -284,7 +278,6 @@ public class LeaseFeeUtility extends AbstractEJB {
 
 
         BigDecimal totalArea;
-        BigDecimal groundRentAmount;
         BigDecimal groundRentRate;
         BigDecimal multiplicationFactor;
         BigDecimal roadClassFactor;
@@ -322,17 +315,14 @@ public class LeaseFeeUtility extends AbstractEJB {
 
 
         if (cadastreEJB.isCalculationPerPlot(landUseCode)) {
-            return new Money(calculatePerPlot(groundRentRate));
+            return calculatePerPlot(groundRentRate);
         } else if (cadastreEJB.isCalculationPerHectare(landUseCode)) {
-            return new Money(CalculatePerHectare(groundRentRate, totalArea));
+            return CalculatePerHectare(groundRentRate, totalArea);
         } else {
-            groundRentAmount =
-                    calculatePerArea(groundRentRate, multiplicationFactor,
-                    roadClassFactor, totalArea,
-                    personalLevy, landUsableFactor);
+            return calculatePerArea(groundRentRate, multiplicationFactor,
+                                    roadClassFactor, totalArea,
+                                    personalLevy, landUsableFactor);
         }
-
-        return new Money(groundRentAmount);
     }
 
     public Money calculateDutyOnGroundRent(CadastreObject cadastreObject, Rrr leaseRight) {
@@ -341,11 +331,9 @@ public class LeaseFeeUtility extends AbstractEJB {
         String landGrade;
         
         BigDecimal groundRent = BigDecimal.ZERO;
-        BigDecimal dutyOnGroundRentValue;
-        
-        BigInteger dutyOnGroundRent;
-        BigInteger dutyOnGroundRentFactor = BigInteger.ZERO;
-        BigInteger groundRentModulo;
+        BigDecimal dutyOnGroundRentFactor = BigDecimal.ZERO;
+        BigDecimal groundRentModulo;
+        Money dutyOnGroundRent = new Money(BigDecimal.ONE);
 
         LandUseGrade landUseGrade;
 
@@ -368,14 +356,12 @@ public class LeaseFeeUtility extends AbstractEJB {
         landUseGrade = cadastreEJB.getLandUseGrade(landUse, landGrade);
 
         if (landUseGrade != null) {
-            dutyOnGroundRentFactor = landUseGrade.getDutyOnGroundRent().toBigInteger();
+            dutyOnGroundRentFactor = landUseGrade.getDutyOnGroundRent();
         }
 
-        dutyOnGroundRent = dutyOnGroundRentFactor.multiply(groundRentModulo);
+        dutyOnGroundRent = dutyOnGroundRent.times(dutyOnGroundRentFactor).times(groundRentModulo);
 
-        dutyOnGroundRentValue = new BigDecimal(dutyOnGroundRent);
-
-        return new Money(dutyOnGroundRentValue);
+        return dutyOnGroundRent;
     }
 
     public Money calculateDutyOnTransfer(Money valuationAmount) {
