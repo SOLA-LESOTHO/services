@@ -403,14 +403,19 @@ public class SearchEJB extends AbstractEJB implements SearchEJBLocal {
      * sorted by lodgement date DESC.
      */
     @Override
-    @RolesAllowed(RolesConstants.DASHBOARD_VIEW_UNASSIGNED_APPS)
+    @RolesAllowed(RolesConstants.APPLICATION_VIEW_APPS)
     public List<ApplicationSearchResult> getUnassignedApplications(String locale) {
 
         Map params = new HashMap<String, Object>();
         params.put(CommonSqlProvider.PARAM_FROM_PART, ApplicationSearchResult.QUERY_FROM);
         params.put(CommonSqlProvider.PARAM_LANGUAGE_CODE, locale);
-        params.put(CommonSqlProvider.PARAM_WHERE_PART, ApplicationSearchResult.QUERY_WHERE_GET_UNASSIGNED);
-        params.put(CommonSqlProvider.PARAM_ORDER_BY_PART, ApplicationSearchResult.QUERY_ORDER_BY);
+        params.put(ApplicationSearchResult.QUERY_PARAM_USER_NAME, getUserName());
+        if (isInRole(RolesConstants.DASHBOARD_VIEW_UNASSIGNED_APPS_ALL)) {
+            params.put(CommonSqlProvider.PARAM_WHERE_PART, ApplicationSearchResult.QUERY_WHERE_GET_UNASSIGNED_ALL);
+        } else {
+            params.put(CommonSqlProvider.PARAM_WHERE_PART, ApplicationSearchResult.QUERY_WHERE_GET_UNASSIGNED_FILTERED);
+        }
+        params.put(CommonSqlProvider.PARAM_ORDER_BY_PART, ApplicationSearchResult.QUERY_ORDER_BY_STATUS);
         params.put(CommonSqlProvider.PARAM_LIMIT_PART, "100");
 
         return getRepository().getEntityList(ApplicationSearchResult.class, params);
@@ -433,20 +438,25 @@ public class SearchEJB extends AbstractEJB implements SearchEJBLocal {
      * sorted by lodgement date DESC.
      */
     @Override
-    @RolesAllowed(RolesConstants.DASHBOARD_VIEW_ASSIGNED_APPS)
+    @RolesAllowed(RolesConstants.APPLICATION_VIEW_APPS)
     public List<ApplicationSearchResult> getAssignedApplications(String locale) {
         Map params = new HashMap<String, Object>();
         params.put(CommonSqlProvider.PARAM_FROM_PART, ApplicationSearchResult.QUERY_FROM);
         params.put(CommonSqlProvider.PARAM_LANGUAGE_CODE, locale);
 
         if (isInRole(RolesConstants.APPLICATION_UNASSIGN_FROM_OTHERS)) {
-            params.put(CommonSqlProvider.PARAM_WHERE_PART, ApplicationSearchResult.QUERY_WHERE_GET_ASSIGNED_ALL);
+            if (isInRole(RolesConstants.DASHBOARD_VIEW_ASSIGNED_APPS_ALL)) {
+                params.put(CommonSqlProvider.PARAM_WHERE_PART, ApplicationSearchResult.QUERY_WHERE_GET_ASSIGNED_ALL);
+            } else {
+                params.put(CommonSqlProvider.PARAM_WHERE_PART, ApplicationSearchResult.QUERY_WHERE_GET_ASSIGNED_ALL_FILTERED);
+            }
+            params.put(ApplicationSearchResult.QUERY_PARAM_USER_NAME, getUserName());
         } else {
             params.put(ApplicationSearchResult.QUERY_PARAM_USER_NAME, getUserName());
             params.put(CommonSqlProvider.PARAM_WHERE_PART, ApplicationSearchResult.QUERY_WHERE_GET_ASSIGNED);
         }
 
-        params.put(CommonSqlProvider.PARAM_ORDER_BY_PART, ApplicationSearchResult.QUERY_ORDER_BY);
+        params.put(CommonSqlProvider.PARAM_ORDER_BY_PART, ApplicationSearchResult.QUERY_ORDER_BY_ASSIGNED);
         params.put(CommonSqlProvider.PARAM_LIMIT_PART, "100");
 
         return getRepository().getEntityList(ApplicationSearchResult.class, params);

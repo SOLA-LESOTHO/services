@@ -1,8 +1,7 @@
 /**
  * ******************************************************************************************
- * Copyright (c) 2013 Food and Agriculture Organization of the United Nations
- * (FAO) and the Lesotho Land Administration Authority (LAA). All rights
- * reserved.
+ * Copyright (C) 2012 - Food and Agriculture Organization of the United Nations
+ * (FAO). All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -11,8 +10,8 @@
  * list of conditions and the following disclaimer. 2. Redistributions in binary
  * form must reproduce the above copyright notice,this list of conditions and
  * the following disclaimer in the documentation and/or other materials provided
- * with the distribution. 3. Neither the names of FAO, the LAA nor the names of
- * its contributors may be used to endorse or promote products derived from this
+ * with the distribution. 3. Neither the name of FAO nor the names of its
+ * contributors may be used to endorse or promote products derived from this
  * software without specific prior written permission.
  *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
@@ -40,6 +39,7 @@ import javax.persistence.Id;
 import javax.persistence.Table;
 import org.sola.services.common.repository.AccessFunctions;
 import org.sola.services.common.repository.CommonSqlProvider;
+import org.sola.services.common.repository.DefaultSorter;
 import org.sola.services.common.repository.entities.AbstractReadOnlyEntity;
 
 /**
@@ -63,15 +63,52 @@ public class ApplicationSearchResult extends AbstractReadOnlyEntity {
             + "LEFT JOIN system.appuser u ON a.assignee_id = u.id "
             + "LEFT JOIN party.party p ON a.contact_person_id = p.id "
             + "LEFT JOIN party.party p2 ON a.agent_id = p2.id ";
-    public static final String QUERY_WHERE_GET_ASSIGNED = "u.username = #{" + QUERY_PARAM_USER_NAME + "} "
+    
+    public static final String QUERY_WHERE_GET_ASSIGNED = "u.username IN (#{" + QUERY_PARAM_USER_NAME + "}, "
+            + "#{" + QUERY_PARAM_USER_NAME + "} || '2', #{" + QUERY_PARAM_USER_NAME + "} || '3')"
             + " AND a.status_code in ('lodged', 'approved')";
-    public static final String QUERY_WHERE_GET_ASSIGNED_ALL = "u.username IS NOT NULL AND a.status_code in ('lodged', 'approved')";
-    public static final String QUERY_WHERE_GET_UNASSIGNED = "u.username IS NULL "
-            + " AND a.status_code in ('lodged', 'approved')";
-    /**
-     * Uses CASE statements to skip execution of the compare_strings function if
-     * the parameter string is empty.
-     */
+    
+    // Returns all assigned applications if the user has the VIEW_ASSIGNED_ALL role
+    public static final String QUERY_WHERE_GET_ASSIGNED_ALL = "u.username IS NOT NULL "
+            + " AND a.status_code IN ('lodged', 'approved') ";
+    
+    // Returns only assigned applications that match the services the user can perform
+    public static final String QUERY_WHERE_GET_ASSIGNED_ALL_FILTERED = "u.username IS NOT NULL "
+            + " AND EXISTS (SELECT a.id "
+            + "   FROM system.appuser u2, "
+            + "        system.appuser_appgroup ug, "
+            + "        system.approle_appgroup rg, "
+            + "        application.service ser, "
+            + "        application.request_type req "
+            + "   WHERE  u2.username = #{" + QUERY_PARAM_USER_NAME + "}"
+            + "   AND   ug.appuser_id = u2.id "
+            + "   AND   rg.appgroup_id = ug.appgroup_id "
+            + "   AND   req.code = rg.approle_code "
+            + "   AND   ser.request_type_code = req.code"
+            + "   AND   ser.application_id = a.id"
+            + "   AND   a.status_code IN ('lodged', 'approved'))";
+    
+    // Returns all unassgined applications that match the services the user can perform
+    public static final String QUERY_WHERE_GET_UNASSIGNED_FILTERED = "u.username IS NULL "
+            + " AND (a.status_code = 'approved' OR EXISTS "
+            + "  (SELECT a.id "
+            + "   FROM system.appuser u2, "
+            + "        system.appuser_appgroup ug, "
+            + "        system.approle_appgroup rg, "
+            + "        application.service ser, "
+            + "        application.request_type req "
+            + "   WHERE  u2.username = #{" + QUERY_PARAM_USER_NAME + "}"
+            + "   AND   ug.appuser_id = u2.id "
+            + "   AND   rg.appgroup_id = ug.appgroup_id "
+            + "   AND   req.code = rg.approle_code "
+            + "   AND   ser.request_type_code = req.code"
+            + "   AND   ser.application_id = a.id"
+            + "   AND   a.status_code = 'lodged' ))";
+    
+    // Returns all unassigned applications if the user has the VIEW_UNASSIGNED_ALL role
+    public static final String QUERY_WHERE_GET_UNASSIGNED_ALL = "u.username IS NULL "
+            + " AND a.status_code IN ('approved', 'lodged' )";
+    
     public static final String QUERY_WHERE_SEARCH_APPLICATIONS =
             "a.lodging_datetime BETWEEN #{" + QUERY_PARAM_FROM_LODGE_DATE + "} AND #{" + QUERY_PARAM_TO_LODGE_DATE + "} "
             + "AND (CASE WHEN #{" + QUERY_PARAM_APP_NR + "} = '' THEN true ELSE "
@@ -93,8 +130,10 @@ public class ApplicationSearchResult extends AbstractReadOnlyEntity {
             + "and r3.ba_unit_id in (select r4.ba_unit_id from administrative.rrr r4 inner join "
             + "(transaction.transaction t2 inner join application.service s2 on t2.from_service_id = s2.id) "
             + "on r4.transaction_id = t2.id where s2.application_id=a.id)) END)";
-    
     public static final String QUERY_ORDER_BY = "a.lodging_datetime desc";
+    public static final String QUERY_ORDER_BY_STATUS = "a.status_code, a.lodging_datetime desc";
+    public static final String QUERY_ORDER_BY_ASSIGNED = "(CASE WHEN u.username = #{" + QUERY_PARAM_USER_NAME + "} THEN 0 ELSE 1 END), "
+            + " a.lodging_datetime DESC";
     @Id
     @Column(name = "id")
     @AccessFunctions(onSelect = "a.id")
@@ -132,8 +171,8 @@ public class ApplicationSearchResult extends AbstractReadOnlyEntity {
     @Column(name = "service_list")
     private String serviceList;
     @AccessFunctions(onSelect = "(select string_agg(DISTINCT application.get_concatenated_name (s.id), ',') "
-            + " FROM application.service s"
-            + " WHERE s.application_id = a.id)")
+    + " FROM application.service s"
+    + " WHERE s.application_id = a.id)")
     @Column(name = "affected_lease_numbers")
     private String affectedLeaseNumbers;
     @Column(name = "fee_paid")
@@ -305,5 +344,4 @@ public class ApplicationSearchResult extends AbstractReadOnlyEntity {
     public void setActionNotes(String actionNotes) {
         this.actionNotes = actionNotes;
     }
-    
 }

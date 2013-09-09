@@ -52,6 +52,8 @@ import org.sola.services.common.repository.entities.AbstractEntity;
     RolesConstants.USER_CHANGE_PASSWORD,
     RolesConstants.DASHBOARD_VIEW_ASSIGNED_APPS,
     RolesConstants.DASHBOARD_VIEW_UNASSIGNED_APPS,
+    RolesConstants.DASHBOARD_VIEW_ASSIGNED_APPS_ALL,
+    RolesConstants.DASHBOARD_VIEW_UNASSIGNED_APPS_ALL,
     RolesConstants.APPLICATION_VIEW_APPS,
     RolesConstants.APPLICATION_CREATE_APPS,
     RolesConstants.APPLICATION_EDIT_APPS,
