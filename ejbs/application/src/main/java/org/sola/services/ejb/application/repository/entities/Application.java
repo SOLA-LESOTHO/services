@@ -84,7 +84,7 @@ public class Application extends AbstractVersionedEntity {
     @Column(name = "action_notes")
     private String actionNotes;
     @Column(name = "contact_person_id")
-    private String contactPersonId;
+    private String contactPersonId; 
     @Column(name = "agent_id")
     private String agentId;
     @Column(name = "status_code", insertable = false, updatable = false)
@@ -107,11 +107,14 @@ public class Application extends AbstractVersionedEntity {
     private String receiptRef;
     @Column(name = "receipt_date")
     private Date receiptDate;
+    @Column(name = "collection_date")
+    private Date collectionDate;
     @ExternalEJB(ejbLocalClass = PartyEJBLocal.class,
     loadMethod = "getParty", saveMethod = "saveParty")
     @ChildEntity(childIdField = "contactPersonId")
     private Party contactPerson;
-    @ExternalEJB(ejbLocalClass = PartyEJBLocal.class, loadMethod = "getParty")
+    @ExternalEJB(ejbLocalClass = PartyEJBLocal.class, 
+    loadMethod = "getParty", saveMethod = "saveParty")
     @ChildEntity(childIdField = "agentId")
     private Party agent;
     @ChildEntityList(parentIdField = "applicationId")
@@ -297,6 +300,14 @@ public class Application extends AbstractVersionedEntity {
 
     public void setReceiptDate(Date receiptDate) {
         this.receiptDate = receiptDate;
+    }
+
+    public Date getCollectionDate() {
+        return collectionDate;
+    }
+
+    public void setCollectionDate(Date collectionDate) {
+        this.collectionDate = collectionDate;
     }
 
     public Party getAgent() {
