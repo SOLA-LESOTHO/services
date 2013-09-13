@@ -39,18 +39,19 @@ public class BaUnitSearchResult extends AbstractEntity {
     public static final String QUERY_PARAM_NAME_LASTPART = "nameLastPart";
     public static final String QUERY_PARAM_OWNER_NAME = "ownerName";
     public static final String QUERY_PARAM_LEASE_NUMBER = "leaseNumber";
+    public static final String QUERY_PARAM_LAND_USE_CODE = "landUseCode";
     public static final String QUERY_ORDER_BY = "prop.name_firstpart, prop.name_lastpart ";
     
     public static final String QUERY_SEARCH_SELECT_PART = ""
             + "SELECT DISTINCT prop.id, prop.name_firstpart, prop.name_lastpart, prop.status_code, "
             + "(SELECT MIN(r1.registration_date) FROM administrative.rrr r1 WHERE r1.nr = rrr.nr AND r1.ba_unit_id = rrr.ba_unit_id) AS original_registration_date, "
-            + "rrr.registration_number, rrr.lease_number, rrr.registration_date, prop.rowversion, prop.change_user, prop.rowidentifier, "
+            + "rrr.registration_number, rrr.lease_number, rrr.land_use_code, rrr.registration_date, prop.rowversion, prop.change_user, prop.rowidentifier, "
             + "(SELECT string_agg(COALESCE(p1.name, '') || ' ' || COALESCE(p1.last_name, ''), '; ') "
             + "FROM administrative.rrr rrr1, administrative.party_for_rrr pr1, party.party p1 "
             + "WHERE rrr1.id = rrr.id AND rrr1.status_code = 'current' "
             + "AND pr1.rrr_id = rrr1.id AND p1.id = pr1.party_id) AS rightholders "
             + "FROM administrative.ba_unit prop LEFT JOIN ( "
-            + "(SELECT r.id, r.nr, r.ba_unit_id, r.lease_number, r.registration_number, r.registration_date FROM administrative.rrr r "
+            + "(SELECT r.id, r.nr, r.ba_unit_id, r.lease_number, r.land_use_code, r.registration_number, r.registration_date FROM administrative.rrr r "
             + "    WHERE r.type_code='lease' AND r.status_code='current') rrr "
             + "INNER JOIN (administrative.party_for_rrr pr INNER JOIN party.party p ON pr.party_id = p.id) "
             + "ON rrr.id = pr.rrr_id) "
@@ -61,6 +62,7 @@ public class BaUnitSearchResult extends AbstractEntity {
             + "AND (compare_strings(#{" + QUERY_PARAM_OWNER_NAME + "}, COALESCE(p.name, '') || ' ' || "
             + "COALESCE(p.last_name, '') || ' ' || COALESCE(p.alias, '')) OR #{" + QUERY_PARAM_OWNER_NAME + "}='') "
             + "AND (COALESCE(prop.name_firstpart, '')=#{" + QUERY_PARAM_NAME_FIRSTPART + "} OR #{" + QUERY_PARAM_NAME_FIRSTPART + "} = '') "
+            + "AND (COALESCE(rrr.land_use_code, '')=#{" + QUERY_PARAM_LAND_USE_CODE + "} OR #{" + QUERY_PARAM_LAND_USE_CODE + "} = '') "
             + "AND (COALESCE(prop.name_lastpart, '')=#{" + QUERY_PARAM_NAME_LASTPART + "} OR #{" + QUERY_PARAM_NAME_LASTPART + "} = '') "
             + "AND (prop.status_code = 'current' OR prop.status_code = 'historic') "
             + " ORDER BY " + QUERY_ORDER_BY
@@ -83,6 +85,8 @@ public class BaUnitSearchResult extends AbstractEntity {
     private String registrationNumber;
     @Column(name="lease_number")
     private String leaseNumber;
+    @Column(name="land_use_code")
+    private String landUseCode;
     @Column(name="registration_date")
     private Date registrationDate;
     @Column(name="original_registration_date")
@@ -90,6 +94,14 @@ public class BaUnitSearchResult extends AbstractEntity {
 
     public BaUnitSearchResult() {
         super();
+    }
+
+    public String getLandUseCode() {
+        return landUseCode;
+    }
+
+    public void setLandUseCode(String landUseCode) {
+        this.landUseCode = landUseCode;
     }
 
     public String getId() {

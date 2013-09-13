@@ -733,12 +733,17 @@ public class SearchEJB extends AbstractEJB implements SearchEJBLocal {
         if (searchParams.getLeaseNumber() == null) {
             searchParams.setLeaseNumber("");
         }
+        
+        if (searchParams.getLandUseCode() == null) {
+            searchParams.setLandUseCode("");
+        }
 
         params.put(CommonSqlProvider.PARAM_QUERY, BaUnitSearchResult.QUERY_SEARCH_BY_PARAMS);
         params.put(BaUnitSearchResult.QUERY_PARAM_OWNER_NAME, searchParams.getOwnerName());
         params.put(BaUnitSearchResult.QUERY_PARAM_NAME_FIRSTPART, searchParams.getNameFirstPart());
         params.put(BaUnitSearchResult.QUERY_PARAM_NAME_LASTPART, searchParams.getNameLastPart());
         params.put(BaUnitSearchResult.QUERY_PARAM_LEASE_NUMBER, searchParams.getLeaseNumber());
+        params.put(BaUnitSearchResult.QUERY_PARAM_LAND_USE_CODE, searchParams.getLandUseCode());
         return getRepository().getEntityList(BaUnitSearchResult.class, params);
     }
 

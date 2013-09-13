@@ -35,9 +35,18 @@ public class BaUnitSearchParams extends AbstractEntity {
     private String nameLastPart;
     private String ownerName;
     private String leaseNumber;
+    private String landUseCode;
     
     public BaUnitSearchParams(){
         super();
+    }
+
+    public String getLandUseCode() {
+        return landUseCode;
+    }
+
+    public void setLandUseCode(String landUseCode) {
+        this.landUseCode = landUseCode;
     }
 
     public String getNameFirstPart() {
