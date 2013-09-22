@@ -31,13 +31,14 @@
 package org.sola.services.ejb.administrative.businesslogic;
 
 import java.io.Serializable;
-import java.math.BigDecimal;
-import java.math.BigInteger;
 import java.util.*;
 import javax.annotation.security.RolesAllowed;
 import javax.ejb.EJB;
 import javax.ejb.Stateless;
-import org.sola.common.*;
+import org.sola.common.DateUtility;
+import org.sola.common.Money;
+import org.sola.common.RolesConstants;
+import org.sola.common.SOLAException;
 import org.sola.common.messaging.ServiceMessage;
 import org.sola.services.common.EntityAction;
 import org.sola.services.common.LocalInfo;
@@ -49,9 +50,6 @@ import org.sola.services.common.repository.CommonSqlProvider;
 import org.sola.services.ejb.administrative.repository.entities.*;
 import org.sola.services.ejb.cadastre.businesslogic.CadastreEJBLocal;
 import org.sola.services.ejb.cadastre.repository.entities.CadastreObject;
-import org.sola.services.ejb.cadastre.repository.entities.GroundRentMultiplicationFactor;
-import org.sola.services.ejb.cadastre.repository.entities.LandUseGrade;
-import org.sola.services.ejb.cadastre.repository.entities.SpatialValueArea;
 import org.sola.services.ejb.source.businesslogic.SourceEJBLocal;
 import org.sola.services.ejb.source.repository.entities.Source;
 import org.sola.services.ejb.system.businesslogic.SystemEJBLocal;
@@ -994,5 +992,48 @@ public class AdministrativeEJB extends AbstractEJB implements AdministrativeEJBL
         
         return leaseFees;
         
+    }
+
+     /**
+     * Retrieves all administrative.transaction_type code values.
+     *
+     * @param languageCode The language code to use for localization of display
+     * values.
+     */
+    @Override
+    public List<TransactionType> getTransactionTypes(String languageCode) {
+        return getRepository().getCodeList(TransactionType.class, languageCode);
+    }
+
+    /**
+     * Returns consent letter object by provided transaction ID.
+     */
+    @Override
+    public Consent getConsentByTransaction(String transactionId) {
+        Map<String, Object> params = new HashMap<String, Object>();
+        params.put(CommonSqlProvider.PARAM_WHERE_PART, Consent.QUERY_WHERE_BY_TRANSACTION_ID);
+        params.put(Consent.QUERY_PARAMETER_TRANSACTION_ID, transactionId);
+        return getRepository().getEntity(Consent.class, params);
+    }
+
+    /** 
+     * Saves consent letter object and returns saved result.
+     * @param  consent Consent object to save.
+     * @param serviceId Service ID, triggered save action.
+     */
+    @Override
+    public Consent saveConsent(Consent consent, String serviceId) {
+        TransactionBasic transaction =
+                transactionEJB.getTransactionByServiceId(serviceId, true, TransactionBasic.class);
+        LocalInfo.setTransactionId(transaction.getId());
+        return getRepository().saveEntity(consent);
+    }
+
+    /**
+     * Returns consent letter object by ID.
+     */
+    @Override
+    public Consent getConsentById(String id) {
+        return getRepository().getEntity(Consent.class, id);
     }
 }

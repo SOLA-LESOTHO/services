@@ -274,4 +274,27 @@ public interface AdministrativeEJBLocal extends AbstractSolaTransactionEJBLocal 
     
     LeaseFee  calculateLeaseFees(CadastreObject co, Rrr leaseRight);
     
+    /**
+     * see {@linkplain AdministrativeEJB#getTransactionTypes(java.lang.String)
+     * AdministrativeEJB.getTransactionTypes}
+     */
+    List<TransactionType> getTransactionTypes(String languageCode);
+    
+    /**
+     * see {@linkplain AdministrativeEJB#getConsentByTransaction(java.lang.String)
+     * AdministrativeEJB.getConsentByTransaction}
+     */
+    Consent getConsentByTransaction(String transactionId);
+    
+    /**
+     * see {@linkplain AdministrativeEJB#getConsentById(java.lang.String)
+     * AdministrativeEJB.getConsentById}
+     */
+    Consent getConsentById(String id);
+    
+    /**
+     * see {@linkplain AdministrativeEJB#saveConsent(org.sola.services.ejb.administrative.repository.entities.Consent)
+     * AdministrativeEJB.saveConsent}
+     */
+    Consent saveConsent(Consent consent, String serviceId);
 }
