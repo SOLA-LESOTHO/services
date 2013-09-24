@@ -32,6 +32,7 @@ import java.util.List;
 import org.sola.services.ejbs.admin.businesslogic.repository.entities.Role;
 import org.sola.services.ejbs.admin.businesslogic.repository.entities.User;
 import org.sola.services.ejbs.admin.businesslogic.repository.entities.Group;
+import org.sola.services.ejbs.admin.businesslogic.repository.entities.Department;
 import org.sola.services.ejbs.admin.businesslogic.repository.entities.GroupSummary;
 import org.sola.services.ejbs.admin.businesslogic.repository.entities.Language;
 
@@ -99,6 +100,12 @@ public interface AdminEJBLocal {
      * AdminEJB.getGroups}
      */
     List<Group> getGroups();
+    
+    /**
+     * See {@linkplain org.sola.services.ejbs.admin.businesslogic.AdminEJB#getDepartments()
+     * AdminEJB.getDepartments}
+     */
+    List<Department> getDepartments();
 
     /**
      * See {@linkplain org.sola.services.ejbs.admin.businesslogic.AdminEJB#getGroupsSummary()
@@ -111,12 +118,24 @@ public interface AdminEJBLocal {
      * AdminEJB.getGroup}
      */
     Group getGroup(String groupId);
+    
+    /**
+     * See {@linkplain org.sola.services.ejbs.admin.businesslogic.AdminEJB#getDepartment(java.lang.String)
+     * AdminEJB.getDepartment}
+     */
+    Department getDepartment(String departmentId);
 
     /**
      * See {@linkplain org.sola.services.ejbs.admin.businesslogic.AdminEJB#saveGroup(org.sola.services.ejbs.admin.businesslogic.repository.entities.Group)
      * AdminEJB.saveGroup}
      */
     Group saveGroup(Group group);
+    
+    /**
+     * See {@linkplain org.sola.services.ejbs.admin.businesslogic.AdminEJB#saveDepartment(org.sola.services.ejbs.admin.businesslogic.repository.entities.Department)
+     * AdminEJB.saveDepartment}
+     */
+    Department saveDepartment(Department department);
 
     /**
      * See {@linkplain org.sola.services.ejbs.admin.businesslogic.AdminEJB#saveRole(org.sola.services.ejbs.admin.businesslogic.repository.entities.Role)
