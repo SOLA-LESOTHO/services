@@ -1288,4 +1288,15 @@ public class ApplicationEJB extends AbstractEJB implements ApplicationEJBLocal {
     public ApplicationFormWithBinary getApplicationFormWithBinary(String code, String lang) {
         return getRepository().getCode(ApplicationFormWithBinary.class, code, lang);
     }
+    
+    @Override
+    public List<ResponseView> getResponseView(LodgementViewParams params) {
+        Map<String, Object> queryParams = new HashMap<String, Object>();
+		queryParams.put(CommonSqlProvider.PARAM_QUERY, ResponseView.QUERY_GET_RESPONSE);
+        queryParams.put(ResponseView.PARAMETER_FROM,
+                params.getFromDate() == null ? new GregorianCalendar(1, 1, 1).getTime() : params.getFromDate());
+        queryParams.put(ResponseView.PARAMETER_TO, 
+                params.getToDate() == null ? new GregorianCalendar(1, 1, 1).getTime() : params.getToDate());
+        return getRepository().executeFunction(queryParams, ResponseView.class);
+    }
 }
