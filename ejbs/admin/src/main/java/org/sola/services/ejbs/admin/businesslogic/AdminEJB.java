@@ -42,11 +42,7 @@ import javax.ejb.Stateless;
 import org.sola.common.RolesConstants;
 import org.sola.services.common.ejbs.AbstractEJB;
 import org.sola.services.common.repository.CommonSqlProvider;
-import org.sola.services.ejbs.admin.businesslogic.repository.entities.GroupSummary;
-import org.sola.services.ejbs.admin.businesslogic.repository.entities.Language;
-import org.sola.services.ejbs.admin.businesslogic.repository.entities.Role;
-import org.sola.services.ejbs.admin.businesslogic.repository.entities.User;
-import org.sola.services.ejbs.admin.businesslogic.repository.entities.Group;
+import org.sola.services.ejbs.admin.businesslogic.repository.entities.*;
 
 /**
  * Contains business logic methods to administer system settings, users and roles.
@@ -144,6 +140,18 @@ public class AdminEJB extends AbstractEJB implements AdminEJBLocal {
     public List<Group> getGroups() {
         return getRepository().getEntityList(Group.class);
     }
+    
+    /**
+     * Returns the list of all user departments supported by SOLA.
+     *
+     * <p>Requires the {@linkplain RolesConstants#ADMIN_MANAGE_SECURITY} role.</p>
+     */
+    @RolesAllowed(RolesConstants.ADMIN_MANAGE_SECURITY)
+    @Override
+    public List<Department> getDepartments() {
+        return getRepository().getEntityList(Department.class);
+    }
+
 
     /**
      * Can be used to create a new user group or save any updates to the details of an existing user
@@ -157,6 +165,19 @@ public class AdminEJB extends AbstractEJB implements AdminEJBLocal {
     public Group saveGroup(Group userGroup) {
         return getRepository().saveEntity(userGroup);
     }
+    
+    /**
+     * Can be used to create a new user department or save any updates to the details of an existing user
+     * department. <p> Requires the {@linkplain RolesConstants#ADMIN_MANAGE_SECURITY} role. </p>
+     *
+     * @param userDepartment The details of the user department to save
+     * @return The user department after the save is completed
+     */
+    @RolesAllowed(RolesConstants.ADMIN_MANAGE_SECURITY)
+    @Override
+    public Department saveDepartment(Department userDepartment) {
+        return getRepository().saveEntity(userDepartment);
+    }
 
     /**
      * Returns the details for the specified group.
@@ -169,6 +190,19 @@ public class AdminEJB extends AbstractEJB implements AdminEJBLocal {
     @Override
     public Group getGroup(String groupId) {
         return getRepository().getEntity(Group.class, groupId);
+    }
+    
+    /**
+     * Returns the details for the specified department.
+     *
+     * <p>Requires the {@linkplain RolesConstants#ADMIN_MANAGE_SECURITY} role.</p>
+     *
+     * @param groupId The identifier of the group to retrieve from the SOLA database
+     */
+    @RolesAllowed(RolesConstants.ADMIN_MANAGE_SECURITY)
+    @Override
+    public Department getDepartment(String departmentId) {
+        return getRepository().getEntity(Department.class, departmentId);
     }
 
     /**
