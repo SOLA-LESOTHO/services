@@ -29,12 +29,7 @@
 package org.sola.services.ejbs.admin.businesslogic;
 
 import java.util.List;
-import org.sola.services.ejbs.admin.businesslogic.repository.entities.Role;
-import org.sola.services.ejbs.admin.businesslogic.repository.entities.User;
-import org.sola.services.ejbs.admin.businesslogic.repository.entities.Group;
-import org.sola.services.ejbs.admin.businesslogic.repository.entities.Department;
-import org.sola.services.ejbs.admin.businesslogic.repository.entities.GroupSummary;
-import org.sola.services.ejbs.admin.businesslogic.repository.entities.Language;
+import org.sola.services.ejbs.admin.businesslogic.repository.entities.*;
 
 /**
  * Local interface for the {@linkplain AdminEJB}. 
@@ -112,6 +107,12 @@ public interface AdminEJBLocal {
      * AdminEJB.getGroupsSummary}
      */
     List<GroupSummary> getGroupsSummary();
+    
+    /**
+     * See {@linkplain org.sola.services.ejbs.admin.businesslogic.AdminEJB#getDepartmentsSummary()
+     * AdminEJB.getDepartmentsSummary}
+     */
+    List<DepartmentSummary> getDepartmentsSummary();
 
     /**
      * See {@linkplain org.sola.services.ejbs.admin.businesslogic.AdminEJB#getGroup(java.lang.String)

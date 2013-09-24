@@ -230,6 +230,17 @@ public class AdminEJB extends AbstractEJB implements AdminEJBLocal {
     public List<GroupSummary> getGroupsSummary() {
         return getRepository().getEntityList(GroupSummary.class);
     }
+    
+    /**
+     * Returns a department list of all user departments supported by SOLA.
+     *
+     * <p>Requires the {@linkplain RolesConstants#ADMIN_MANAGE_SECURITY} role.</p>
+     */
+    @RolesAllowed(RolesConstants.ADMIN_MANAGE_SECURITY)
+    @Override
+    public List<DepartmentSummary> getDepartmentsSummary() {
+        return getRepository().getEntityList(DepartmentSummary.class);
+    }
 
     /**
      * Allows the users password to be changed <p> Requires the {@linkplain RolesConstants#ADMIN_CHANGE_PASSWORD}
