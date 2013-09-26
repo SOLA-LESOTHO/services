@@ -32,11 +32,11 @@ public class Department extends AbstractEntity{
         super();
     }
 
-    public List<User> getUsers() {
+    public List<User> getDepartmentUsers() {
         return departmentUsers;
     }
 
-    public void setUsers(List<User> departmentUsers) {
+    public void setDepartmentUsers(List<User> departmentUsers) {
         this.departmentUsers = departmentUsers;
     }
     
