@@ -25,18 +25,18 @@ public class Department extends AbstractEntity{
     @Column(name = "description")
     private String description;
     
-    @ChildEntityList(parentIdField = "departmentId", cascadeDelete=true)
+    // @ChildEntityList(parentIdField = "departmentId", cascadeDelete=false)
     private List<User> departmentUsers;
     
     public Department(){
         super();
     }
 
-    public List<User> getUsers() {
+    public List<User> getDepartmentUsers() {
         return departmentUsers;
     }
 
-    public void setUsers(List<User> departmentUsers) {
+    public void setDepartmentUsers(List<User> departmentUsers) {
         this.departmentUsers = departmentUsers;
     }
     

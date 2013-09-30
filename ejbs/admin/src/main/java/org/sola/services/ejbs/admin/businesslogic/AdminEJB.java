@@ -197,7 +197,7 @@ public class AdminEJB extends AbstractEJB implements AdminEJBLocal {
      *
      * <p>Requires the {@linkplain RolesConstants#ADMIN_MANAGE_SECURITY} role.</p>
      *
-     * @param groupId The identifier of the group to retrieve from the SOLA database
+     * @param departmentId The identifier of the group to retrieve from the SOLA database
      */
     @RolesAllowed(RolesConstants.ADMIN_MANAGE_SECURITY)
     @Override
