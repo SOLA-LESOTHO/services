@@ -25,7 +25,7 @@ public class Department extends AbstractEntity{
     @Column(name = "description")
     private String description;
     
-    @ChildEntityList(parentIdField = "departmentId", cascadeDelete=true)
+    // @ChildEntityList(parentIdField = "departmentId", cascadeDelete=false)
     private List<User> departmentUsers;
     
     public Department(){
