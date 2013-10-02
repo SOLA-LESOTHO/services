@@ -43,7 +43,9 @@ public class UserSearchResult extends AbstractReadOnlyEntity {
             + "(SELECT name FROM system.appgroup g INNER JOIN system.appuser_appgroup ug2 "
             + "ON g.id = ug2.appgroup_id WHERE ug2.appuser_id = u.id ORDER BY g.name) tmp "
             + ") AS groups_list "
-            + "FROM system.appuser u LEFT JOIN system.appuser_appgroup ug ON u.id = ug.appuser_id ";
+            + "FROM system.appuser u "
+            + "LEFT JOIN system.appdepartment ud ON u.appdepartment_id = ud.id "
+            + "LEFT JOIN system.appuser_appgroup ug ON u.id = ug.appuser_id ";
     
     public static final String QUERY_ACTIVE_USERS = UserSearchResult.SELECT_QUERY 
             + "WHERE active = 't' ORDER BY u.last_name";
@@ -52,6 +54,7 @@ public class UserSearchResult extends AbstractReadOnlyEntity {
             + "WHERE POSITION(LOWER(COALESCE(#{userName}, '')) IN LOWER(COALESCE(username, ''))) > 0 "
             + "AND POSITION(LOWER(COALESCE(#{firstName}, '')) IN LOWER(COALESCE(first_name, ''))) > 0 "
             + "AND POSITION(LOWER(COALESCE(#{lastName}, '')) IN LOWER(COALESCE(last_name, ''))) > 0 "
+            + "AND POSITION(LOWER(COALESCE(#{department}, '')) IN LOWER(COALESCE(appdepartment_id, ''))) > 0 "
             + "AND (ug.appgroup_id = #{groupId} OR #{groupId} = '') ORDER BY u.username";
     
     @Id
@@ -67,6 +70,8 @@ public class UserSearchResult extends AbstractReadOnlyEntity {
     private String lastName;
     @Column(name = "description")
     private String description;
+    @Column(name = "appdepartment_id")
+    private String department;
     @Column(name = "groups_list")
     private String groupsList;
 

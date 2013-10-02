@@ -368,6 +368,10 @@ public class SearchEJB extends AbstractEJB implements SearchEJBLocal {
         if (searchParams.getGroupId() == null) {
             searchParams.setGroupId("");
         }
+        
+        if (searchParams.getDepartmentId() == null) {
+            searchParams.setDepartmentId("");
+        }
 
         if (searchParams.getUserName() == null) {
             searchParams.setUserName("");
@@ -386,6 +390,7 @@ public class SearchEJB extends AbstractEJB implements SearchEJBLocal {
         params.put("userName", searchParams.getUserName());
         params.put("firstName", searchParams.getFirstName());
         params.put("lastName", searchParams.getLastName());
+        params.put("departmentId", searchParams.getDepartmentId());
         params.put("groupId", searchParams.getGroupId());
         return getRepository().getEntityList(UserSearchResult.class, params);
     }
