@@ -70,7 +70,7 @@ public class UserSearchResult extends AbstractReadOnlyEntity {
     private String lastName;
     @Column(name = "description")
     private String description;
-    @Column(name = "appdepartment_id")
+    @Column(name = "department")
     private String department;
     @Column(name = "groups_list")
     private String groupsList;
@@ -79,6 +79,13 @@ public class UserSearchResult extends AbstractReadOnlyEntity {
         super();
     }
 
+    public String getDepartment() {
+        return department;
+    }
+
+    public void setDepartment(String department) {
+        this.department = department;
+    }
     public String getId() {
         return id;
     }
