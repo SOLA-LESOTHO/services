@@ -32,7 +32,7 @@ import org.sola.services.common.repository.entities.AbstractReadOnlyEntity;
 
 public class UserSearchParams  extends AbstractReadOnlyEntity {
     private String groupId;
-    private String departmentId;
+    //private String departmentId;
     private String userName;
     private String firstName;
     private String lastName;
@@ -41,13 +41,15 @@ public class UserSearchParams  extends AbstractReadOnlyEntity {
         super();
     }
 
-    public String getDepartmentId() {
+    /*public String getDepartmentId() {
         return departmentId;
     }
 
     public void setDepartmentId(String departmentId) {
         this.departmentId = departmentId;
     }
+    * 
+    */
     
     public String getFirstName() {
         return firstName;
