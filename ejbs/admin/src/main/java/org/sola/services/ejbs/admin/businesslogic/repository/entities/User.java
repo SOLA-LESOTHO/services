@@ -59,8 +59,8 @@ public class User extends AbstractVersionedEntity {
     private boolean active;
     @Column(name = "description")
     private String description;
-    @Column(name = "appdepartment_id")
-    private String department;
+    //@Column(name = "appdepartment_id")
+    //private String department;
     @Column(name = "passwd")
     private String password;
 
@@ -79,13 +79,15 @@ public class User extends AbstractVersionedEntity {
         super();
     }
     
-    public String getDepartment() {
+    /*public String getDepartment() {
         return department;
     }
 
     public void setDepartment(String department) {
         this.department = department;
     }
+    * 
+    */
 
     public boolean isActive() {
         return active;
