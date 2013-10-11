@@ -29,6 +29,7 @@
 package org.sola.services.ejb.search.businesslogic;
 
 import java.util.*;
+import javax.annotation.security.PermitAll;
 import javax.annotation.security.RolesAllowed;
 import javax.ejb.EJB;
 import javax.ejb.Stateless;
@@ -363,7 +364,8 @@ public class SearchEJB extends AbstractEJB implements SearchEJBLocal {
      * @return The users that match the search criteria.
      */
     @Override
-    @RolesAllowed(RolesConstants.ADMIN_MANAGE_SECURITY)
+    @RolesAllowed({RolesConstants.ADMIN_MANAGE_SECURITY, RolesConstants.APPLICATION_ASSIGN_TO_OTHERS, RolesConstants.APPLICATION_UNASSIGN_FROM_YOURSELF,
+        RolesConstants.APPLICATION_ASSIGN_TO_YOURSELF})
     public List<UserSearchResult> searchUsers(UserSearchParams searchParams) {
         if (searchParams.getGroupId() == null) {
             searchParams.setGroupId("");
