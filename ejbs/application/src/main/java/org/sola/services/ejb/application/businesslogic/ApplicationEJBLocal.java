@@ -286,5 +286,9 @@ public interface ApplicationEJBLocal extends AbstractEJBLocal {
     List<SysRegCertificates> getSysRegCertificatesByApplication(String searchString, String nr);
     
     List<ResponseView> getResponseView(LodgementViewParams params);
-
+    /**
+     * See {@linkplain ApplicationEJB#getWorkSummary(java.util.Date, java.util.Date)
+     * ApplicationEJB.getWorkSummary}.
+     */
+    List<WorkSummary> getWorkSummary(Date fromDate, Date toDate);
 }

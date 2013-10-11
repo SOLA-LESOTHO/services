@@ -1299,4 +1299,24 @@ public class ApplicationEJB extends AbstractEJB implements ApplicationEJBLocal {
                 params.getToDate() == null ? new GregorianCalendar(1, 1, 1).getTime() : params.getToDate());
         return getRepository().executeFunction(queryParams, ResponseView.class);
     }
+    
+    /**
+     * Retrieves a summary of the work performed during the specified reporting period.
+     *
+     * @param fromDate The start of the reporting period
+     * @param toDate The end of the reporting period
+     */
+    @Override
+    @RolesAllowed(RolesConstants.REPORTS_VIEW)
+    public List<WorkSummary> getWorkSummary(Date fromDate, Date toDate) {
+
+        List<WorkSummary> result;
+        Map queryParams = new HashMap<String, Object>();
+        queryParams.put(CommonSqlProvider.PARAM_FROM_PART, WorkSummary.QUERY_FROM_WORK_SUMMARY);
+        queryParams.put(WorkSummary.PARAMETER_FROM, fromDate);
+        queryParams.put(WorkSummary.PARAMETER_TO, toDate);
+
+        result = getRepository().getEntityList(WorkSummary.class, queryParams);
+        return result;
+    }
 }
