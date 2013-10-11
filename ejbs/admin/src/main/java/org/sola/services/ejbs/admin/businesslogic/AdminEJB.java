@@ -56,8 +56,8 @@ public class AdminEJB extends AbstractEJB implements AdminEJBLocal {
      *
      * <p>Requires the {@linkplain RolesConstants#ADMIN_MANAGE_SECURITY} role.</p>
      */
-    @RolesAllowed(RolesConstants.ADMIN_MANAGE_SECURITY)
-    @Override
+    @RolesAllowed({RolesConstants.ADMIN_MANAGE_SECURITY, RolesConstants.APPLICATION_ASSIGN_TO_OTHERS, RolesConstants.APPLICATION_UNASSIGN_FROM_YOURSELF,
+        RolesConstants.APPLICATION_ASSIGN_TO_YOURSELF})
     public List<User> getUsers() {
         return getRepository().getEntityList(User.class);
     }
@@ -69,7 +69,8 @@ public class AdminEJB extends AbstractEJB implements AdminEJBLocal {
      *
      * @param userName The user name of the user to search for.
      */
-    @RolesAllowed({RolesConstants.ADMIN_MANAGE_SECURITY, RolesConstants.USER_CHANGE_PASSWORD})
+    @RolesAllowed({RolesConstants.ADMIN_MANAGE_SECURITY, RolesConstants.APPLICATION_ASSIGN_TO_OTHERS, RolesConstants.APPLICATION_UNASSIGN_FROM_YOURSELF,
+        RolesConstants.APPLICATION_ASSIGN_TO_YOURSELF})
     @Override
     public User getUser(String userName) {
         Map params = new HashMap<String, Object>();
@@ -83,7 +84,8 @@ public class AdminEJB extends AbstractEJB implements AdminEJBLocal {
      *
      * <p>No role is required to execute this method.</p>
      */
-    @PermitAll
+   @RolesAllowed({RolesConstants.ADMIN_MANAGE_SECURITY, RolesConstants.APPLICATION_ASSIGN_TO_OTHERS, RolesConstants.APPLICATION_UNASSIGN_FROM_YOURSELF,
+        RolesConstants.APPLICATION_ASSIGN_TO_YOURSELF})
     @Override
     public User getCurrentUser() {
         Map params = new HashMap<String, Object>();
@@ -135,7 +137,8 @@ public class AdminEJB extends AbstractEJB implements AdminEJBLocal {
      *
      * <p>Requires the {@linkplain RolesConstants#ADMIN_MANAGE_SECURITY} role.</p>
      */
-    @RolesAllowed(RolesConstants.ADMIN_MANAGE_SECURITY)
+    @RolesAllowed({RolesConstants.ADMIN_MANAGE_SECURITY, RolesConstants.APPLICATION_ASSIGN_TO_OTHERS, RolesConstants.APPLICATION_UNASSIGN_FROM_YOURSELF,
+        RolesConstants.APPLICATION_ASSIGN_TO_YOURSELF})
     @Override
     public List<Group> getGroups() {
         return getRepository().getEntityList(Group.class);
@@ -186,7 +189,8 @@ public class AdminEJB extends AbstractEJB implements AdminEJBLocal {
      *
      * @param groupId The identifier of the group to retrieve from the SOLA database
      */
-    @RolesAllowed(RolesConstants.ADMIN_MANAGE_SECURITY)
+    @RolesAllowed({RolesConstants.ADMIN_MANAGE_SECURITY, RolesConstants.APPLICATION_ASSIGN_TO_OTHERS, RolesConstants.APPLICATION_UNASSIGN_FROM_YOURSELF,
+        RolesConstants.APPLICATION_ASSIGN_TO_YOURSELF})
     @Override
     public Group getGroup(String groupId) {
         return getRepository().getEntity(Group.class, groupId);
@@ -225,7 +229,8 @@ public class AdminEJB extends AbstractEJB implements AdminEJBLocal {
      *
      * <p>Requires the {@linkplain RolesConstants#ADMIN_MANAGE_SECURITY} role.</p>
      */
-    @RolesAllowed(RolesConstants.ADMIN_MANAGE_SECURITY)
+    @RolesAllowed({RolesConstants.ADMIN_MANAGE_SECURITY, RolesConstants.APPLICATION_ASSIGN_TO_OTHERS, RolesConstants.APPLICATION_UNASSIGN_FROM_YOURSELF,
+        RolesConstants.APPLICATION_ASSIGN_TO_YOURSELF})
     @Override
     public List<GroupSummary> getGroupsSummary() {
         return getRepository().getEntityList(GroupSummary.class);
@@ -300,7 +305,7 @@ public class AdminEJB extends AbstractEJB implements AdminEJBLocal {
      *
      * @param userName The username to use for retrieval of the roles.
      */
-    @RolesAllowed(RolesConstants.ADMIN_MANAGE_SECURITY)
+    @PermitAll
     @Override
     public List<Role> getUserRoles(String userName) {
         Map params = new HashMap<String, Object>();
