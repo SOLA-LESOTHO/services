@@ -41,6 +41,8 @@ public class SlrMigrationSqlProvider {
 
     public static final String QUERY_PARAM_FROM_DATE = "fromDate";
     public static final String QUERY_PARAM_TO_DATE = "toDate";
+    public static final String OFFICIAL_AREA_TYPE = "'officialArea'";
+    public static final String CALCULATED_AREA_TYPE = "'calculatedArea'";
 
     /**
      * Disables all triggers on the specified table. QUERY_PARAM_TABLE_NAME is
@@ -152,21 +154,32 @@ public class SlrMigrationSqlProvider {
                 + " AND   s.ext_archive_id = 'slr-' || slr.ext_archive_id || '-' || slr.version"
                 + " AND   s.version = slr.version)");
 
-        result = result += SQL();
+        result += SQL();
         return result;
     }
 
+    /**
+     * Retrieves the SLR Parcel records from the SQL Server summary database.
+     * Note that all parcels in the PublishedParcels table are considered
+     * registered
+     *
+     * @param fromDate Used with toDate to limit the number of records returned
+     * by checking the lastModified date of the dbo.mfDocuments table.
+     * @param toDate Used with fromDate to limit the number of records returned
+     * by checking the lastModified date of the dbo.mfDocuments table.
+     */
     public static String buildGetSlrParcelSql(Date fromDate, Date toDate) {
         String result;
         BEGIN();
         SELECT("DISTINCT d.[LeaseNumberFinal] AS lease_number");
         SELECT("p.[Geom].STAsBinary() AS geom");
+        SELECT("ROUND(p.[Geom].STArea(), 0, 1) AS area");
         SELECT("d.[AreaVillage] AS village");
         SELECT("CASE WHEN d.[AdjudicationAreaDescription] LIKE '30-%' THEN 'MAZENOD - MASERU DISTRICT' "
                 + "  WHEN d.[AdjudicationAreaDescription] LIKE '31-%' THEN 'HLOTSE URBAN AREA' "
                 + "  WHEN d.[AdjudicationAreaDescription] LIKE '32-%' THEN 'MAPUTSOE URBAN AREA' "
                 + "  ELSE 'MASERU URBAN AREA' END AS area_desc");
-        SELECT("dbo.GetGroundRentZone(pp.[Geom]) AS ground_rent_zone");
+        SELECT("dbo.GetGroundRentZone(p.[Geom]) AS ground_rent_zone");
         SELECT("p.[AdjudicationParcelNumber] AS adjudication_parcel_number");
         FROM("dbo.mfDocuments d");
         FROM("dbo.PublishedParcels p");
@@ -182,6 +195,227 @@ public class SlrMigrationSqlProvider {
             WHERE("d.[LastModified] BETWEEN #{" + QUERY_PARAM_FROM_DATE
                     + "} AND #{" + QUERY_PARAM_TO_DATE + "}");
         }
+        result = SQL();
+        return result;
+    }
+
+    /**
+     * Creates Delete Statement to clear the slr.slr_parcel table prior to
+     * transferring the records from the MS SQL Server (Lesotho) database.
+     *
+     */
+    public static String buildDeleteSlrParcelSql() {
+        String result;
+        BEGIN();
+        DELETE_FROM("slr.slr_parcel");
+        result = SQL();
+        return result;
+    }
+
+    /**
+     * Prepares the slr_parcel table for transfer into the SOLA schema tables by
+     * checking if the parcel record already exists in SOLA and if so,
+     * determines which values should be updated. The flags on this table can be
+     * changed prior to the load operation to control which values are updated
+     * into SOLA
+     */
+    public static String buildUpdateSlrParcelSql() {
+        String result;
+        BEGIN();
+        UPDATE("slr.slr_parcel");
+        SET("id = co.id");
+        SET("address_id = COALESCE((SELECT address_id "
+                + " FROM cadastre.spatial_unit_address "
+                + " WHERE spatial_unit_id = co.id), address_id)");
+        SET("matched = TRUE");
+        SET("update_geom = CASE WHEN st_equals(geom, co.geom_polygon) = FALSE "
+                + " AND geometrytype(geom) = 'POLYGON'"
+                + " AND change_user = 'test' THEN TRUE ELSE FALSE END");
+        SET("update_address = CASE WHEN EXISTS (SELECT spatial_unit_id "
+                + " FROM cadastre.spatial_unit_address "
+                + " WHERE spatial_unit_id = co.id) THEN FALSE ELSE TRUE END");
+        SET("update_area = CASE WHEN EXISTS (SELECT spatial_unit_id "
+                + " FROM cadastre.spatial_value_area "
+                + " WHERE spatial_unit_id = co.id "
+                + " AND   type_code = 'officialArea' "
+                + " AND  (change_user != 'test' OR size = area)) THEN FALSE ELSE TRUE END");
+        SET("update_zone = CASE WHEN co.land_grade_code != ('grade' || ground_rent_zone::VARCHAR) "
+                + " AND change_user = 'test' THEN TRUE ELSE FALSE END "
+                + " FROM cadastre.cadastre_object co"); // Add the table here as update does not recognize FROM
+        WHERE("co.name_firstpart = TRIM((regexp_split_to_array (lease_number, '-'))[1])");
+        WHERE("co.name_lastpart = TRIM((regexp_split_to_array (lease_number, '-'))[2])");
+        result = SQL();
+        return result;
+    }
+
+    /**
+     * Validates the content of the slr_parcel table and reports any data
+     * inconsistencies for further investigation.
+     *
+     * @return
+     */
+    public static String buildValidateSlrParcelSql() {
+        String result;
+        BEGIN();
+        SELECT("slr.lease_number");
+        SELECT("slr.adjudication_parcel_number as apn");
+        SELECT("'MULTIPOLYGON' as msg");
+        FROM("slr.slr_parcel slr");
+        WHERE("geometrytype(slr.geom) = 'MULTIPOLYGON'");
+        result = SQL();
+        return result;
+    }
+
+    /**
+     * Generates the insert statement for the Spatial Unit table based on the
+     * unmatched records in the slr.slr_parcel table.
+     */
+    public static String buildInsertSpatialUnitSql() {
+        String result;
+        result = "INSERT INTO cadastre.spatial_unit (id, label, level_id, change_user) ";
+        BEGIN();
+        SELECT("slr.id");
+        SELECT("slr.lease_number");
+        SELECT("l.id");
+        SELECT("'slr-migration'");
+        FROM("slr.slr_parcel slr");
+        FROM("cadastre.level l");
+        WHERE("slr.matched = FALSE");
+        WHERE("l.name = 'Parcels'");
+        result += SQL();
+        return result;
+    }
+
+    /**
+     * Generates the insert statement for the Cadastre Object table based on the
+     * unmatched records in the slr.slr_parcel table. The
+     * buildInsertSpatialUnitSql must be executed before this method to ensure
+     * spatial_unit records are created.
+     */
+    public static String buildInsertCadastreObjectSql() {
+        String result;
+        result = "INSERT INTO cadastre.cadastre_object (id, source_reference,"
+                + " name_firstpart, name_lastpart, status_code, geom_polygon,"
+                + " transaction_id, land_grade_code, change_user, rowversion, "
+                + " adjudication_parcel_number) ";
+        BEGIN();
+        SELECT("slr.id");
+        SELECT("'slr'");
+        SELECT("TRIM((regexp_split_to_array (slr.lease_number, '-'))[1])");
+        SELECT("TRIM((regexp_split_to_array (slr.lease_number, '-'))[2])");
+        SELECT("'current'");
+        SELECT("CASE WHEN geometrytype(slr.geom) = 'MULTIPOLYGON' "
+                + " THEN st_geometryN(slr.geom, 1) ELSE slr.geom END");
+        SELECT("'slr-migration'");
+        SELECT("'grade' || slr.ground_rent_zone::VARCHAR");
+        SELECT("'slr-migration'");
+        SELECT("1");
+        SELECT("slr.adjudication_parcel_number");
+        FROM("slr.slr_parcel slr");
+        WHERE("slr.matched = FALSE");
+        result += SQL();
+        return result;
+    }
+
+    /**
+     * Generates the insert statement for the Spatial Value Area table based on
+     * the unmatched records in the slr.slr_parcel table. Can be used to create
+     * inserts for officalArea and calculatedArea types.
+     *
+     * @param typeCode Either officialArea or calculatedArea
+     */
+    public static String buildInsertSpatialValueAreaSql(String typeCode) {
+        String result;
+        result = "INSERT INTO cadastre.spatial_value_area (spatial_unit_id,"
+                + " type_code, size, change_user) ";
+        BEGIN();
+        SELECT("slr.id");
+        SELECT(typeCode);
+        SELECT("slr.area");
+        SELECT("'slr-migration'");
+        FROM("slr.slr_parcel slr");
+        WHERE("slr.matched = FALSE");
+        result += SQL();
+        return result;
+    }
+
+    /**
+     * Generates the insert statement for the Address table based on the
+     * unmatched records in the slr.slr_parcel table as well as the records
+     * marked with update_address.
+     */
+    public static String buildInsertAddressSql() {
+        String result;
+        result = "INSERT INTO address.address (id,"
+                + " description, change_user) ";
+        BEGIN();
+        SELECT("slr.address_id");
+        SELECT("slr.village || ', ' || slr.area_desc");
+        SELECT("'slr-migration'");
+        FROM("slr.slr_parcel slr");
+        WHERE("slr.matched = FALSE OR update_address = TRUE");
+        result += SQL();
+        return result;
+    }
+
+    /**
+     * Generates the insert statement for the Spatial Unit Address table based
+     * on the unmatched records in the slr.slr_parcel table as well as the
+     * records marked with update_address.
+     */
+    public static String buildInsertParcelAddressSql() {
+        String result;
+        result = "INSERT INTO cadastre.spatial_unit_address (spatial_unit_id,"
+                + " address_id, change_user) ";
+        BEGIN();
+        SELECT("slr.id");
+        SELECT("slr.address_id");
+        SELECT("'slr-migration'");
+        FROM("slr.slr_parcel slr");
+        WHERE("slr.matched = FALSE OR update_address = TRUE");
+        result += SQL();
+        return result;
+    }
+
+    /**
+     * Generates the statement to update the geom_polygon field the Cadastre
+     * Object table based on the records marked with update_geom in the
+     * slr.slr_parcel table.
+     */
+    public static String buildUpdateCadastreObjectSql() {
+        String result;
+        BEGIN();
+        UPDATE("cadastre.cadastre_object");
+        SET("adjudication_parcel_number = slr.adjudication_parcel_number");
+        SET("geom_polygon = CASE WHEN slr.update_geom = TRUE "
+                + " THEN slr.geom ELSE geom_polygon END");
+        SET("land_grade_code = CASE WHEN slr.update_zone = TRUE "
+                + " THEN 'grade' || slr.ground_rent_zone::VARCHAR ELSE land_grade_code END");
+        SET("change_user = 'slr-migration' "
+                + " FROM slr.slr_parcel slr");
+        WHERE("slr.id = cadastre_object.id");
+        WHERE("slr.matched = TRUE");
+        result = SQL();
+        return result;
+    }
+
+    /**
+     * Generates the statement to update size field the Spatial Value Area table
+     * based on the records marked with update_area the slr.slr_parcel table.
+     * Can be used to create updates for officalArea and calculatedArea types.
+     *
+     * @param typeCode Either officialArea or calculatedArea
+     */
+    public static String buildUpdateSpatialValueAreaSql(String typeCode) {
+        String result;
+        BEGIN();
+        UPDATE("cadastre.spatial_value_area");
+        SET("size = slr.area");
+        SET("change_user = 'slr-migration' "
+                + " FROM slr.slr_parcel slr");
+        WHERE("slr.id = spatial_value_area.spatial_unit_id");
+        WHERE("spatial_value_area.type_code = " + typeCode);
+        WHERE("slr.update_area = TRUE");
         result = SQL();
         return result;
     }

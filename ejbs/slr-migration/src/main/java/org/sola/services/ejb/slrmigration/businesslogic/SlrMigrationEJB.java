@@ -36,7 +36,6 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Timer;
 import javax.ejb.EJB;
 import javax.ejb.Stateless;
 import org.sola.common.DateUtility;
@@ -48,7 +47,9 @@ import org.sola.services.common.repository.CommonRepositoryImpl;
 import org.sola.services.common.repository.CommonSqlProvider;
 import org.sola.services.common.repository.DatabaseConnectionManager;
 import org.sola.services.ejb.slrmigration.repository.SlrMigrationSqlProvider;
+import org.sola.services.ejb.slrmigration.repository.entities.SlrParcel;
 import org.sola.services.ejb.slrmigration.repository.entities.SlrSource;
+import org.sola.services.ejb.slrmigration.repository.entities.SlrValidation;
 
 /**
  * EJB to manage data in the SLR Migration processes.
@@ -113,7 +114,7 @@ public class SlrMigrationEJB extends AbstractEJB implements SlrMigrationEJBLocal
                     + " Registered Only = " + registeredOnly
                     + " fromDate = " + (fromDate == null ? "null" : DateUtility.getMediumDateString(fromDate, false))
                     + " toDate = " + (toDate == null ? "null" : DateUtility.getMediumDateString(toDate, false));
-            result += System.lineSeparator() + "SlrSource prepare started: "
+            result += System.lineSeparator() + "SlrSource transfer started: "
                     + DateUtility.getDateTimeString(DateUtility.now(), DateFormat.MEDIUM, DateFormat.LONG);
 
             Map params = new HashMap<String, Object>();
@@ -189,6 +190,181 @@ public class SlrMigrationEJB extends AbstractEJB implements SlrMigrationEJBLocal
         }
         long elapsed = (System.currentTimeMillis() - startTime) / 1000;
         result += System.lineSeparator() + "Load Source completed in " + elapsed + "s";
+        LogUtility.log(result);
+        return result;
+    }
+
+    /**
+     * Transfers the published parcels from the Lesotho (SLR) database into the
+     * SOLA SLR schema. Also checks the data to load into SOLA and marks which
+     * data attributes will be updated if a matching record already exists in
+     * SOLA. Modifying the flags in the slr.slr_parcel table will affect which
+     * records are uploaded/modified.
+     *
+     * @param fromDate Used with toDate to limit the number of records returned
+     * by checking the lastModified date of the dbo.mfDocuments table. If null,
+     * all parcels in the PublishedParcels table will be transferred.
+     * @param toDate Used with fromDate to limit the number of records returned
+     * by checking the lastModified date of the dbo.mfDocuments table. If null,
+     * all parcels in the PublishedParcels table will be transferred.
+     * @return Summary messages describing the progress of the transfer.
+     */
+    @Override
+    public String transferSlrParcel(Date fromDate, Date toDate) {
+        String result = "";
+        int count = 0;
+        SlrParcel current = null;
+        long startTime = System.currentTimeMillis();
+        try {
+            result += System.lineSeparator() + "Retrieving SlrParcel with parameters;"
+                    + " fromDate = " + (fromDate == null ? "null" : DateUtility.getMediumDateString(fromDate, false))
+                    + " toDate = " + (toDate == null ? "null" : DateUtility.getMediumDateString(toDate, false));
+            result += System.lineSeparator() + "SlrParcel transfer started: "
+                    + DateUtility.getDateTimeString(DateUtility.now(), DateFormat.MEDIUM, DateFormat.LONG);
+
+            Map params = new HashMap<String, Object>();
+            // Remove all records from the slr.slr_parcel table first
+            params.put(CommonSqlProvider.PARAM_QUERY, SlrMigrationSqlProvider.buildDeleteSlrParcelSql());
+            int rows = getRepository().bulkUpdate(params);
+            result += System.lineSeparator() + "Deleted " + rows + " rows from slr.slr_parcel";
+
+            params.remove(CommonSqlProvider.PARAM_QUERY);
+            params.put(CommonSqlProvider.PARAM_QUERY, SlrMigrationSqlProvider.buildGetSlrParcelSql(fromDate, toDate));
+            params.put(SlrMigrationSqlProvider.QUERY_PARAM_FROM_DATE, fromDate);
+            params.put(SlrMigrationSqlProvider.QUERY_PARAM_TO_DATE, toDate);
+            List<SlrParcel> parcels = getSlrRepository().getEntityList(SlrParcel.class, params);
+            if (parcels != null) {
+                result += System.lineSeparator() + parcels.size() + " SlrParcels to process";
+                for (SlrParcel p : parcels) {
+                    current = p;
+                    // Configure the entity so that it will be inserted into the database
+                    p.clearOriginalValues();
+                    p.setLoaded(false);
+                    // Save each new slr_parcel record into the SOLA database
+                    getRepository().saveEntity(p);
+                    count++;
+                }
+
+                // Set the flags on the slr_parcel table to indicate which data attributes will be updated
+                // as well has identify the new records that will be created. 
+                params.remove(CommonSqlProvider.PARAM_QUERY);
+                params.put(CommonSqlProvider.PARAM_QUERY, SlrMigrationSqlProvider.buildUpdateSlrParcelSql());
+                rows = getRepository().bulkUpdate(params);
+                result += System.lineSeparator() + "Updated " + rows + " rows in slr.slr_parcel. Check the"
+                        + " slr.slr_parcel table and modify as required to control that data that will be loaded"
+                        + " into SOLA. ";
+
+                // Run validations on the SlrParcel records
+                params.remove(CommonSqlProvider.PARAM_QUERY);
+                params.put(CommonSqlProvider.PARAM_QUERY, SlrMigrationSqlProvider.buildValidateSlrParcelSql());
+                List<SlrValidation> list = getRepository().getEntityList(SlrValidation.class, params);
+                if (list != null && list.size() > 0) {
+                    result += System.lineSeparator() + list.size() + " validation messages...";
+                    for (SlrValidation v : list) {
+                        if (v.getMsg().equals("MULTIPOLYGON")) {
+                            // SOLA only accepts parcels with a geometry type of POLYGON
+                            result += System.lineSeparator() + "Parcel has multipolygon geometry and will not be loaded into SOLA;"
+                                    + " Lease Num = " + v.getLeaseNumber() + ", APN = " + v.getApn();
+                        }
+                    }
+                }
+            } else {
+                result += System.lineSeparator() + "No SlrParcels to process";
+            }
+        } catch (Exception ex) {
+            result += System.lineSeparator() + "Processed " + count + " records";
+            if (current != null) {
+                result += System.lineSeparator() + "Current SlrParcel = "
+                        + current.getAdjudicationParcelNumber() + ", Lease: " + current.getLeaseNumber();
+            }
+            result += System.lineSeparator() + "EXCEPTION > " + FaultUtility.getStackTraceAsString(ex);
+        }
+        long elapsed = (System.currentTimeMillis() - startTime) / 1000;
+        result += System.lineSeparator() + "SlrParcel transfer completed in " + elapsed + "s";
+        LogUtility.log(result);
+        return result;
+    }
+
+    /**
+     * Loads the slr_parcel records into the cadastre schema. The records and
+     * data attributes to update/modify can be controlled by setting the update
+     * flags on the slr_parcel table.
+     *
+     * @return Summary messages describing the progress of the load.
+     */
+    @Override
+    public String loadParcel() {
+        String result = "";
+        long startTime = System.currentTimeMillis();
+        try {
+            result += System.lineSeparator() + "Load Parcel started: "
+                    + DateUtility.getDateTimeString(DateUtility.now(), DateFormat.MEDIUM, DateFormat.LONG);
+
+            // Only disable triggers on cadastre.cadastre_object as the triggers try to insert a new 
+            // spatial_unit record and set the name_firstpart and name_lastpart based on the location 
+            // of the geom. It is not necessary to disable triggers on the other tables. 
+            result += System.lineSeparator() + "Disable triggers on cadastre.cadastre_object";
+            Map params = new HashMap<String, Object>();
+            params.put(CommonSqlProvider.PARAM_QUERY, SlrMigrationSqlProvider.buildDisableTriggerSql("cadastre.cadastre_object"));
+            getRepository().bulkUpdate(params);
+
+            result += System.lineSeparator() + "Load new parcel records into SOLA";
+            params.remove(CommonSqlProvider.PARAM_QUERY);
+            params.put(CommonSqlProvider.PARAM_QUERY, SlrMigrationSqlProvider.buildInsertSpatialUnitSql());
+            int rows = getRepository().bulkUpdate(params);
+            result += System.lineSeparator() + "Inserted " + rows + " records into cadastre.spatial_unit";
+
+            params.remove(CommonSqlProvider.PARAM_QUERY);
+            params.put(CommonSqlProvider.PARAM_QUERY, SlrMigrationSqlProvider.buildInsertCadastreObjectSql());
+            rows = getRepository().bulkUpdate(params);
+            result += System.lineSeparator() + "Inserted " + rows + " records into cadastre.cadastre_object";
+
+            params.remove(CommonSqlProvider.PARAM_QUERY);
+            params.put(CommonSqlProvider.PARAM_QUERY,
+                    SlrMigrationSqlProvider.buildInsertSpatialValueAreaSql(SlrMigrationSqlProvider.OFFICIAL_AREA_TYPE));
+            rows = getRepository().bulkUpdate(params);
+            result += System.lineSeparator() + "Inserted " + rows + " officalArea records into cadastre.spatial_value_area";
+
+            params.remove(CommonSqlProvider.PARAM_QUERY);
+            params.put(CommonSqlProvider.PARAM_QUERY,
+                    SlrMigrationSqlProvider.buildInsertSpatialValueAreaSql(SlrMigrationSqlProvider.CALCULATED_AREA_TYPE));
+            rows = getRepository().bulkUpdate(params);
+            result += System.lineSeparator() + "Inserted " + rows + " calculatedArea records into cadastre.spatial_value_area";
+
+            params.remove(CommonSqlProvider.PARAM_QUERY);
+            params.put(CommonSqlProvider.PARAM_QUERY, SlrMigrationSqlProvider.buildInsertAddressSql());
+            rows = getRepository().bulkUpdate(params);
+            result += System.lineSeparator() + "Inserted " + rows + " records into address.address";
+
+            params.remove(CommonSqlProvider.PARAM_QUERY);
+            params.put(CommonSqlProvider.PARAM_QUERY, SlrMigrationSqlProvider.buildInsertParcelAddressSql());
+            rows = getRepository().bulkUpdate(params);
+            result += System.lineSeparator() + "Inserted " + rows + " records into cadastre.spatial_unit_address";
+
+            result += System.lineSeparator() + "Update existing parcel records in SOLA";
+            params.remove(CommonSqlProvider.PARAM_QUERY);
+            params.put(CommonSqlProvider.PARAM_QUERY, SlrMigrationSqlProvider.buildUpdateCadastreObjectSql());
+            rows = getRepository().bulkUpdate(params);
+            result += System.lineSeparator() + "Updated " + rows + " records in cadastre.cadastre_object";
+
+            params.remove(CommonSqlProvider.PARAM_QUERY);
+            params.put(CommonSqlProvider.PARAM_QUERY,
+                    SlrMigrationSqlProvider.buildUpdateSpatialValueAreaSql(SlrMigrationSqlProvider.OFFICIAL_AREA_TYPE));
+            rows = getRepository().bulkUpdate(params);
+            result += System.lineSeparator() + "Updated " + rows + " official areas in cadastre.spatial_value_area";
+
+            // Does not update the calculated area values as these can remain unchanged. 
+
+            result += System.lineSeparator() + "Enable triggers on cadastre.cadastre_object";
+            params.remove(CommonSqlProvider.PARAM_QUERY);
+            params.put(CommonSqlProvider.PARAM_QUERY, SlrMigrationSqlProvider.buildEnableTriggerSql("cadastre.cadastre_object"));
+            getRepository().bulkUpdate(params);
+
+        } catch (Exception ex) {
+            result += System.lineSeparator() + "EXCEPTION > " + FaultUtility.getStackTraceAsString(ex);
+        }
+        long elapsed = (System.currentTimeMillis() - startTime) / 1000;
+        result += System.lineSeparator() + "Load Parcels completed in " + elapsed + "s";
         LogUtility.log(result);
         return result;
     }

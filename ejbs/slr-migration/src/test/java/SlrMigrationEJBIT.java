@@ -57,20 +57,42 @@ public class SlrMigrationEJBIT extends AbstractEJBTest {
     public void tearDown() {
     }
 
-    @Test
+    //@Test
     public void loadSlrSource() throws Exception {
         SlrMigrationEJBLocal instance = (SlrMigrationEJBLocal) getEJBInstance(SLR_MODULE_NAME,
                 SlrMigrationEJB.class.getSimpleName());
         getUserTransaction().begin();
-        
+
         //String result = instance.transferSlrSource(false, null, null);
-        String result = instance.loadSource(); 
+        String result = instance.loadSource();
         getUserTransaction().commit();
         System.out.println(result);
     }
-    
-    @Test
+
+    //@Test
     public void checkSQL() {
-        System.out.println(SlrMigrationSqlProvider.buildLoadSourceSql()); 
+        //System.out.println(SlrMigrationSqlProvider.buildGetSlrParcelSql(null, null));
+        System.out.println(SlrMigrationSqlProvider.buildUpdateSlrParcelSql());
+        System.out.println(SlrMigrationSqlProvider.buildInsertSpatialUnitSql());
+        System.out.println(SlrMigrationSqlProvider.buildInsertCadastreObjectSql());
+        System.out.println(SlrMigrationSqlProvider.buildInsertSpatialValueAreaSql("officialArea"));
+        System.out.println(SlrMigrationSqlProvider.buildInsertAddressSql());
+        System.out.println(SlrMigrationSqlProvider.buildInsertParcelAddressSql());
+        System.out.println(SlrMigrationSqlProvider.buildUpdateCadastreObjectSql());
+        System.out.println(SlrMigrationSqlProvider.buildUpdateSpatialValueAreaSql("officialArea"));
+
+    }
+
+    @Test
+    public void loadSlrParcel() throws Exception {
+        SlrMigrationEJBLocal instance = (SlrMigrationEJBLocal) getEJBInstance(SLR_MODULE_NAME,
+                SlrMigrationEJB.class.getSimpleName());
+        getUserTransaction().begin();
+
+        //String result = instance.transferSlrParcel(null, null);
+        //System.out.println(result);
+        String result = instance.loadParcel();
+        getUserTransaction().commit();
+        //System.out.println(result);
     }
 }

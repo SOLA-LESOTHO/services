@@ -28,23 +28,53 @@
  * POSSIBILITY OF SUCH DAMAGE.
  * *********************************************************************************************
  */
-package org.sola.services.ejb.slrmigration.businesslogic;
+package org.sola.services.ejb.slrmigration.repository.entities;
 
-import java.util.Date;
-import javax.ejb.Local;
+import javax.persistence.Column;
+import javax.persistence.Table;
+import org.sola.services.common.repository.entities.AbstractReadOnlyEntity;
 
 /**
+ * Entity used to assist with validation of the data migrated from the SLR
+ * database
  *
  * @author soladev
  */
-@Local
-public interface SlrMigrationEJBLocal {
+@Table(name = "", schema = "slr")
+public class SlrValidation extends AbstractReadOnlyEntity {
 
-    String transferSlrSource(boolean registeredOnly, Date fromDate, Date toDate);
+    @Column(name = "lease_number")
+    private String leaseNumber;
+    @Column
+    private String apn;
+    @Column
+    private String msg;
 
-    String loadSource();
+    public SlrValidation() {
+        super();
+    }
 
-    String transferSlrParcel(Date fromDate, Date toDate);
+    public String getLeaseNumber() {
+        return leaseNumber;
+    }
 
-    String loadParcel();
+    public void setLeaseNumber(String leaseNumber) {
+        this.leaseNumber = leaseNumber;
+    }
+
+    public String getApn() {
+        return apn;
+    }
+
+    public void setApn(String apn) {
+        this.apn = apn;
+    }
+
+    public String getMsg() {
+        return msg;
+    }
+
+    public void setMsg(String msg) {
+        this.msg = msg;
+    }
 }
