@@ -37,8 +37,8 @@ import org.sola.services.common.repository.AccessFunctions;
 import org.sola.services.common.repository.entities.AbstractEntity;
 
 /**
- * Entity for the slr.slr_source table. Used by the SLR Migration to create
- * source records in SOLA.
+ * Entity for the slr.slr_parcel table. Used by the SLR Migration to create
+ * parcel records in SOLA.
  *
  * @author soladev
  */
@@ -59,7 +59,7 @@ public class SlrParcel extends AbstractEntity {
     @Column(name = "adjudication_parcel_number")
     private String adjudicationParcelNumber;
     @Column
-    private Double area;
+    private int area;
     @Column(name = "address_id")
     private String addressId;
     @Column
@@ -128,11 +128,11 @@ public class SlrParcel extends AbstractEntity {
         this.geom = geom;
     }
 
-    public Double getArea() {
+    public int getArea() {
         return area;
     }
 
-    public void setArea(Double area) {
+    public void setArea(int area) {
         this.area = area;
     }
 

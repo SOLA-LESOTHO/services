@@ -29,6 +29,8 @@
  * POSSIBILITY OF SUCH DAMAGE.
  * *********************************************************************************************
  */
+import java.util.Date;
+import java.util.GregorianCalendar;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -57,41 +59,78 @@ public class SlrMigrationEJBIT extends AbstractEJBTest {
     public void tearDown() {
     }
 
-    //@Test
+     @Test
     public void loadSlrSource() throws Exception {
         SlrMigrationEJBLocal instance = (SlrMigrationEJBLocal) getEJBInstance(SLR_MODULE_NAME,
                 SlrMigrationEJB.class.getSimpleName());
         getUserTransaction().begin();
 
-        //String result = instance.transferSlrSource(false, null, null);
-        String result = instance.loadSource();
+        String result = instance.transferSlrSource(null, true, 
+         new GregorianCalendar(2013, 01, 01).getTime(), new GregorianCalendar(2013, 06, 01).getTime());
+        // System.out.println(result);
+        //String result = instance.loadSource();
         getUserTransaction().commit();
-        System.out.println(result);
+        //System.out.println(result);
     }
 
     //@Test
     public void checkSQL() {
-        //System.out.println(SlrMigrationSqlProvider.buildGetSlrParcelSql(null, null));
-        System.out.println(SlrMigrationSqlProvider.buildUpdateSlrParcelSql());
-        System.out.println(SlrMigrationSqlProvider.buildInsertSpatialUnitSql());
-        System.out.println(SlrMigrationSqlProvider.buildInsertCadastreObjectSql());
-        System.out.println(SlrMigrationSqlProvider.buildInsertSpatialValueAreaSql("officialArea"));
-        System.out.println(SlrMigrationSqlProvider.buildInsertAddressSql());
-        System.out.println(SlrMigrationSqlProvider.buildInsertParcelAddressSql());
-        System.out.println(SlrMigrationSqlProvider.buildUpdateCadastreObjectSql());
-        System.out.println(SlrMigrationSqlProvider.buildUpdateSpatialValueAreaSql("officialArea"));
+        //System.out.println(SlrMigrationSqlProvider.buildGetSlrParcelSql("11-1", null, null));
+        // System.out.println(SlrMigrationSqlProvider.buildGetSlrSourceSql(true, "11-1", null, null));
+        System.out.println(SlrMigrationSqlProvider.buildGetSlrLeaseSql(1, true, new GregorianCalendar(2013, 01, 01).getTime(), new GregorianCalendar(2013, 06, 01).getTime()));
+        // System.out.println(SlrMigrationSqlProvider.buildGetSlrPartySql("11-1", true, null, null));
+
 
     }
 
-    @Test
+   // @Test
     public void loadSlrParcel() throws Exception {
         SlrMigrationEJBLocal instance = (SlrMigrationEJBLocal) getEJBInstance(SLR_MODULE_NAME,
                 SlrMigrationEJB.class.getSimpleName());
         getUserTransaction().begin();
 
-        //String result = instance.transferSlrParcel(null, null);
+         String result = instance.transferSlrParcel(null, 
+                new GregorianCalendar(2013, 1, 1).getTime(), new GregorianCalendar(2013, 1, 9).getTime());
         //System.out.println(result);
-        String result = instance.loadParcel();
+        //String result = instance.loadParcel();
+        getUserTransaction().commit();
+        //System.out.println(result);
+    }
+
+    //@Test
+    public void loadSlrParty() throws Exception {
+        SlrMigrationEJBLocal instance = (SlrMigrationEJBLocal) getEJBInstance(SLR_MODULE_NAME,
+                SlrMigrationEJB.class.getSimpleName());
+        getUserTransaction().begin();
+
+         String result = instance.transferSlrParty(null, true, 
+                new GregorianCalendar(2013, 01, 01).getTime(), new GregorianCalendar(2013, 06, 01).getTime());
+        //System.out.println(result);
+        getUserTransaction().commit();
+        //System.out.println(result);
+    }
+
+   // @Test
+    public void loadSlrLease() throws Exception {
+        SlrMigrationEJBLocal instance = (SlrMigrationEJBLocal) getEJBInstance(SLR_MODULE_NAME,
+                SlrMigrationEJB.class.getSimpleName());
+        getUserTransaction().begin();
+
+        String result = instance.transferSlrLease(new GregorianCalendar(2013, 10, 01).getTime(), null, false, 
+              new GregorianCalendar(2013, 01, 01).getTime(), new GregorianCalendar(2013, 06, 01).getTime());
+        //System.out.println(result);
+       // String result = instance.loadLeaseAndParty();
+        getUserTransaction().commit();
+        //System.out.println(result);
+    }
+
+  //  @Test
+    public void loadRrrSourceLink() throws Exception {
+        SlrMigrationEJBLocal instance = (SlrMigrationEJBLocal) getEJBInstance(SLR_MODULE_NAME,
+                SlrMigrationEJB.class.getSimpleName());
+        getUserTransaction().begin();
+
+        String result = instance.loadRrrSourceLink();
         getUserTransaction().commit();
         //System.out.println(result);
     }

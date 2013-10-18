@@ -40,11 +40,19 @@ import javax.ejb.Local;
 @Local
 public interface SlrMigrationEJBLocal {
 
-    String transferSlrSource(boolean registeredOnly, Date fromDate, Date toDate);
+    String transferSlrSource(String adjudicationArea, boolean registeredOnly, Date fromDate, Date toDate);
 
     String loadSource();
 
-    String transferSlrParcel(Date fromDate, Date toDate);
+    String transferSlrParcel(String adjudicationArea, Date fromDate, Date toDate);
 
     String loadParcel();
+
+    String transferSlrLease(Date registrationDate, String adjudicationArea, boolean registeredOnly, Date fromDate, Date toDate);
+
+    String transferSlrParty(String adjudicationArea, boolean registeredOnly, Date fromDate, Date toDate);
+
+    String loadLeaseAndParty();
+
+    String loadRrrSourceLink();
 }
