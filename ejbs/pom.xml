@@ -30,6 +30,7 @@
         <module>scheduler</module>
         <module>transaction</module>
         <module>admin</module>
+        <module>slr-migration</module>
     </modules>
     <dependencies>
         <dependency>
@@ -113,10 +114,10 @@
                         <version>2.3.2</version>
                         <configuration>
                             <!-- javaee6 contains upgrades of APIs contained within the JDK itself.
-                                 As such these need to be placed on the bootclasspath, rather than classpath of the
-                                 compiler.
-                                 If you don't make use of these new updated API, you can delete the profile.
-                                 On non-SUN jdk, you will need to create a similar profile for your jdk, with the similar property as sun.boot.class.path in Sun's JDK.-->
+                            As such these need to be placed on the bootclasspath, rather than classpath of the
+                            compiler.
+                            If you don't make use of these new updated API, you can delete the profile.
+                            On non-SUN jdk, you will need to create a similar profile for your jdk, with the similar property as sun.boot.class.path in Sun's JDK.-->
                             <compilerArguments>
                                 <bootclasspath>${settings.localRepository}/javax/javaee-endorsed-api/6.0/javaee-endorsed-api-6.0.jar${path.separator}${sun.boot.class.path}</bootclasspath>
                             </compilerArguments>

@@ -1,29 +1,31 @@
 /**
  * ******************************************************************************************
- * Copyright (c) 2013 Food and Agriculture Organization of the United Nations (FAO)
- * and the Lesotho Land Administration Authority (LAA). All rights reserved.
+ * Copyright (c) 2013 Food and Agriculture Organization of the United Nations
+ * (FAO) and the Lesotho Land Administration Authority (LAA). All rights
+ * reserved.
  *
- * Redistribution and use in source and binary forms, with or without modification,
- * are permitted provided that the following conditions are met:
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
  *
- *    1. Redistributions of source code must retain the above copyright notice,this list
- *       of conditions and the following disclaimer.
- *    2. Redistributions in binary form must reproduce the above copyright notice,this list
- *       of conditions and the following disclaimer in the documentation and/or other
- *       materials provided with the distribution.
- *    3. Neither the names of FAO, the LAA nor the names of its contributors may be used to
- *       endorse or promote products derived from this software without specific prior
- * 	  written permission.
+ * 1. Redistributions of source code must retain the above copyright notice,this
+ * list of conditions and the following disclaimer. 2. Redistributions in binary
+ * form must reproduce the above copyright notice,this list of conditions and
+ * the following disclaimer in the documentation and/or other materials provided
+ * with the distribution. 3. Neither the names of FAO, the LAA nor the names of
+ * its contributors may be used to endorse or promote products derived from this
+ * software without specific prior written permission.
  *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY
- * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES
- * OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT
- * SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
- * SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,PROCUREMENT
- * OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
- * HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT,STRICT LIABILITY,OR TORT
- * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
- * EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
+ * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+ * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,PROCUREMENT OF
+ * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+ * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+ * CONTRACT,STRICT LIABILITY,OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING
+ * IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+ * POSSIBILITY OF SUCH DAMAGE.
  * *********************************************************************************************
  */
 /*
@@ -37,6 +39,7 @@ import static org.apache.ibatis.jdbc.SqlBuilder.*;
 import org.sola.common.StringUtility;
 import org.sola.services.ejb.search.repository.entities.BaUnitSearchParams;
 import org.sola.services.ejb.search.repository.entities.BaUnitSearchResult;
+import static org.sola.services.ejb.search.repository.entities.BaUnitSearchResult.QUERY_PARAM_LAND_USE_CODE;
 import org.sola.services.ejb.search.repository.entities.DisputeSearchResult;
 
 /**
@@ -388,36 +391,50 @@ public class SearchSqlProvider {
         SELECT("prop.name_firstpart");
         SELECT("prop.name_lastpart");
         SELECT("prop.status_code");
-        SELECT("(SELECT string_agg(COALESCE(p1.name, '') || ' ' || COALESCE(p1.last_name, ''), '::::') "
-                + "FROM administrative.rrr rrr1, administrative.party_for_rrr pr1, party.party p1 "
-                + "WHERE rrr1.ba_unit_id = prop.id "
-                + "AND rrr1.status_code = 'current' "
-                + "AND pr1.rrr_id = rrr1.id "
+        SELECT("rrr.registration_number");
+        SELECT("rrr.lease_number");
+        SELECT("rrr.land_use_code");
+        SELECT("rrr.registration_date");
+        SELECT("(SELECT MIN(r1.registration_date) "
+                + "FROM administrative.rrr r1 "
+                + "WHERE r1.nr = rrr.nr "
+                + "AND   r1.ba_unit_id = rrr.ba_unit_id) AS original_registration_date");
+        SELECT("(SELECT string_agg(COALESCE(p1.name, '') || ' ' || COALESCE(p1.last_name, ''), '; ') "
+                + "FROM administrative.party_for_rrr pr1, party.party p1 "
+                + "WHERE pr1.rrr_id = rrr.id "
                 + "AND p1.id = pr1.party_id ) AS rightholders");
+        SELECT("rrr.rowversion");
+        SELECT("rrr.change_user");
+        SELECT("rrr.rowidentifier");
         FROM("administrative.ba_unit prop");
-        
-        if (params.getOwnerName() != null || !StringUtility.isEmpty(params.getLeaseNumber())) {
-            FROM("administrative.rrr rrr");
-            if (!StringUtility.isEmpty(params.getLeaseNumber())) {
-                WHERE("rrr.registration_number = #{" + BaUnitSearchResult.QUERY_PARAM_LEASE_NUMBER + "}");
-            }
-            if (params.getOwnerName() != null) {
-                FROM("administrative.party_for_rrr pr");
-                FROM("party.party p");
-                WHERE("rrr.ba_unit_id = prop.id");
-                WHERE("rrr.status_code = 'current'");
-                WHERE("pr.rrr_id = rrr.id");
-                WHERE("p.id = pr.party_id");
-                WHERE("compare_strings(#{" + BaUnitSearchResult.QUERY_PARAM_OWNER_NAME + "}, "
-                        + "COALESCE(p.name, '') || ' ' || COALESCE(p.last_name, '') || ' ' || COALESCE(p.alias, ''))");
-            }
+        FROM("administrative.rrr rrr");
+        WHERE("rrr.ba_unit_id = prop.id");
+        WHERE("rrr.type_code = 'lease'");
+        // Only search rrr that have a status that matches the ba unit status. 
+        WHERE("rrr.status_code = prop.status_code");
+
+        if (!StringUtility.isEmpty(params.getLeaseNumber())) {
+            WHERE("compare_strings(#{" + BaUnitSearchResult.QUERY_PARAM_LEASE_NUMBER + "}, "
+                    + "COALESCE(rrr.lease_number, '')");
+        }
+        if (!StringUtility.isEmpty(params.getLandUseCode())) {
+            WHERE("rrr.land_use_code = #{" + BaUnitSearchResult.QUERY_PARAM_LAND_USE_CODE + "}");
         }
 
-        if (params.getNameFirstPart() != null) {
+        if (!StringUtility.isEmpty(params.getOwnerName())) {
+            FROM("administrative.party_for_rrr pr");
+            FROM("party.party p");
+            WHERE("pr.rrr_id = rrr.id");
+            WHERE("p.id = pr.party_id");
+            WHERE("compare_strings(#{" + BaUnitSearchResult.QUERY_PARAM_OWNER_NAME + "}, "
+                    + "COALESCE(p.name, '') || ' ' || COALESCE(p.last_name, '') || ' ' || COALESCE(p.alias, ''))");
+        }
+
+        if (!StringUtility.isEmpty(params.getNameFirstPart())) {
             WHERE("compare_strings(#{" + BaUnitSearchResult.QUERY_PARAM_NAME_FIRSTPART
                     + "}, COALESCE(prop.name_firstpart, ''))");
         }
-        if (params.getNameLastPart() != null) {
+        if (!StringUtility.isEmpty(params.getNameLastPart())) {
             WHERE("compare_strings(#{" + BaUnitSearchResult.QUERY_PARAM_NAME_LASTPART
                     + "}, COALESCE(prop.name_lastpart, ''))");
         }
