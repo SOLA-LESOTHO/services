@@ -1,29 +1,31 @@
 /**
  * ******************************************************************************************
- * Copyright (c) 2013 Food and Agriculture Organization of the United Nations (FAO)
- * and the Lesotho Land Administration Authority (LAA). All rights reserved.
+ * Copyright (c) 2013 Food and Agriculture Organization of the United Nations
+ * (FAO) and the Lesotho Land Administration Authority (LAA). All rights
+ * reserved.
  *
- * Redistribution and use in source and binary forms, with or without modification,
- * are permitted provided that the following conditions are met:
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
  *
- *    1. Redistributions of source code must retain the above copyright notice,this list
- *       of conditions and the following disclaimer.
- *    2. Redistributions in binary form must reproduce the above copyright notice,this list
- *       of conditions and the following disclaimer in the documentation and/or other
- *       materials provided with the distribution.
- *    3. Neither the names of FAO, the LAA nor the names of its contributors may be used to
- *       endorse or promote products derived from this software without specific prior
- * 	  written permission.
+ * 1. Redistributions of source code must retain the above copyright notice,this
+ * list of conditions and the following disclaimer. 2. Redistributions in binary
+ * form must reproduce the above copyright notice,this list of conditions and
+ * the following disclaimer in the documentation and/or other materials provided
+ * with the distribution. 3. Neither the names of FAO, the LAA nor the names of
+ * its contributors may be used to endorse or promote products derived from this
+ * software without specific prior written permission.
  *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY
- * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES
- * OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT
- * SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
- * SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,PROCUREMENT
- * OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
- * HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT,STRICT LIABILITY,OR TORT
- * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
- * EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
+ * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+ * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,PROCUREMENT OF
+ * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+ * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+ * CONTRACT,STRICT LIABILITY,OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING
+ * IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+ * POSSIBILITY OF SUCH DAMAGE.
  * *********************************************************************************************
  */
 package org.sola.services.ejb.search.businesslogic;
@@ -370,12 +372,12 @@ public class SearchEJB extends AbstractEJB implements SearchEJBLocal {
         if (searchParams.getGroupId() == null) {
             searchParams.setGroupId("");
         }
-        
-        /*if (searchParams.getDepartmentId() == null) {
-            searchParams.setDepartmentId("");
-        }
-        * 
-        */
+
+        /*
+         * if (searchParams.getDepartmentId() == null) {
+         * searchParams.setDepartmentId(""); }
+         *
+         */
 
         if (searchParams.getUserName() == null) {
             searchParams.setUserName("");
@@ -583,14 +585,16 @@ public class SearchEJB extends AbstractEJB implements SearchEJBLocal {
 
     /**
      * Returns the list of Crs
-     * @return 
+     *
+     * @return
      */
     @Override
-    public List<Crs> getCrsList(){
+    public List<Crs> getCrsList() {
         Map params = new HashMap<String, Object>();
         params.put(CommonSqlProvider.PARAM_ORDER_BY_PART, Crs.ORDER_COLUMN);
         return getRepository().getEntityList(Crs.class, params);
     }
+
     /**
      * Executes a group of dynamic spatial queries using a filtering geometry.
      * Primarily used to obtain results for the Object Information Tool. Each
@@ -725,7 +729,7 @@ public class SearchEJB extends AbstractEJB implements SearchEJBLocal {
      */
     @Override
     @RolesAllowed({RolesConstants.ADMINISTRATIVE_BA_UNIT_SEARCH, RolesConstants.APPLICATION_EDIT_APPS,
-    RolesConstants.APPLICATION_CREATE_APPS})
+        RolesConstants.APPLICATION_CREATE_APPS})
     public List<BaUnitSearchResult> searchBaUnits(BaUnitSearchParams searchParams) {
         Map params = new HashMap<String, Object>();
 
@@ -738,11 +742,11 @@ public class SearchEJB extends AbstractEJB implements SearchEJBLocal {
         if (searchParams.getOwnerName() == null) {
             searchParams.setOwnerName("");
         }
-        
+
         if (searchParams.getLeaseNumber() == null) {
             searchParams.setLeaseNumber("");
         }
-        
+
         if (searchParams.getLandUseCode() == null) {
             searchParams.setLandUseCode("");
         }
@@ -757,10 +761,10 @@ public class SearchEJB extends AbstractEJB implements SearchEJBLocal {
     }
 
     @Override
-    public List<BaUnitSearchResult> searchBaUnitsByIds(List<String> baUnitIds){
+    public List<BaUnitSearchResult> searchBaUnitsByIds(List<String> baUnitIds) {
         Map params = new HashMap<String, Object>();
         String whereClause = "WHERE prop.id IN (";
-        
+
         int i = 0;
         for (String id : baUnitIds) {
             whereClause = whereClause + "#{idVal" + i + "}, ";
@@ -769,13 +773,13 @@ public class SearchEJB extends AbstractEJB implements SearchEJBLocal {
         }
 
         whereClause = whereClause.substring(0, whereClause.length() - 2) + ")";
-        String query = BaUnitSearchResult.QUERY_SEARCH_SELECT_PART + whereClause 
+        String query = BaUnitSearchResult.QUERY_SEARCH_SELECT_PART + whereClause
                 + " ORDER BY " + BaUnitSearchResult.QUERY_ORDER_BY + "LIMIT 100";
-        
+
         params.put(CommonSqlProvider.PARAM_QUERY, query);
         return getRepository().getEntityListByIds(BaUnitSearchResult.class, baUnitIds, params);
     }
-    
+
     /**
      * Retrieves the list of active spatial search options from the
      * system.map_search_option table.
@@ -861,8 +865,8 @@ public class SearchEJB extends AbstractEJB implements SearchEJBLocal {
         List result = getRepository().executeSql(params);
         byte[] value = null;
 
-        if (result != null && result.size()>0 && result.get(0) != null){
-            value = (byte[]) ((HashMap)result.get(0)).get("extent");
+        if (result != null && result.size() > 0 && result.get(0) != null) {
+            value = (byte[]) ((HashMap) result.get(0)).get("extent");
         }
         return value;
     }
@@ -902,10 +906,10 @@ public class SearchEJB extends AbstractEJB implements SearchEJBLocal {
 
         params.put(DisputeSearchResult.QUERY_PARAM_PLOT_NR,
                 searchParams.getPlotNumber() == null ? "" : searchParams.getPlotNumber());
-        
+
         params.put(DisputeSearchResult.QUERY_PARAM_CASE_TYPE,
                 searchParams.getCaseType() == null ? "" : searchParams.getCaseType());
-        
+
         params.put(DisputeSearchResult.QUERY_PARAM_LODGEMENT_DATE_FROM,
                 searchParams.getLodgementDateFrom() == null
                 ? new GregorianCalendar(1, 1, 1).getTime()
@@ -928,12 +932,13 @@ public class SearchEJB extends AbstractEJB implements SearchEJBLocal {
 
         return params;
     }
-    
+
     @Override
     public List<CadastreObjectSearchResult> searchCadastreObjects(CadastreObjectSearchParams searchParams) {
-        if(searchParams==null)
+        if (searchParams == null) {
             return null;
-        
+        }
+
         if (searchParams.getNameFirstPart() == null) {
             searchParams.setNameFirstPart("");
         }
@@ -943,7 +948,7 @@ public class SearchEJB extends AbstractEJB implements SearchEJBLocal {
         if (searchParams.getAddress() == null) {
             searchParams.setAddress("");
         }
-        
+
         Map params = new HashMap<String, Object>();
         params.put(CommonSqlProvider.PARAM_QUERY, CadastreObjectSearchResult.QUERY_SEARCH);
         params.put(CadastreObjectSearchResult.PARAM_NAME_FIRST_PART, searchParams.getNameFirstPart());
