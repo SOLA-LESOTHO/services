@@ -68,6 +68,7 @@ import org.sola.services.ejb.transaction.repository.entities.TransactionBasic;
 @EJB(name = "java:global/SOLA/AdministrativeEJBLocal", beanInterface = AdministrativeEJBLocal.class)
 public class AdministrativeEJB extends AbstractEJB implements AdministrativeEJBLocal {
 
+    public static final String SLR_MIGRATION_USER = "slr-migration";
     @EJB
     private SystemEJBLocal systemEJB;
     @EJB
@@ -94,6 +95,7 @@ public class AdministrativeEJB extends AbstractEJB implements AdministrativeEJBL
     protected void postConstruct() {
         setEntityPackage(BaUnit.class.getPackage().getName());
     }
+
     /**
      * Retrieves all administrative.change_status_type code values.
      *
@@ -208,7 +210,7 @@ public class AdministrativeEJB extends AbstractEJB implements AdministrativeEJBL
     /**
      * Saves any updates to an existing BA Unit. Can also be used to create a
      * new BA Unit, however this method does not set any default values on the
-     * BA Unit like null null null null null null null     {@linkplain #createBaUnit(java.lang.String, org.sola.services.ejb.administrative.repository.entities.BaUnit)
+     * BA Unit like null null null null null null null null null null null     {@linkplain #createBaUnit(java.lang.String, org.sola.services.ejb.administrative.repository.entities.BaUnit)
      * createBaUnit}. Will also create a new Transaction record for the BA Unit
      * if the Service is not already associated to a Transaction.
      *
@@ -256,7 +258,40 @@ public class AdministrativeEJB extends AbstractEJB implements AdministrativeEJBL
         LocalInfo.setTransactionId(transaction.getId());
         BaUnit result = null;
         try {
+            // If this pending baUnit was created by the SLR Migration, allow the baUnit, RRR and Notation
+            // to be linked to the new service transaction so that the baUnit can become current.
+            boolean updateSlrMigration = false;
+            if (RegistrationStatusType.STATUS_PENDING.equals(baUnit.getStatusCode())
+                    && SLR_MIGRATION_USER.equals(baUnit.getTransactionId())) {
+                updateSlrMigration = true;
+            }
             result = getRepository().saveEntity(baUnit);
+            
+            if (updateSlrMigration) {
+                // Update transaction_id on BaUnit
+                Map<String, Object> params = new HashMap<String, Object>();
+                params.put(CommonSqlProvider.PARAM_QUERY, BaUnit.QUERY_UPDATE_SLR_MIGRATION_TRANSACTION);
+                params.put(BaUnit.QUERY_PARAMETER_TRANSACTIONID, transaction.getId());
+                params.put(BaUnit.QUERY_PARAMETER_ID, result.getId());
+                getRepository().bulkUpdate(params);
+                
+                // Update transaction_id on Rrr
+                params = new HashMap<String, Object>();
+                params.put(CommonSqlProvider.PARAM_QUERY, Rrr.QUERY_UPDATE_SLR_MIGRATION_TRANSACTION);
+                params.put(Rrr.QUERY_PARAMETER_TRANSACTIONID, transaction.getId());
+                params.put(Rrr.QUERY_PARAMETER_BA_UNIT_ID, result.getId());
+                getRepository().bulkUpdate(params);
+                
+                // Update transaction_id on BaUnitNotation
+                params = new HashMap<String, Object>();
+                params.put(CommonSqlProvider.PARAM_QUERY, BaUnitNotation.QUERY_UPDATE_SLR_MIGRATION_TRANSACTION);
+                params.put(BaUnitNotation.QUERY_PARAMETER_TRANSACTIONID, transaction.getId());
+                params.put(BaUnitNotation.QUERY_PARAMETER_BA_UNIT_ID, result.getId());
+                getRepository().bulkUpdate(params);
+                
+                //Refresh the result with latest updates
+                result = getRepository().refreshEntity(result);
+            }
         } catch (RuntimeException e) {
             if (FaultUtility.getStackTraceAsString(e).contains("ba_unit_unique_name_parts")) {
                 throw new SOLAException(ServiceMessage.EXCEPTION_BAUNIT_HAS_DUPLICATE_NAME,
@@ -729,10 +764,8 @@ public class AdministrativeEJB extends AbstractEJB implements AdministrativeEJBL
      * THORISO - LEGAL (DISPUTES)
      *
      */
-
-     /**
-     * Clears the LaNr on all new source records associated with the
-     * Dispute.
+    /**
+     * Clears the LaNr on all new source records associated with the Dispute.
      *
      * @param Dispute The dispute to check.
      */
@@ -745,7 +778,7 @@ public class AdministrativeEJB extends AbstractEJB implements AdministrativeEJBL
             }
         }
     }
-   
+
     /*
      * Retrieves the DisputeComments matching the supplied identifier.
      *
@@ -840,7 +873,7 @@ public class AdministrativeEJB extends AbstractEJB implements AdministrativeEJBL
             dispute.setCompletionDate(DateUtility.now());
         }
         treatDisputeSources(dispute);
-        
+
         return saveDispute(dispute);
     }
 
@@ -853,7 +886,7 @@ public class AdministrativeEJB extends AbstractEJB implements AdministrativeEJBL
         if (dispute == null) {
             return dispute;
         }
-        
+
         treatDisputeSources(dispute);
         dispute = getRepository().saveEntity(dispute);
 
@@ -957,44 +990,44 @@ public class AdministrativeEJB extends AbstractEJB implements AdministrativeEJBL
     public List<DeedType> getDeedTypes(String languageCode) {
         return getRepository().getCodeList(DeedType.class, languageCode);
     }
- 
+
     @Override
-    public  LeaseFee  calculateLeaseFees(CadastreObject co, Rrr leaseRight){
-        
+    public LeaseFee calculateLeaseFees(CadastreObject co, Rrr leaseRight) {
+
         LeaseFee leaseFees = new LeaseFee();
         LeaseFeeUtility leaseUtility = new LeaseFeeUtility();
         leaseUtility.setCadastreEJB(cadastreEJB);
-        
-        String landUse; 
+
+        String landUse;
         String landGrade;
-                
+
         Money groundRent;
         Money registrationFee;
         Money serviceFee;
         Money stampDuty;
-        
+
         landUse = leaseRight.getLandUseCode();
-        
+
         landGrade = co.getLandGradeCode();
-        
+
         groundRent = leaseUtility.calculateGroundRent(co, leaseRight);
-        
+
         leaseRight.setGroundRent(groundRent.getAmount());
-        
+
         stampDuty = leaseUtility.calculateDutyOnGroundRent(co, leaseRight);
         registrationFee = leaseUtility.determineRegistrationFee(landUse, landGrade);
         serviceFee = leaseUtility.determineServiceFee(landUse, landGrade);
-        
+
         leaseFees.setGroundRent(groundRent.getAmount());
         leaseFees.setServiceFee(serviceFee.getAmount());
         leaseFees.setStampDuty(stampDuty.getAmount());
         leaseFees.setRegistrationFee(registrationFee.getAmount());
-        
+
         return leaseFees;
-        
+
     }
 
-     /**
+    /**
      * Retrieves all administrative.transaction_type code values.
      *
      * @param languageCode The language code to use for localization of display
@@ -1016,9 +1049,10 @@ public class AdministrativeEJB extends AbstractEJB implements AdministrativeEJBL
         return getRepository().getEntity(Consent.class, params);
     }
 
-    /** 
+    /**
      * Saves consent letter object and returns saved result.
-     * @param  consent Consent object to save.
+     *
+     * @param consent Consent object to save.
      * @param serviceId Service ID, triggered save action.
      */
     @Override

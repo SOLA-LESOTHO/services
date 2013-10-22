@@ -32,15 +32,20 @@ package org.sola.services.ejb.slrmigration.businesslogic;
 
 import java.net.URL;
 import java.text.DateFormat;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import javax.annotation.security.RolesAllowed;
+import javax.ejb.ConcurrencyManagement;
+import javax.ejb.ConcurrencyManagementType;
 import javax.ejb.EJB;
-import javax.ejb.Stateless;
+import javax.ejb.Singleton;
+import javax.ejb.TransactionAttribute;
+import javax.ejb.TransactionAttributeType;
 import org.sola.common.DateUtility;
+import org.sola.common.RolesConstants;
 import org.sola.common.StringUtility;
 import org.sola.common.logging.LogUtility;
 import org.sola.services.common.ejbs.AbstractEJB;
@@ -57,18 +62,23 @@ import org.sola.services.ejb.slrmigration.repository.entities.SlrSource;
 import org.sola.services.ejb.slrmigration.repository.entities.SlrValidation;
 
 /**
- * EJB to manage data in the SLR Migration processes.
+ * EJB to manage data in the SLR Migration processes. Singleton EJB's are
+ * subject to READ and WRITE concurrency control to manage access to the EJB
+ * methods. To avoid unnecessary blocking of EJB methods, BEAN concurrency is
+ * used instead of the default Container Concurrency.
  */
-@Stateless
+@ConcurrencyManagement(ConcurrencyManagementType.BEAN)
+@Singleton
 @EJB(name = "java:global/SOLA/SlrMigrationEJBLocal", beanInterface = SlrMigrationEJBLocal.class)
 public class SlrMigrationEJB extends AbstractEJB implements SlrMigrationEJBLocal {
 
     CommonRepository slrRepository;
+    volatile String progressMessage;
 
     /**
      * Sets the entity package for the EJB to
-     * Party.class.getPackage().getName(). This is used to restrict the save and
-     * retrieval of Code Entities.
+     * SlrSource.class.getPackage().getName(). This is used to restrict the save
+     * and retrieval of Code Entities.
      *
      * @see AbstractEJB#getCodeEntity(java.lang.Class, java.lang.String,
      * java.lang.String) AbstractEJB.getCodeEntity
@@ -93,6 +103,19 @@ public class SlrMigrationEJB extends AbstractEJB implements SlrMigrationEJBLocal
                     DatabaseConnectionManager.SQL_SERVER_ENV);
         }
         return slrRepository;
+    }
+
+    /**
+     * Returns the current progressMessage.
+     */
+    @Override
+    @TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
+    public String getProgressMessage() {
+        return progressMessage;
+    }
+
+    public void setProgressMessage(String progressMessage) {
+        this.progressMessage = progressMessage;
     }
 
     /**
@@ -134,27 +157,29 @@ public class SlrMigrationEJB extends AbstractEJB implements SlrMigrationEJBLocal
      * @return Summary messages describing the progress of the transfer.
      */
     @Override
+    @RolesAllowed(RolesConstants.SLR_MIGRATION)
     public String transferSlrSource(String adjudicationArea, boolean registeredOnly,
             Date fromDate, Date toDate) {
-        String result = "";
         int count = 0;
         SlrSource current = null;
+        progressMessage = "";
         long startTime = System.currentTimeMillis();
         try {
-            result += System.lineSeparator() + "Retrieving SlrSource with parameters;"
+            progressMessage += System.lineSeparator() + "Retrieving SlrSource with parameters;"
                     + " Adjudication Area = " + (adjudicationArea == null ? "null" : adjudicationArea)
                     + ", Registered Only = " + registeredOnly
                     + ", fromDate = " + (fromDate == null ? "null" : DateUtility.getMediumDateString(fromDate, false))
                     + ", toDate = " + (toDate == null ? "null" : DateUtility.getMediumDateString(toDate, false));
-            result += System.lineSeparator() + "SlrSource transfer started: "
+            progressMessage += System.lineSeparator() + "SlrSource transfer started: "
                     + DateUtility.getDateTimeString(DateUtility.now(), DateFormat.MEDIUM, DateFormat.LONG);
 
             Map params = new HashMap<String, Object>();
             // Remove all records from the slr.slr_source table first
             params.put(CommonSqlProvider.PARAM_QUERY, SlrMigrationSqlProvider.buildDeleteSlrSourceSql());
             int rows = getRepository().bulkUpdate(params);
-            result += System.lineSeparator() + "Deleted " + rows + " rows from slr.slr_source";
+            progressMessage += System.lineSeparator() + "Deleted " + rows + " rows from slr.slr_source";
 
+            progressMessage += System.lineSeparator() + "Executing query to retrieve source records from SLR database. This may take some time...";
             params.remove(CommonSqlProvider.PARAM_QUERY);
             int numAreas = prepAdjudicationAreaParams(adjudicationArea, params);
             params.put(CommonSqlProvider.PARAM_QUERY, SlrMigrationSqlProvider.buildGetSlrSourceSql(registeredOnly, numAreas, fromDate, toDate));
@@ -163,7 +188,7 @@ public class SlrMigrationEJB extends AbstractEJB implements SlrMigrationEJBLocal
 
             List<SlrSource> sources = getSlrRepository().getEntityList(SlrSource.class, params);
             if (sources != null) {
-                result += System.lineSeparator() + sources.size() + " SlrSources to process";
+                progressMessage += System.lineSeparator() + sources.size() + " SlrSources to transfer";
                 for (SlrSource s : sources) {
                     current = s;
                     // Configure the entity so that it will be inserted into the database
@@ -172,22 +197,25 @@ public class SlrMigrationEJB extends AbstractEJB implements SlrMigrationEJBLocal
                     // Save each new slr_source record into the SOLA database
                     getRepository().saveEntity(s);
                     count++;
+                    if (count % 1000 == 0) {
+                        progressMessage += System.lineSeparator() + count + " SlrSources transferred...";
+                    }
                 }
             } else {
-                result += System.lineSeparator() + "No SlrSources to process";
+                progressMessage += System.lineSeparator() + "No SlrSources to process";
             }
         } catch (Exception ex) {
-            result += System.lineSeparator() + "Processed " + count + " records";
+            progressMessage += System.lineSeparator() + "Processed " + count + " records";
             if (current != null) {
-                result += System.lineSeparator() + "Current SlrSource = "
+                progressMessage += System.lineSeparator() + "Current SlrSource = "
                         + current.getAdjudicationParcelNumber() + ", FileId: " + current.getExtArchiveId();
             }
-            result += System.lineSeparator() + "EXCEPTION > " + FaultUtility.getStackTraceAsString(ex);
+            progressMessage += System.lineSeparator() + "EXCEPTION > " + FaultUtility.getStackTraceAsString(ex);
         }
         long elapsed = (System.currentTimeMillis() - startTime) / 1000;
-        result += System.lineSeparator() + "SlrSource transfer completed in " + elapsed + "s";
-        LogUtility.log(result);
-        return result;
+        progressMessage += System.lineSeparator() + "SlrSource transfer completed in " + elapsed + "s";
+        LogUtility.log(progressMessage);
+        return progressMessage;
     }
 
     /**
@@ -196,36 +224,37 @@ public class SlrMigrationEJB extends AbstractEJB implements SlrMigrationEJBLocal
      * @return Summary messages describing the progress of the load.
      */
     @Override
+    @RolesAllowed(RolesConstants.SLR_MIGRATION)
     public String loadSource() {
-        String result = "";
+        progressMessage = "";
         long startTime = System.currentTimeMillis();
         try {
-            result += System.lineSeparator() + "Load Source started: "
+            progressMessage += System.lineSeparator() + "Load Source started: "
                     + DateUtility.getDateTimeString(DateUtility.now(), DateFormat.MEDIUM, DateFormat.LONG);
 
-            result += System.lineSeparator() + "Disable triggers on source.source";
+            progressMessage += System.lineSeparator() + "Disable triggers on source.source";
             Map params = new HashMap<String, Object>();
             params.put(CommonSqlProvider.PARAM_QUERY, SlrMigrationSqlProvider.buildDisableTriggerSql("source.source"));
             getRepository().bulkUpdate(params);
 
-            result += System.lineSeparator() + "Load SLR source records into source.source";
+            progressMessage += System.lineSeparator() + "Load SLR source records into source.source";
             params.remove(CommonSqlProvider.PARAM_QUERY);
             params.put(CommonSqlProvider.PARAM_QUERY, SlrMigrationSqlProvider.buildLoadSourceSql());
             int rows = getRepository().bulkUpdate(params);
-            result += System.lineSeparator() + "Loaded " + rows + " records into source.source";
+            progressMessage += System.lineSeparator() + "Loaded " + rows + " records into source.source";
 
-            result += System.lineSeparator() + "Enable triggers on source.source";
+            progressMessage += System.lineSeparator() + "Enable triggers on source.source";
             params.remove(CommonSqlProvider.PARAM_QUERY);
             params.put(CommonSqlProvider.PARAM_QUERY, SlrMigrationSqlProvider.buildEnableTriggerSql("source.source"));
             getRepository().bulkUpdate(params);
 
         } catch (Exception ex) {
-            result += System.lineSeparator() + "EXCEPTION > " + FaultUtility.getStackTraceAsString(ex);
+            progressMessage += System.lineSeparator() + "EXCEPTION > " + FaultUtility.getStackTraceAsString(ex);
         }
         long elapsed = (System.currentTimeMillis() - startTime) / 1000;
-        result += System.lineSeparator() + "Load Source completed in " + elapsed + "s";
-        LogUtility.log(result);
-        return result;
+        progressMessage += System.lineSeparator() + "Load Source completed in " + elapsed + "s";
+        LogUtility.log(progressMessage);
+        return progressMessage;
     }
 
     /**
@@ -246,25 +275,27 @@ public class SlrMigrationEJB extends AbstractEJB implements SlrMigrationEJBLocal
      * @return Summary messages describing the progress of the transfer.
      */
     @Override
+    @RolesAllowed(RolesConstants.SLR_MIGRATION)
     public String transferSlrParcel(String adjudicationArea, Date fromDate, Date toDate) {
-        String result = "";
+        progressMessage = "";
         int count = 0;
         SlrParcel current = null;
         long startTime = System.currentTimeMillis();
         try {
-            result += System.lineSeparator() + "Retrieving SlrParcel with parameters;"
+            progressMessage += System.lineSeparator() + "Retrieving SlrParcel with parameters;"
                     + " Adjudication Area = " + (adjudicationArea == null ? "null" : adjudicationArea)
                     + ", fromDate = " + (fromDate == null ? "null" : DateUtility.getMediumDateString(fromDate, false))
                     + ", toDate = " + (toDate == null ? "null" : DateUtility.getMediumDateString(toDate, false));
-            result += System.lineSeparator() + "SlrParcel transfer started: "
+            progressMessage += System.lineSeparator() + "SlrParcel transfer started: "
                     + DateUtility.getDateTimeString(DateUtility.now(), DateFormat.MEDIUM, DateFormat.LONG);
 
             Map params = new HashMap<String, Object>();
             // Remove all records from the slr.slr_parcel table first
             params.put(CommonSqlProvider.PARAM_QUERY, SlrMigrationSqlProvider.buildDeleteSlrParcelSql());
             int rows = getRepository().bulkUpdate(params);
-            result += System.lineSeparator() + "Deleted " + rows + " rows from slr.slr_parcel";
+            progressMessage += System.lineSeparator() + "Deleted " + rows + " rows from slr.slr_parcel";
 
+            progressMessage += System.lineSeparator() + "Executing query to retrieve parcel records from SLR database. This may take some time...";
             params.remove(CommonSqlProvider.PARAM_QUERY);
             int numAreas = prepAdjudicationAreaParams(adjudicationArea, params);
             params.put(CommonSqlProvider.PARAM_QUERY, SlrMigrationSqlProvider.buildGetSlrParcelSql(numAreas, fromDate, toDate));
@@ -272,7 +303,7 @@ public class SlrMigrationEJB extends AbstractEJB implements SlrMigrationEJBLocal
             params.put(SlrMigrationSqlProvider.QUERY_PARAM_TO_DATE, toDate);
             List<SlrParcel> parcels = getSlrRepository().getEntityList(SlrParcel.class, params);
             if (parcels != null) {
-                result += System.lineSeparator() + parcels.size() + " SlrParcels to process";
+                progressMessage += System.lineSeparator() + parcels.size() + " SlrParcels to transfer";
                 for (SlrParcel p : parcels) {
                     current = p;
                     // Configure the entity so that it will be inserted into the database
@@ -281,14 +312,19 @@ public class SlrMigrationEJB extends AbstractEJB implements SlrMigrationEJBLocal
                     // Save each new slr_parcel record into the SOLA database
                     getRepository().saveEntity(p);
                     count++;
+                    if (count % 1000 == 0) {
+                        progressMessage += System.lineSeparator() + count + " SlrParcels transferred...";
+                    }
                 }
+
 
                 // Set the flags on the slr_parcel table to indicate which data attributes will be updated
                 // as well has identify the new records that will be created. 
+                progressMessage += System.lineSeparator() + "Transfer completed. Determining attributes to update...";
                 params.remove(CommonSqlProvider.PARAM_QUERY);
                 params.put(CommonSqlProvider.PARAM_QUERY, SlrMigrationSqlProvider.buildUpdateSlrParcelSql());
                 rows = getRepository().bulkUpdate(params);
-                result += System.lineSeparator() + "Updated " + rows + " rows in slr.slr_parcel. Check the"
+                progressMessage += System.lineSeparator() + "Updated " + rows + " rows in slr.slr_parcel. Check the"
                         + " slr.slr_parcel table and modify as required to control that data that will be loaded"
                         + " into SOLA. ";
 
@@ -297,30 +333,30 @@ public class SlrMigrationEJB extends AbstractEJB implements SlrMigrationEJBLocal
                 params.put(CommonSqlProvider.PARAM_QUERY, SlrMigrationSqlProvider.buildValidateSlrParcelSql());
                 List<SlrValidation> list = getRepository().getEntityList(SlrValidation.class, params);
                 if (list != null && list.size() > 0) {
-                    result += System.lineSeparator() + list.size() + " validation messages...";
+                    progressMessage += System.lineSeparator() + list.size() + " validation messages...";
                     for (SlrValidation v : list) {
                         if (v.getMsg().equals("MULTIPOLYGON")) {
                             // SOLA only accepts parcels with a geometry type of POLYGON
-                            result += System.lineSeparator() + "Parcel has multipolygon geometry and will not be loaded into SOLA;"
+                            progressMessage += System.lineSeparator() + "Parcel has multipolygon geometry and will not be loaded into SOLA;"
                                     + " Lease Num = " + v.getLeaseNumber() + ", APN = " + v.getApn();
                         }
                     }
                 }
             } else {
-                result += System.lineSeparator() + "No SlrParcels to process";
+                progressMessage += System.lineSeparator() + "No SlrParcels to process";
             }
         } catch (Exception ex) {
-            result += System.lineSeparator() + "Processed " + count + " records";
+            progressMessage += System.lineSeparator() + "Processed " + count + " records";
             if (current != null) {
-                result += System.lineSeparator() + "Current SlrParcel = "
+                progressMessage += System.lineSeparator() + "Current SlrParcel = "
                         + current.getAdjudicationParcelNumber() + ", Lease: " + current.getLeaseNumber();
             }
-            result += System.lineSeparator() + "EXCEPTION > " + FaultUtility.getStackTraceAsString(ex);
+            progressMessage += System.lineSeparator() + "EXCEPTION > " + FaultUtility.getStackTraceAsString(ex);
         }
         long elapsed = (System.currentTimeMillis() - startTime) / 1000;
-        result += System.lineSeparator() + "SlrParcel transfer completed in " + elapsed + "s";
-        LogUtility.log(result);
-        return result;
+        progressMessage += System.lineSeparator() + "SlrParcel transfer completed in " + elapsed + "s";
+        LogUtility.log(progressMessage);
+        return progressMessage;
     }
 
     /**
@@ -331,80 +367,81 @@ public class SlrMigrationEJB extends AbstractEJB implements SlrMigrationEJBLocal
      * @return Summary messages describing the progress of the load.
      */
     @Override
+    @RolesAllowed(RolesConstants.SLR_MIGRATION)
     public String loadParcel() {
-        String result = "";
+        progressMessage = "";
         long startTime = System.currentTimeMillis();
         try {
-            result += System.lineSeparator() + "Load Parcel started: "
+            progressMessage += System.lineSeparator() + "Load Parcel started: "
                     + DateUtility.getDateTimeString(DateUtility.now(), DateFormat.MEDIUM, DateFormat.LONG);
 
             // Only disable triggers on cadastre.cadastre_object as the triggers try to insert a new 
             // spatial_unit record and set the name_firstpart and name_lastpart based on the location 
             // of the geom. It is not necessary to disable triggers on the other tables. 
-            result += System.lineSeparator() + "Disable triggers on cadastre.cadastre_object";
+            progressMessage += System.lineSeparator() + "Disable triggers on cadastre.cadastre_object";
             Map params = new HashMap<String, Object>();
             params.put(CommonSqlProvider.PARAM_QUERY, SlrMigrationSqlProvider.buildDisableTriggerSql("cadastre.cadastre_object"));
             getRepository().bulkUpdate(params);
 
-            result += System.lineSeparator() + "Load new parcel records into SOLA";
+            progressMessage += System.lineSeparator() + "Load new parcel records into SOLA";
             params.remove(CommonSqlProvider.PARAM_QUERY);
             params.put(CommonSqlProvider.PARAM_QUERY, SlrMigrationSqlProvider.buildInsertSpatialUnitSql());
             int rows = getRepository().bulkUpdate(params);
-            result += System.lineSeparator() + "Inserted " + rows + " records into cadastre.spatial_unit";
+            progressMessage += System.lineSeparator() + "Inserted " + rows + " records into cadastre.spatial_unit";
 
             params.remove(CommonSqlProvider.PARAM_QUERY);
             params.put(CommonSqlProvider.PARAM_QUERY, SlrMigrationSqlProvider.buildInsertCadastreObjectSql());
             rows = getRepository().bulkUpdate(params);
-            result += System.lineSeparator() + "Inserted " + rows + " records into cadastre.cadastre_object";
+            progressMessage += System.lineSeparator() + "Inserted " + rows + " records into cadastre.cadastre_object";
 
             params.remove(CommonSqlProvider.PARAM_QUERY);
             params.put(CommonSqlProvider.PARAM_QUERY,
                     SlrMigrationSqlProvider.buildInsertSpatialValueAreaSql(SlrMigrationSqlProvider.OFFICIAL_AREA_TYPE));
             rows = getRepository().bulkUpdate(params);
-            result += System.lineSeparator() + "Inserted " + rows + " officalArea records into cadastre.spatial_value_area";
+            progressMessage += System.lineSeparator() + "Inserted " + rows + " officalArea records into cadastre.spatial_value_area";
 
             params.remove(CommonSqlProvider.PARAM_QUERY);
             params.put(CommonSqlProvider.PARAM_QUERY,
                     SlrMigrationSqlProvider.buildInsertSpatialValueAreaSql(SlrMigrationSqlProvider.CALCULATED_AREA_TYPE));
             rows = getRepository().bulkUpdate(params);
-            result += System.lineSeparator() + "Inserted " + rows + " calculatedArea records into cadastre.spatial_value_area";
+            progressMessage += System.lineSeparator() + "Inserted " + rows + " calculatedArea records into cadastre.spatial_value_area";
 
             params.remove(CommonSqlProvider.PARAM_QUERY);
             params.put(CommonSqlProvider.PARAM_QUERY, SlrMigrationSqlProvider.buildInsertAddressSql());
             rows = getRepository().bulkUpdate(params);
-            result += System.lineSeparator() + "Inserted " + rows + " records into address.address";
+            progressMessage += System.lineSeparator() + "Inserted " + rows + " records into address.address";
 
             params.remove(CommonSqlProvider.PARAM_QUERY);
             params.put(CommonSqlProvider.PARAM_QUERY, SlrMigrationSqlProvider.buildInsertParcelAddressSql());
             rows = getRepository().bulkUpdate(params);
-            result += System.lineSeparator() + "Inserted " + rows + " records into cadastre.spatial_unit_address";
+            progressMessage += System.lineSeparator() + "Inserted " + rows + " records into cadastre.spatial_unit_address";
 
-            result += System.lineSeparator() + "Update existing parcel records in SOLA";
+            progressMessage += System.lineSeparator() + "Update existing parcel records in SOLA";
             params.remove(CommonSqlProvider.PARAM_QUERY);
             params.put(CommonSqlProvider.PARAM_QUERY, SlrMigrationSqlProvider.buildUpdateCadastreObjectSql());
             rows = getRepository().bulkUpdate(params);
-            result += System.lineSeparator() + "Updated " + rows + " records in cadastre.cadastre_object";
+            progressMessage += System.lineSeparator() + "Updated " + rows + " records in cadastre.cadastre_object";
 
             params.remove(CommonSqlProvider.PARAM_QUERY);
             params.put(CommonSqlProvider.PARAM_QUERY,
                     SlrMigrationSqlProvider.buildUpdateSpatialValueAreaSql(SlrMigrationSqlProvider.OFFICIAL_AREA_TYPE));
             rows = getRepository().bulkUpdate(params);
-            result += System.lineSeparator() + "Updated " + rows + " official areas in cadastre.spatial_value_area";
+            progressMessage += System.lineSeparator() + "Updated " + rows + " official areas in cadastre.spatial_value_area";
 
             // Does not update the calculated area values as these can remain unchanged. 
 
-            result += System.lineSeparator() + "Enable triggers on cadastre.cadastre_object";
+            progressMessage += System.lineSeparator() + "Enable triggers on cadastre.cadastre_object";
             params.remove(CommonSqlProvider.PARAM_QUERY);
             params.put(CommonSqlProvider.PARAM_QUERY, SlrMigrationSqlProvider.buildEnableTriggerSql("cadastre.cadastre_object"));
             getRepository().bulkUpdate(params);
 
         } catch (Exception ex) {
-            result += System.lineSeparator() + "EXCEPTION > " + FaultUtility.getStackTraceAsString(ex);
+            progressMessage += System.lineSeparator() + "EXCEPTION > " + FaultUtility.getStackTraceAsString(ex);
         }
         long elapsed = (System.currentTimeMillis() - startTime) / 1000;
-        result += System.lineSeparator() + "Load Parcels completed in " + elapsed + "s";
-        LogUtility.log(result);
-        return result;
+        progressMessage += System.lineSeparator() + "Load Parcels completed in " + elapsed + "s";
+        LogUtility.log(progressMessage);
+        return progressMessage;
     }
 
     /**
@@ -425,30 +462,32 @@ public class SlrMigrationEJB extends AbstractEJB implements SlrMigrationEJBLocal
      * @return Summary messages describing the progress of the transfer.
      */
     @Override
+    @RolesAllowed(RolesConstants.SLR_MIGRATION)
     public String transferSlrLease(Date registrationDate, String adjudicationArea,
             boolean registeredOnly, Date fromDate, Date toDate) {
-        String result = "";
+        progressMessage = "";
         registrationDate = registrationDate == null
                 ? new GregorianCalendar(2013, GregorianCalendar.AUGUST, 15).getTime() : registrationDate;
         int count = 0;
         SlrLease current = null;
         long startTime = System.currentTimeMillis();
         try {
-            result += System.lineSeparator() + "Retrieving SlrLeases with parameters;"
+            progressMessage += System.lineSeparator() + "Retrieving SlrLeases with parameters;"
                     + " Registration Date = " + DateUtility.getMediumDateString(registrationDate, false)
                     + ", Adjudication Area = " + (adjudicationArea == null ? "null" : adjudicationArea)
                     + ", Registered Only = " + registeredOnly
                     + ", fromDate = " + (fromDate == null ? "null" : DateUtility.getMediumDateString(fromDate, false))
                     + ", toDate = " + (toDate == null ? "null" : DateUtility.getMediumDateString(toDate, false));
-            result += System.lineSeparator() + "SlrLease transfer started: "
+            progressMessage += System.lineSeparator() + "SlrLease transfer started: "
                     + DateUtility.getDateTimeString(DateUtility.now(), DateFormat.MEDIUM, DateFormat.LONG);
 
             Map params = new HashMap<String, Object>();
             // Remove all records from the slr.slr_lease table first
             params.put(CommonSqlProvider.PARAM_QUERY, SlrMigrationSqlProvider.buildDeleteSlrLeaseSql());
             int rows = getRepository().bulkUpdate(params);
-            result += System.lineSeparator() + "Deleted " + rows + " rows from slr.slr_lease";
+            progressMessage += System.lineSeparator() + "Deleted " + rows + " rows from slr.slr_lease";
 
+            progressMessage += System.lineSeparator() + "Executing query to retrieve lease records from SLR database. This may take some time...";
             params.remove(CommonSqlProvider.PARAM_QUERY);
             int numAreas = prepAdjudicationAreaParams(adjudicationArea, params);
             params.put(CommonSqlProvider.PARAM_QUERY, SlrMigrationSqlProvider.buildGetSlrLeaseSql(numAreas, registeredOnly, fromDate, toDate));
@@ -456,7 +495,7 @@ public class SlrMigrationEJB extends AbstractEJB implements SlrMigrationEJBLocal
             params.put(SlrMigrationSqlProvider.QUERY_PARAM_TO_DATE, toDate);
             List<SlrLease> leases = getSlrRepository().getEntityList(SlrLease.class, params);
             if (leases != null) {
-                result += System.lineSeparator() + leases.size() + " SlrLeases to process";
+                progressMessage += System.lineSeparator() + leases.size() + " SlrLeases to transfer";
                 for (SlrLease l : leases) {
                     current = l;
                     // Configure the entity so that it will be inserted into the database
@@ -466,35 +505,39 @@ public class SlrMigrationEJB extends AbstractEJB implements SlrMigrationEJBLocal
                     // Save each new slr_lease record into the SOLA database
                     getRepository().saveEntity(l);
                     count++;
+                    if (count % 1000 == 0) {
+                        progressMessage += System.lineSeparator() + count + " SlrLeases transferred...";
+                    }
                 }
 
-                // Determine the leases that already exist in SOLA and flag them  
+                // Determine the leases that already exist in SOLA and flag them 
+                progressMessage += System.lineSeparator() + count + "Transfer completed. Checking for leases that already exist in SOLA...";
                 params.remove(CommonSqlProvider.PARAM_QUERY);
                 params.put(CommonSqlProvider.PARAM_QUERY, SlrMigrationSqlProvider.buildMatchSlrLeaseSql());
                 rows = getRepository().bulkUpdate(params);
-                result += System.lineSeparator() + "Found " + rows + " SlrLease records that match leases "
+                progressMessage += System.lineSeparator() + "Found " + rows + " SlrLease records that match leases "
                         + "in SOLA. The matched leases will not be uploaded to SOLA.";
 
                 // Determine the parcel (i.e. cadastre_object) matching the lease number  
                 params.remove(CommonSqlProvider.PARAM_QUERY);
                 params.put(CommonSqlProvider.PARAM_QUERY, SlrMigrationSqlProvider.buildUpdateSlrLeaseParcelSql());
                 rows = getRepository().bulkUpdate(params);
-                result += System.lineSeparator() + "Matched " + rows + " cadastre_objects to the leases that will be uploaded.";
+                progressMessage += System.lineSeparator() + "Matched " + rows + " cadastre_objects to the leases that will be uploaded.";
             } else {
-                result += System.lineSeparator() + "No SlrLeases to process";
+                progressMessage += System.lineSeparator() + "No SlrLeases to process";
             }
         } catch (Exception ex) {
-            result += System.lineSeparator() + "Processed " + count + " records";
+            progressMessage += System.lineSeparator() + "Processed " + count + " records";
             if (current != null) {
-                result += System.lineSeparator() + "Current SlrLease = "
+                progressMessage += System.lineSeparator() + "Current SlrLease = "
                         + current.getAdjudicationParcelNumber();
             }
-            result += System.lineSeparator() + "EXCEPTION > " + FaultUtility.getStackTraceAsString(ex);
+            progressMessage += System.lineSeparator() + "EXCEPTION > " + FaultUtility.getStackTraceAsString(ex);
         }
         long elapsed = (System.currentTimeMillis() - startTime) / 1000;
-        result += System.lineSeparator() + "SlrLease transfer completed in " + elapsed + "s";
-        LogUtility.log(result);
-        return result;
+        progressMessage += System.lineSeparator() + "SlrLease transfer completed in " + elapsed + "s";
+        LogUtility.log(progressMessage);
+        return progressMessage;
     }
 
     /**
@@ -513,27 +556,29 @@ public class SlrMigrationEJB extends AbstractEJB implements SlrMigrationEJBLocal
      * @return Summary messages describing the progress of the transfer.
      */
     @Override
+    @RolesAllowed(RolesConstants.SLR_MIGRATION)
     public String transferSlrParty(String adjudicationArea, boolean registeredOnly,
             Date fromDate, Date toDate) {
-        String result = "";
+        progressMessage = "";
         int count = 0;
         SlrParty current = null;
         long startTime = System.currentTimeMillis();
         try {
-            result += System.lineSeparator() + "Retrieving SlrParties with parameters;"
+            progressMessage += System.lineSeparator() + "Retrieving SlrParties with parameters;"
                     + " Adjudication Area = " + (adjudicationArea == null ? "null" : adjudicationArea)
                     + ", Registered Only = " + registeredOnly
                     + ", fromDate = " + (fromDate == null ? "null" : DateUtility.getMediumDateString(fromDate, false))
                     + ", toDate = " + (toDate == null ? "null" : DateUtility.getMediumDateString(toDate, false));
-            result += System.lineSeparator() + "SlrParty transfer started: "
+            progressMessage += System.lineSeparator() + "SlrParty transfer started: "
                     + DateUtility.getDateTimeString(DateUtility.now(), DateFormat.MEDIUM, DateFormat.LONG);
 
             Map params = new HashMap<String, Object>();
             // Remove all records from the slr.slr_party table first
             params.put(CommonSqlProvider.PARAM_QUERY, SlrMigrationSqlProvider.buildDeleteSlrPartySql());
             int rows = getRepository().bulkUpdate(params);
-            result += System.lineSeparator() + "Deleted " + rows + " rows from slr.slr_party";
+            progressMessage += System.lineSeparator() + "Deleted " + rows + " rows from slr.slr_party";
 
+            progressMessage += System.lineSeparator() + "Executing query to retrieve party records from SLR database. This may take some time...";
             params.remove(CommonSqlProvider.PARAM_QUERY);
             int numAreas = prepAdjudicationAreaParams(adjudicationArea, params);
             params.put(CommonSqlProvider.PARAM_QUERY, SlrMigrationSqlProvider.buildGetSlrPartySql(numAreas, registeredOnly, fromDate, toDate));
@@ -541,7 +586,7 @@ public class SlrMigrationEJB extends AbstractEJB implements SlrMigrationEJBLocal
             params.put(SlrMigrationSqlProvider.QUERY_PARAM_TO_DATE, toDate);
             List<SlrParty> parties = getSlrRepository().getEntityList(SlrParty.class, params);
             if (parties != null) {
-                result += System.lineSeparator() + parties.size() + " SlrParty records to process";
+                progressMessage += System.lineSeparator() + parties.size() + " SlrParty records to transfer";
                 for (SlrParty p : parties) {
                     current = p;
                     // Configure the entity so that it will be inserted into the database
@@ -550,29 +595,33 @@ public class SlrMigrationEJB extends AbstractEJB implements SlrMigrationEJBLocal
                     // Save each new slr_party record into the SOLA database
                     getRepository().saveEntity(p);
                     count++;
+                    if (count % 1000 == 0) {
+                        progressMessage += System.lineSeparator() + count + " SlrParties transferred...";
+                    }
                 }
 
-                // Determine the parties that already exist in SOLA and flag them  
+                // Determine the parties that already exist in SOLA and flag them 
+                progressMessage += System.lineSeparator() + count + "Transfer completed. Checking for parties that already exist in SOLA...";
                 params.remove(CommonSqlProvider.PARAM_QUERY);
                 params.put(CommonSqlProvider.PARAM_QUERY, SlrMigrationSqlProvider.buildMatchSlrPartySql());
                 rows = getRepository().bulkUpdate(params);
-                result += System.lineSeparator() + "Found " + rows + " SlrParty records that match party records "
+                progressMessage += System.lineSeparator() + "Found " + rows + " SlrParty records that match party records "
                         + "in SOLA. The matched parties will not be uploaded to SOLA.";
             } else {
-                result += System.lineSeparator() + "No SlrParty records to process";
+                progressMessage += System.lineSeparator() + "No SlrParty records to process";
             }
         } catch (Exception ex) {
-            result += System.lineSeparator() + "Processed " + count + " records";
+            progressMessage += System.lineSeparator() + "Processed " + count + " records";
             if (current != null) {
-                result += System.lineSeparator() + "Current SlrParty = "
+                progressMessage += System.lineSeparator() + "Current SlrParty = "
                         + current.getSlrReference();
             }
-            result += System.lineSeparator() + "EXCEPTION > " + FaultUtility.getStackTraceAsString(ex);
+            progressMessage += System.lineSeparator() + "EXCEPTION > " + FaultUtility.getStackTraceAsString(ex);
         }
         long elapsed = (System.currentTimeMillis() - startTime) / 1000;
-        result += System.lineSeparator() + "SlrParty transfer completed in " + elapsed + "s";
-        LogUtility.log(result);
-        return result;
+        progressMessage += System.lineSeparator() + "SlrParty transfer completed in " + elapsed + "s";
+        LogUtility.log(progressMessage);
+        return progressMessage;
     }
 
     /**
@@ -580,60 +629,75 @@ public class SlrMigrationEJB extends AbstractEJB implements SlrMigrationEJBLocal
      * administrative schemas. This method only inserts new records. If an
      * existing record is found, it is left unchanged.
      *
+     * @param makeCurrent The transerSlrLease method can be used to transfer
+     * leases that have been submitted to LAA, but not yet marked as registered
+     * in the SLR database. By default these leases are transfered with a
+     * 'pending' status into SOLA. To force these leases to have a 'current'
+     * status in SOLA, set makeCurrent = true. When makeCurrent is false the
+     * status of the lease is determined based on its status in the SLR
+     * database.
      * @return Summary messages describing the progress of the load.
      */
     @Override
-    public String loadLeaseAndParty() {
-        String result = "";
+    @RolesAllowed(RolesConstants.SLR_MIGRATION)
+    public String loadLeaseAndParty(boolean makeCurrent) {
+        progressMessage = "";
         long startTime = System.currentTimeMillis();
         try {
-            result += System.lineSeparator() + "Load Lease and Party started: "
+            progressMessage += System.lineSeparator() + "Load Lease and Party started: "
                     + DateUtility.getDateTimeString(DateUtility.now(), DateFormat.MEDIUM, DateFormat.LONG);
 
-            result += System.lineSeparator() + "Load new party records into SOLA";
             Map params = new HashMap<String, Object>();
+            if (makeCurrent) {
+                params.put(CommonSqlProvider.PARAM_QUERY, SlrMigrationSqlProvider.buildUpdateSlrLeaseStatusSql());
+                int rows = getRepository().bulkUpdate(params);
+                progressMessage += System.lineSeparator() + "Updated " + rows + " SlrLease records to have the 'current' status";
+            }
+
+            progressMessage += System.lineSeparator() + "Load new party records into SOLA";
+            params.remove(CommonSqlProvider.PARAM_QUERY);
             params.put(CommonSqlProvider.PARAM_QUERY, SlrMigrationSqlProvider.buildInsertPartyAddressSql());
             int rows = getRepository().bulkUpdate(params);
-            result += System.lineSeparator() + "Inserted " + rows + " records into address.address";
+            progressMessage += System.lineSeparator() + "Inserted " + rows + " records into address.address";
 
             params.remove(CommonSqlProvider.PARAM_QUERY);
             params.put(CommonSqlProvider.PARAM_QUERY, SlrMigrationSqlProvider.buildInsertPartySql());
             rows = getRepository().bulkUpdate(params);
-            result += System.lineSeparator() + "Inserted " + rows + " records into party.party";
+            progressMessage += System.lineSeparator() + "Inserted " + rows + " records into party.party";
 
             params.remove(CommonSqlProvider.PARAM_QUERY);
             params.put(CommonSqlProvider.PARAM_QUERY, SlrMigrationSqlProvider.buildInsertPartyRoleSql());
             rows = getRepository().bulkUpdate(params);
-            result += System.lineSeparator() + "Inserted " + rows + " records into party.party_role";
+            progressMessage += System.lineSeparator() + "Inserted " + rows + " records into party.party_role";
 
-            result += System.lineSeparator() + "Load new lease records into SOLA";
+            progressMessage += System.lineSeparator() + "Load new lease records into SOLA";
             params.remove(CommonSqlProvider.PARAM_QUERY);
             params.put(CommonSqlProvider.PARAM_QUERY, SlrMigrationSqlProvider.buildInsertBaUnitSql());
             rows = getRepository().bulkUpdate(params);
-            result += System.lineSeparator() + "Inserted " + rows + " records into administrative.ba_unit";
+            progressMessage += System.lineSeparator() + "Inserted " + rows + " records into administrative.ba_unit";
 
             params.remove(CommonSqlProvider.PARAM_QUERY);
             params.put(CommonSqlProvider.PARAM_QUERY, SlrMigrationSqlProvider.buildInsertRrrSql());
             rows = getRepository().bulkUpdate(params);
-            result += System.lineSeparator() + "Inserted " + rows + " records into administrative.rrr";
+            progressMessage += System.lineSeparator() + "Inserted " + rows + " records into administrative.rrr";
 
             params.remove(CommonSqlProvider.PARAM_QUERY);
             params.put(CommonSqlProvider.PARAM_QUERY, SlrMigrationSqlProvider.buildInsertNotationSql());
             rows = getRepository().bulkUpdate(params);
-            result += System.lineSeparator() + "Inserted " + rows + " records into administrative.notation";
+            progressMessage += System.lineSeparator() + "Inserted " + rows + " records into administrative.notation";
 
             params.remove(CommonSqlProvider.PARAM_QUERY);
             params.put(CommonSqlProvider.PARAM_QUERY, SlrMigrationSqlProvider.buildInsertPartyForRrrSql());
             rows = getRepository().bulkUpdate(params);
-            result += System.lineSeparator() + "Inserted " + rows + " records into administrative.party_for_rrr";
+            progressMessage += System.lineSeparator() + "Inserted " + rows + " records into administrative.party_for_rrr";
 
         } catch (Exception ex) {
-            result += System.lineSeparator() + "EXCEPTION > " + FaultUtility.getStackTraceAsString(ex);
+            progressMessage += System.lineSeparator() + "EXCEPTION > " + FaultUtility.getStackTraceAsString(ex);
         }
         long elapsed = (System.currentTimeMillis() - startTime) / 1000;
-        result += System.lineSeparator() + "Load Lease and Party completed in " + elapsed + "s";
-        LogUtility.log(result);
-        return result;
+        progressMessage += System.lineSeparator() + "Load Lease and Party completed in " + elapsed + "s";
+        LogUtility.log(progressMessage);
+        return progressMessage;
     }
 
     /**
@@ -643,25 +707,26 @@ public class SlrMigrationEJB extends AbstractEJB implements SlrMigrationEJBLocal
      * @return Summary messages describing the progress of the load.
      */
     @Override
+    @RolesAllowed(RolesConstants.SLR_MIGRATION)
     public String loadRrrSourceLink() {
-        String result = "";
+        progressMessage = "";
         long startTime = System.currentTimeMillis();
         try {
-            result += System.lineSeparator() + "Load Rrr Source Link started: "
+            progressMessage += System.lineSeparator() + "Load Rrr Source Link started: "
                     + DateUtility.getDateTimeString(DateUtility.now(), DateFormat.MEDIUM, DateFormat.LONG);
 
             Map params = new HashMap<String, Object>();
             params.remove(CommonSqlProvider.PARAM_QUERY);
             params.put(CommonSqlProvider.PARAM_QUERY, SlrMigrationSqlProvider.buildInsertSourceRrrSql());
             int rows = getRepository().bulkUpdate(params);
-            result += System.lineSeparator() + "Loaded " + rows + " records into administrative.source_describes_rrr";
+            progressMessage += System.lineSeparator() + "Loaded " + rows + " records into administrative.source_describes_rrr";
 
         } catch (Exception ex) {
-            result += System.lineSeparator() + "EXCEPTION > " + FaultUtility.getStackTraceAsString(ex);
+            progressMessage += System.lineSeparator() + "EXCEPTION > " + FaultUtility.getStackTraceAsString(ex);
         }
         long elapsed = (System.currentTimeMillis() - startTime) / 1000;
-        result += System.lineSeparator() + "Load Rrr Source Link completed in " + elapsed + "s";
-        LogUtility.log(result);
-        return result;
+        progressMessage += System.lineSeparator() + "Load Rrr Source Link completed in " + elapsed + "s";
+        LogUtility.log(progressMessage);
+        return progressMessage;
     }
 }

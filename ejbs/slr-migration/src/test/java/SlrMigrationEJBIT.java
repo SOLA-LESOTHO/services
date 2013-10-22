@@ -59,7 +59,7 @@ public class SlrMigrationEJBIT extends AbstractEJBTest {
     public void tearDown() {
     }
 
-     @Test
+    // @Test
     public void loadSlrSource() throws Exception {
         SlrMigrationEJBLocal instance = (SlrMigrationEJBLocal) getEJBInstance(SLR_MODULE_NAME,
                 SlrMigrationEJB.class.getSimpleName());

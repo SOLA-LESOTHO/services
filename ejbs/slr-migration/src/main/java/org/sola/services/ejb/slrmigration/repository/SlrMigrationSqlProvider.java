@@ -764,6 +764,19 @@ public class SlrMigrationSqlProvider {
     }
 
     /**
+     * Creates bulk update statement that sets the status of all records in the
+     * slr.slr_lease table to current
+     */
+    public static String buildUpdateSlrLeaseStatusSql() {
+        String result;
+        BEGIN();
+        UPDATE("slr.slr_lease");
+        SET("status  = 'current'");
+        result = SQL();
+        return result;
+    }
+
+    /**
      * Creates bulk update statement that updates the slr.slr_lease table with
      * the cadastre_objects (a.k.a. parcels) that match the lease number of each
      * lease record.
@@ -833,8 +846,8 @@ public class SlrMigrationSqlProvider {
         String result;
         result = "INSERT INTO administrative.rrr(id, ba_unit_id, "
                 + "nr, type_code, status_code, is_primary, transaction_id, "
-                + "registration_date, lease_number, land_use_code, start_date, "
-                + "expiration_date, land_usable, personal_levy, stamp_duty, "
+                + "registration_date, registration_number, lease_number, land_use_code, "
+                + "start_date, expiration_date, land_usable, personal_levy, stamp_duty, "
                 + "registration_fee, ground_rent, change_user) ";
         BEGIN();
         SELECT("slr.rrr_id");
@@ -845,6 +858,7 @@ public class SlrMigrationSqlProvider {
         SELECT("TRUE");
         SELECT("'slr-migration'");
         SELECT("slr.reg_date");
+        SELECT("slr.lease_number");
         SELECT("slr.lease_number");
         SELECT("CASE TRIM(LOWER(slr.land_use)) "
                 + "WHEN 'residential' THEN TRIM(LOWER(slr.land_use)) "

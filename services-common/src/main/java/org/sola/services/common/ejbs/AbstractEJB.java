@@ -95,7 +95,8 @@ import org.sola.services.common.repository.entities.AbstractEntity;
     RolesConstants.ADMINISTRATIVE_DISPUTE_COMMENTS_SAVE,
     RolesConstants.ADMINISTRATIVE_DISPUTE_PARTY_SAVE,
     RolesConstants.ADMINISTRATIVE_DISPUTE_SAVE,
-    RolesConstants.ADMIN_MANAGE_BR
+    RolesConstants.ADMIN_MANAGE_BR,
+    RolesConstants.SLR_MIGRATION
 })
 public abstract class AbstractEJB implements AbstractEJBLocal {
 

@@ -52,7 +52,9 @@ public interface SlrMigrationEJBLocal {
 
     String transferSlrParty(String adjudicationArea, boolean registeredOnly, Date fromDate, Date toDate);
 
-    String loadLeaseAndParty();
+    String loadLeaseAndParty(boolean makeCurrent);
 
     String loadRrrSourceLink();
+    
+    String getProgressMessage();
 }
