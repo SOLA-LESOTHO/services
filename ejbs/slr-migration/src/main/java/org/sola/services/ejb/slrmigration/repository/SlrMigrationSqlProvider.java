@@ -1040,6 +1040,7 @@ public class SlrMigrationSqlProvider {
         FROM("source.source s");
         WHERE("r.lease_number = s.reference_nr");
         WHERE("r.type_code = 'lease'");
+        WHERE("r.transaction_id = 'slr-migration'");
         WHERE("s.ext_archive_id LIKE 'slr-%'");
         WHERE("NOT EXISTS (SELECT sr.rrr_id FROM administrative.source_describes_rrr sr "
                 + " WHERE sr.rrr_id = r.id AND sr.source_id = s.id)");
