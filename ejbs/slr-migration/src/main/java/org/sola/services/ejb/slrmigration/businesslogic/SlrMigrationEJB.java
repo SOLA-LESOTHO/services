@@ -337,7 +337,8 @@ public class SlrMigrationEJB extends AbstractEJB implements SlrMigrationEJBLocal
                     for (SlrValidation v : list) {
                         if (v.getMsg().equals("MULTIPOLYGON")) {
                             // SOLA only accepts parcels with a geometry type of POLYGON
-                            progressMessage += System.lineSeparator() + "Parcel has multipolygon geometry and will not be loaded into SOLA;"
+                            progressMessage += System.lineSeparator() + "Parcel has multipolygon geometry. Only the first ring of this "
+                                    + "geometry will be loaded into SOLA;"
                                     + " Lease Num = " + v.getLeaseNumber() + ", APN = " + v.getApn();
                         }
                     }
