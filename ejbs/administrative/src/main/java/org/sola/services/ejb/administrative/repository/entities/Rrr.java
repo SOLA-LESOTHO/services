@@ -58,9 +58,17 @@ import org.sola.services.ejb.transaction.repository.entities.TransactionStatusTy
 public class Rrr extends AbstractVersionedEntity {
 
     public static final String QUERY_PARAMETER_TRANSACTIONID = "transactionId";
+    public static final String QUERY_PARAMETER_BA_UNIT_ID = "baUnitId";
     public static final String QUERY_WHERE_BYTRANSACTIONID = "transaction_id = "
             + "#{" + QUERY_PARAMETER_TRANSACTIONID + "}";
     public static final String QUERY_ORDER_BY = " status_code, nr ";
+    public static final String QUERY_UPDATE_SLR_MIGRATION_TRANSACTION =
+            "UPDATE administrative.rrr "
+            + "SET transaction_id = #{" + QUERY_PARAMETER_TRANSACTIONID + "} "
+            + "WHERE ba_unit_id = #{" + QUERY_PARAMETER_BA_UNIT_ID + "} "
+            + "AND status_code = 'pending' "
+            + "AND type_code = 'lease'"
+            + "AND transaction_id = 'slr-migration'";
     @Id
     @Column(name = "id")
     private String id;
@@ -457,6 +465,7 @@ public class Rrr extends AbstractVersionedEntity {
     public void setServiceFee(BigDecimal serviceFee) {
         this.serviceFee = serviceFee;
     }
+
     @Override
     public void preSave() {
         if (this.isNew()) {

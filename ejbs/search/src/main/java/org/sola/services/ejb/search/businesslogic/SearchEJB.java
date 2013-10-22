@@ -751,7 +751,7 @@ public class SearchEJB extends AbstractEJB implements SearchEJBLocal {
             searchParams.setLandUseCode("");
         }
 
-        params.put(CommonSqlProvider.PARAM_QUERY, BaUnitSearchResult.QUERY_SEARCH_BY_PARAMS);
+        params.put(CommonSqlProvider.PARAM_QUERY, SearchSqlProvider.buildSearchBaUnitSql(searchParams));
         params.put(BaUnitSearchResult.QUERY_PARAM_OWNER_NAME, searchParams.getOwnerName());
         params.put(BaUnitSearchResult.QUERY_PARAM_NAME_FIRSTPART, searchParams.getNameFirstPart());
         params.put(BaUnitSearchResult.QUERY_PARAM_NAME_LASTPART, searchParams.getNameLastPart());

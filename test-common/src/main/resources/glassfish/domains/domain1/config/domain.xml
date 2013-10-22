@@ -35,24 +35,52 @@ option applies only if the new code is made subject to such option by the copyri
             <property name="connectionAttributes" value=";create=true"/>
         </jdbc-connection-pool>
         <jdbc-connection-pool driver-classname="" datasource-classname="org.postgresql.ds.PGConnectionPoolDataSource" res-type="javax.sql.ConnectionPoolDataSource" description="" name="sola">
-<!--            <property name="databaseName" value="${glassfish.jdbc-connection-pool.database}"></property>
+            <property name="databaseName" value="${glassfish.jdbc-connection-pool.database}"></property>
             <property name="portNumber" value="${glassfish.jdbc-connection-pool.port}"></property>
             <property name="serverName" value="${glassfish.jdbc-connection-pool.server}"></property>
             <property name="user" value="${glassfish.jdbc-connection-pool.username}"></property>
-            <property name="password" value="${glassfish.jdbc-connection-pool.password}"></property>-->
-            <property name="databaseName" value="sola"></property>
-            <property name="portNumber" value="5432"></property>
-            <property name="serverName" value="ubtserver"></property>
-            <property name="user" value="postgres"></property>
-            <property name="password" value="PRGS143"></property>
+            <property name="password" value="${glassfish.jdbc-connection-pool.password}"></property>
         </jdbc-connection-pool>
         <jdbc-resource pool-name="sola" description="" jndi-name="jdbc/sola"></jdbc-resource>
+        <jdbc-connection-pool datasource-classname="org.postgresql.xa.PGXADataSource" res-type="javax.sql.XADataSource" name="sola_slr">
+            <property name="databaseName" value="${glassfish.jdbc-connection-pool.database}"></property>
+            <property name="portNumber" value="${glassfish.jdbc-connection-pool.port}"></property>
+            <property name="serverName" value="${glassfish.jdbc-connection-pool.server}"></property>
+            <property name="user" value="${glassfish.jdbc-connection-pool.username}"></property>
+            <property name="password" value="${glassfish.jdbc-connection-pool.password}"></property>
+        </jdbc-connection-pool>
+        <jdbc-resource pool-name="sola_slr" jndi-name="jdbc/sola_slr"></jdbc-resource>
+           <jdbc-connection-pool datasource-classname="com.microsoft.sqlserver.jdbc.SQLServerXADataSource" res-type="javax.sql.XADataSource" name="sql_server" non-transactional-connections="true" transaction-isolation-level="repeatable-read"> <property name="User" value="${glassfish.jdbc-connection-pool.sql_username}"></property>
+            <property name="DatabaseName" value="${glassfish.jdbc-connection-pool.sql_database}"></property>
+            <property name="ApplicationName" value="Microsoft JDBC Driver for SQL Server"></property>
+            <property name="LockTimeout" value="-1"></property>
+            <property name="Password" value="${glassfish.jdbc-connection-pool.sql_password}"></property>
+            <property name="SendTimeAsDatetime" value="true"></property>
+            <property name="PacketSize" value="8000"></property>
+            <property name="SendStringParametersAsUnicode" value="true"></property>
+            <property name="ServerName" value="localhost"></property>
+            <property name="XopenStates" value="false"></property>
+            <property name="TrustServerCertificate" value="false"></property>
+            <property name="URL" value="jdbc:sqlserver://"></property>
+            <property name="PortNumber" value="1433"></property>
+            <property name="LoginTimeout" value="15"></property>
+            <property name="ResponseBuffering" value="adaptive"></property>
+            <property name="MultiSubnetFailover" value="false"></property>
+            <property name="SelectMethod" value="direct"></property>
+            <property name="LastUpdateCount" value="true"></property>
+            <property name="Encrypt" value="false"></property>
+            <property name="ApplicationIntent" value="readwrite"></property>
+            <property name="instanceName" value="${glassfish.jdbc-connection-pool.sql_instance_name}"></property>
+        </jdbc-connection-pool>
+        <jdbc-resource pool-name="sql_server" description="" jndi-name="jdbc/sqlserver"></jdbc-resource>
     </resources>
     <servers>
         <server name="server" config-ref="server-config">
             <resource-ref ref="jdbc/__TimerPool"/>
             <resource-ref ref="jdbc/__default"/>
             <resource-ref ref="jdbc/sola"/>
+            <resource-ref ref="jdbc/sqlserver"></resource-ref>
+            <resource-ref ref="jdbc/sola_slr"></resource-ref>
         </server>
     </servers>
     <configs>
@@ -100,14 +128,14 @@ option applies only if the new code is made subject to such option by the copyri
                 </auth-realm>
                 <auth-realm classname="com.sun.enterprise.security.auth.realm.certificate.CertificateRealm" name="certificate"/>
                 <auth-realm name="SolaRealm" classname="com.sun.enterprise.security.auth.realm.jdbc.JDBCRealm">
-                  <property name="digest-algorithm" value="SHA-256"></property>
-                  <property name="user-name-column" value="username"></property>
-                  <property name="password-column" value="passwd"></property>
-                  <property name="group-name-column" value="rolename"></property>
-                  <property name="group-table" value="system.user_roles"></property>
-                  <property name="user-table" value="system.appuser"></property>
-                  <property name="datasource-jndi" value="jdbc/sola"></property>
-                  <property name="jaas-context" value="jdbcRealm"></property>
+                    <property name="digest-algorithm" value="SHA-256"></property>
+                    <property name="user-name-column" value="username"></property>
+                    <property name="password-column" value="passwd"></property>
+                    <property name="group-name-column" value="rolename"></property>
+                    <property name="group-table" value="system.user_roles"></property>
+                    <property name="user-table" value="system.appuser"></property>
+                    <property name="datasource-jndi" value="jdbc/sola"></property>
+                    <property name="jaas-context" value="jdbcRealm"></property>
                 </auth-realm>
                 <jacc-provider policy-configuration-factory-provider="com.sun.enterprise.security.provider.PolicyConfigurationFactoryImpl" policy-provider="com.sun.enterprise.security.provider.PolicyWrapper" name="default">
                     <property value="${com.sun.aas.instanceRoot}/generated/policy" name="repository"/>
@@ -158,12 +186,12 @@ option applies only if the new code is made subject to such option by the copyri
             <transaction-service tx-log-dir="${com.sun.aas.instanceRoot}/logs"> </transaction-service>
             <java-config>
                 <jvm-options>
--Djavax.net.ssl.keyStore=${com.sun.aas.instanceRoot}/config/keystore.jks
+                    -Djavax.net.ssl.keyStore=${com.sun.aas.instanceRoot}/config/keystore.jks
                 </jvm-options>
                 <jvm-options>
--Djavax.net.ssl.trustStore=${com.sun.aas.instanceRoot}/config/cacerts.jks
+                    -Djavax.net.ssl.trustStore=${com.sun.aas.instanceRoot}/config/cacerts.jks
                 </jvm-options>
-                 <jvm-options>-Djava.security.auth.login.config=${com.sun.aas.instanceRoot}/config/login.conf</jvm-options> 
+                <jvm-options>-Djava.security.auth.login.config=${com.sun.aas.instanceRoot}/config/login.conf</jvm-options> 
                 <jvm-options>-Dorg.glassfish.jms.InitializeOnDemand=true</jvm-options>
             </java-config>
             <network-config>

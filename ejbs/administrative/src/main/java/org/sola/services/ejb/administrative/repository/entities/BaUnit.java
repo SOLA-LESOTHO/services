@@ -77,6 +77,12 @@ public class BaUnit extends AbstractVersionedEntity {
             + "name_lastpart = #{" + QUERY_PARAMETER_LASTPART + "}";
     public static final String QUERY_WHERE_BYBAUNITID =
             "id = #{" + QUERY_PARAMETER_ID + "}";
+    public static final String QUERY_UPDATE_SLR_MIGRATION_TRANSACTION =
+            "UPDATE administrative.ba_unit "
+            + "SET transaction_id = #{" + QUERY_PARAMETER_TRANSACTIONID + "} "
+            + "WHERE id = #{" + QUERY_PARAMETER_ID + "} "
+            + "AND status_code = 'pending' "
+            + "AND transaction_id = 'slr-migration'";
     @Id
     @Column(name = "id")
     private String id;

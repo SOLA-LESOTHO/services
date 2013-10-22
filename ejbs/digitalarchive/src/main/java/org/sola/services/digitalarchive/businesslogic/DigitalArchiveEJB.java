@@ -33,6 +33,7 @@ package org.sola.services.digitalarchive.businesslogic;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
+import java.net.URL;
 import java.util.*;
 import java.util.logging.Level;
 import javax.annotation.security.RolesAllowed;
@@ -45,7 +46,11 @@ import org.sola.common.FileUtility;
 import org.sola.common.RolesConstants;
 import org.sola.common.logging.LogUtility;
 import org.sola.services.common.ejbs.AbstractEJB;
+import org.sola.services.common.repository.CommonRepository;
+import org.sola.services.common.repository.CommonRepositoryImpl;
 import org.sola.services.common.repository.CommonSqlProvider;
+import org.sola.services.common.repository.DatabaseConnectionManager;
+import org.sola.services.digitalarchive.repository.DigitalArchiveSqlProvider;
 import org.sola.services.digitalarchive.repository.entities.Document;
 import org.sola.services.digitalarchive.repository.entities.FileBinary;
 import org.sola.services.digitalarchive.repository.entities.FileInfo;
@@ -62,6 +67,7 @@ import org.sola.services.ejb.system.businesslogic.SystemEJBLocal;
 @EJB(name = "java:global/SOLA/DigitalArchiveEJBLocal", beanInterface = DigitalArchiveEJBLocal.class)
 public class DigitalArchiveEJB extends AbstractEJB implements DigitalArchiveEJBLocal {
 
+    private static final String SLR_DOCUMENT_PREFIX = "slr-";
     @EJB
     private SystemEJBLocal systemEJB;
     // The location of the network scan folder. This may be on another computer. 
@@ -72,6 +78,7 @@ public class DigitalArchiveEJB extends AbstractEJB implements DigitalArchiveEJBL
     private NetworkFolder thumbFolder;
     private int thumbWidth;
     private int thumbHeight;
+    CommonRepository slrDocRepository;
 
     /**
      * Configures the default network location to read scanned images as well as
@@ -116,6 +123,45 @@ public class DigitalArchiveEJB extends AbstractEJB implements DigitalArchiveEJBL
     }
 
     /**
+     * Returns a database connection to the SLR Document database in SQL Server. Note that
+     * the system.settings must have a setting of slr-db-connection with the value ON before
+     * a connection will be established. 
+     */
+    private CommonRepository getSlrDocRepository() {
+        if (slrDocRepository == null
+                && systemEJB.getSetting(ConfigConstants.SLR_DATABASE_CONNECTION, ConfigConstants.SETTING_OFF)
+                .equalsIgnoreCase(ConfigConstants.SETTING_ON)) {
+            URL connectConfigFileUrl = this.getClass().getResource(CommonRepository.CONNECT_CONFIG_FILE_NAME);
+            slrDocRepository = new CommonRepositoryImpl(connectConfigFileUrl,
+                    DatabaseConnectionManager.SQL_SERVER_ENV);
+            try {
+                // Test to make sure the connection to the SLR Lesotho database is in place
+                getSlrDocument("slr-x-x", false);
+            } catch (Exception ex) {
+                // Error occurred while trying to connect to the SLR Lesotho database. Report the 
+                // exception and continue
+                LogUtility.log("Error when trying to connect to the SLR Lesotho database.", ex);
+            }
+        }
+        return slrDocRepository;
+    }
+
+    /**
+     * Determines if the document should be retrieved from the SQL Server SLR
+     * database. SLR documents will include the slr- prefix in the identifier
+     *
+     * @param docId Document Identifier
+     *
+     */
+    private boolean isSlrDocument(String docId) {
+        boolean result = false;
+        if (docId != null) {
+            result = docId.toLowerCase().startsWith(SLR_DOCUMENT_PREFIX);
+        }
+        return result;
+    }
+
+    /**
      * Retrieves the document for the specified identifier. This includes the
      * document content (i.e the digital file). <p>Requires the
      * {@linkplain RolesConstants#SOURCE_SEARCH} role.</p>
@@ -127,8 +173,11 @@ public class DigitalArchiveEJB extends AbstractEJB implements DigitalArchiveEJBL
     public Document getDocument(String documentId) {
         Document result = null;
         if (documentId != null) {
-            result = getRepository().getEntity(Document.class, documentId);
-
+            if (isSlrDocument(documentId)) {
+                result = getSlrDocument(documentId, true);
+            } else {
+                result = getRepository().getEntity(Document.class, documentId);
+            }
         }
         return result;
     }
@@ -146,12 +195,17 @@ public class DigitalArchiveEJB extends AbstractEJB implements DigitalArchiveEJBL
     public Document getDocumentInfo(String documentId) {
         Document result = null;
         if (documentId != null) {
-            Map params = new HashMap<String, Object>();
-            params.put(CommonSqlProvider.PARAM_WHERE_PART, Document.QUERY_WHERE_BYID);
-            params.put("id", documentId);
-            // Exclude the body field from the generated SELECT statement
-            params.put(CommonSqlProvider.PARAM_EXCLUDE_LIST, Arrays.asList("body"));
-            result = getRepository().getEntity(Document.class, params);
+            if (isSlrDocument(documentId)) {
+                result = getSlrDocument(documentId, false);
+            } else {
+                Map params = new HashMap<String, Object>();
+                params.put(CommonSqlProvider.PARAM_WHERE_PART, Document.QUERY_WHERE_BYID);
+                params.put("id", documentId);
+                // Exclude the body field from the generated SELECT statement
+                params.put(CommonSqlProvider.PARAM_EXCLUDE_LIST, Arrays.asList("body"));
+                result = getRepository().getEntity(Document.class, params);
+            }
+
         }
         return result;
     }
@@ -457,5 +511,30 @@ public class DigitalArchiveEJB extends AbstractEJB implements DigitalArchiveEJBL
         }
 
         return true;
+    }
+
+    /**
+     * Prepares the SQL query to retrieve a document from the SLR Lesotho
+     * database if a valid connection is available.
+     *
+     * @param documentId The id of the document to retrieve.
+     * @param getBody Indicates if the body of the document should be retrieved
+     * as well.
+     * @return
+     */
+    private Document getSlrDocument(String documentId, boolean getBody) {
+        Document result = null;
+        Map params = new HashMap<String, Object>();
+        // Check there is a valid connection to the SLR Lesotho database
+        if (getSlrDocRepository() != null) {
+            // SLR Document. Retrieve from the MS SQL Database.
+            params.put(CommonSqlProvider.PARAM_QUERY, DigitalArchiveSqlProvider.buildGetSlrDocumentSql(getBody));
+            params.put(DigitalArchiveSqlProvider.QUERY_PARAM_DOCUMENT_ID, documentId);
+            // Split the identifer to get the FileId and Version used in the SLR database.
+            params.put(DigitalArchiveSqlProvider.QUERY_PARAM_FILE_ID, documentId.split("-")[1]);
+            params.put(DigitalArchiveSqlProvider.QUERY_PARAM_VERSION, documentId.split("-")[2]);
+            result = getSlrDocRepository().getEntity(Document.class, params);
+        }
+        return result;
     }
 }
