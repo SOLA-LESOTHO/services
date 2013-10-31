@@ -45,34 +45,24 @@ public class ResponseView  extends AbstractReadOnlyEntity{
     public static final String QUERY_GET_RESPONSE = 
                         "select * from application.getResponseTime(#{" + PARAMETER_FROM + "},"
                     + " #{" + PARAMETER_TO + "})"
-                    + " AS ResponseTimeReport(service_id varchar, start_date varchar, "
-                    + "finish_date date, lead_time integer)";
+                    + " AS ResponseTimeReport(request_type varchar, service_count integer, "
+                    + "total_time integer, average_time float)";
     
-    @Column(name="service_id")
-    private String serviceId;
     @Column(name="request_type")
     private String requestType;
-    @Column(name="start_date")
-    private Date startDate;
-    @Column(name="finish_date")
-    private Date finishDate;
-    @Column(name="lead_time")
-    private Integer leadTime;
+    @Column(name="service_count")
+    private Integer serviceCount;
+    @Column(name="total_time")
+    private Integer totalTime;
+    @Column(name="average_time")
+    private double averageTime;
 
-    public Date getFinishDate() {
-        return finishDate;
+    public double getAverageTime() {
+        return averageTime;
     }
 
-    public void setFinishDate(Date finishDate) {
-        this.finishDate = finishDate;
-    }
-
-    public Integer getLeadTime() {
-        return leadTime;
-    }
-
-    public void setLeadTime(Integer leadTime) {
-        this.leadTime = leadTime;
+    public void setAverageTime(double averageTime) {
+        this.averageTime = averageTime;
     }
 
     public String getRequestType() {
@@ -83,20 +73,21 @@ public class ResponseView  extends AbstractReadOnlyEntity{
         this.requestType = requestType;
     }
 
-    public String getServiceId() {
-        return serviceId;
+    public Integer getServiceCount() {
+        return serviceCount;
     }
 
-    public void setServiceId(String serviceId) {
-        this.serviceId = serviceId;
+    public void setServiceCount(Integer serviceCount) {
+        this.serviceCount = serviceCount;
     }
 
-    public Date getStartDate() {
-        return startDate;
+    public Integer getTotalTime() {
+        return totalTime;
     }
 
-    public void setStartDate(Date startDate) {
-        this.startDate = startDate;
+    public void setTotalTime(Integer totalTime) {
+        this.totalTime = totalTime;
     }
+
     
 }
