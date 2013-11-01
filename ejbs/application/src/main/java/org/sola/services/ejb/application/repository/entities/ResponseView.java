@@ -96,6 +96,5 @@ public class ResponseView  extends AbstractReadOnlyEntity{
     public void setTotalTime(Integer totalTime) {
         this.totalTime = totalTime;
     }
-
     
 }
