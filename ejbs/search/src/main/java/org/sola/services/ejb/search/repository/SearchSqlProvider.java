@@ -415,7 +415,7 @@ public class SearchSqlProvider {
 
         if (!StringUtility.isEmpty(params.getLeaseNumber())) {
             WHERE("compare_strings(#{" + BaUnitSearchResult.QUERY_PARAM_LEASE_NUMBER + "}, "
-                    + "COALESCE(rrr.lease_number, '')");
+                    + "COALESCE(rrr.lease_number, ''))");
         }
         if (!StringUtility.isEmpty(params.getLandUseCode())) {
             WHERE("rrr.land_use_code = #{" + BaUnitSearchResult.QUERY_PARAM_LAND_USE_CODE + "}");
