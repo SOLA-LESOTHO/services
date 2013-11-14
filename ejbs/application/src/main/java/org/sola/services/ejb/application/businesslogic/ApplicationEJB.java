@@ -1319,4 +1319,21 @@ public class ApplicationEJB extends AbstractEJB implements ApplicationEJBLocal {
         result = getRepository().getEntityList(WorkSummary.class, queryParams);
         return result;
     }
+    
+    /**
+     * Retrieves statistics of mortgages completed, their number, their total amount of money and computed average amount.
+     *
+     * @param fromDate The start of the reporting period
+     * @param toDate The end of the reporting period
+     */
+    @Override
+    public List<MortgageStatsView> getMortgageStatsView(LodgementViewParams params) {
+        Map<String, Object> queryParams = new HashMap<String, Object>();
+		queryParams.put(CommonSqlProvider.PARAM_QUERY, MortgageStatsView.QUERY_GET_MORTGAGE_STATS);
+        queryParams.put(MortgageStatsView.PARAMETER_FROM,
+                params.getFromDate() == null ? new GregorianCalendar(1, 1, 1).getTime() : params.getFromDate());
+        queryParams.put(ResponseView.PARAMETER_TO, 
+                params.getToDate() == null ? new GregorianCalendar(1, 1, 1).getTime() : params.getToDate());
+        return getRepository().executeFunction(queryParams, MortgageStatsView.class);
+    }
 }

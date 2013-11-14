@@ -82,6 +82,11 @@ public interface ApplicationEJBLocal extends AbstractEJBLocal {
      * ApplicationEJB.getLodgementView}.
      */
     List<LodgementView> getLodgementView(LodgementViewParams params);
+    /**
+     * See {@linkplain ApplicationEJB#getLodgementView(org.sola.services.ejb.application.repository.entities.LodgementViewParams)
+     * ApplicationEJB.getLodgementView}.
+     */
+    List<MortgageStatsView> getMortgageStatsView(LodgementViewParams params);
 
     /**
      * See {@linkplain ApplicationEJB#getLodgementTiming(org.sola.services.ejb.application.repository.entities.LodgementViewParams)
