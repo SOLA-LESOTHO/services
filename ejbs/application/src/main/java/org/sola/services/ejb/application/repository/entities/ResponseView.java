@@ -39,8 +39,7 @@ public class ResponseView  extends AbstractReadOnlyEntity{
     
     public static final String PARAMETER_FROM = "fromDate";
     
-    public static final String PARAMETER_TO = "toDate";
-  
+    public static final String PARAMETER_TO = "toDate";  
     
     public static final String QUERY_GET_RESPONSE = 
                         "select * from application.getResponseTime(#{" + PARAMETER_FROM + "},"
