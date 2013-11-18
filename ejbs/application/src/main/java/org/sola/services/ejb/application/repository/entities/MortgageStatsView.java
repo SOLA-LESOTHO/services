@@ -21,13 +21,13 @@ public class MortgageStatsView extends AbstractReadOnlyEntity{
     public static final String QUERY_GET_MORTGAGE_STATS = 
                         "select * from application.getmortgagestats(#{" + PARAMETER_FROM + "},"
                     + " #{" + PARAMETER_TO + "})"
-                    + " AS MortgageStatsReport(mortgages varchar, amount float,"
+                    + " AS MortgageStatsReport(mortgages integer, amount float,"
                     + " average_amount float)";
     
     @Column(name="mortgages")
     private Integer mortgages;
     @Column(name="amount")
-    private Integer amount;
+    private double amount;
     @Column(name="average_amount")
     private double averageAmount;
 
@@ -35,11 +35,11 @@ public class MortgageStatsView extends AbstractReadOnlyEntity{
         super();
     }
 
-    public Integer getAmount() {
+    public double getAmount() {
         return amount;
     }
 
-    public void setAmount(Integer amount) {
+    public void setAmount(double amount) {
         this.amount = amount;
     }
 
