@@ -1336,4 +1336,20 @@ public class ApplicationEJB extends AbstractEJB implements ApplicationEJBLocal {
                 params.getToDate() == null ? new GregorianCalendar(1, 1, 1).getTime() : params.getToDate());
         return getRepository().executeFunction(queryParams, MortgageStatsView.class);
     }
+
+    @RolesAllowed(RolesConstants.REPORTS_VIEW)
+    @Override
+    public List<StatisticalView> getStatisticsSummary(Date fromDate, Date toDate) {
+
+        List<StatisticalView> result;
+        Map queryParams = new HashMap<String, Object>();
+        queryParams.put(CommonSqlProvider.PARAM_FROM_PART, StatisticalView.QUERY_GETSTATISTICS);
+        queryParams.put(StatisticalView.PARAMETER_FROM, fromDate);
+        queryParams.put(StatisticalView.PARAMETER_TO, toDate);
+
+        result = getRepository().getEntityList(StatisticalView.class, queryParams);
+        return result;
+    }
+
+
 }
