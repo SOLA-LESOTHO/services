@@ -1319,4 +1319,25 @@ public class ApplicationEJB extends AbstractEJB implements ApplicationEJBLocal {
         result = getRepository().getEntityList(WorkSummary.class, queryParams);
         return result;
     }
+    
+    /**
+     * Retrieves a summary of the work performed during the specified reporting period.
+     *
+     * @param fromDate The start of the reporting period
+     * @param toDate The end of the reporting period
+     */
+    @Override
+    @RolesAllowed(RolesConstants.REPORTS_VIEW)
+    public List<StatisticalView> getStatisticsSummary(Date fromDate, Date toDate) {
+
+        List<StatisticalView> result;
+        Map queryParams = new HashMap<String, Object>();
+        queryParams.put(CommonSqlProvider.PARAM_FROM_PART, StatisticalView.QUERY_GETSTATISTICS);
+        queryParams.put(StatisticalView.PARAMETER_FROM, fromDate);
+        queryParams.put(StatisticalView.PARAMETER_TO, toDate);
+
+        result = getRepository().getEntityList(StatisticalView.class, queryParams);
+        return result;
+    }
+
 }
