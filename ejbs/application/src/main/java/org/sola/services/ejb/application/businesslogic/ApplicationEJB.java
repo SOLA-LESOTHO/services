@@ -30,7 +30,6 @@ package org.sola.services.ejb.application.businesslogic;
 
 import java.io.Serializable;
 import java.math.BigDecimal;
-import java.math.BigInteger;
 import java.util.*;
 import javax.annotation.security.RolesAllowed;
 import javax.ejb.EJB;
@@ -44,10 +43,6 @@ import org.sola.services.common.repository.CommonSqlProvider;
 import org.sola.services.ejb.administrative.businesslogic.AdministrativeEJBLocal;
 import org.sola.services.ejb.application.repository.entities.*;
 import org.sola.services.ejb.cadastre.businesslogic.CadastreEJBLocal;
-import org.sola.services.ejb.cadastre.repository.entities.CadastreObject;
-import org.sola.services.ejb.cadastre.repository.entities.GroundRentMultiplicationFactor;
-import org.sola.services.ejb.cadastre.repository.entities.LandUseGrade;
-import org.sola.services.ejb.cadastre.repository.entities.SpatialValueArea;
 import org.sola.services.ejb.party.repository.entities.Party;
 import org.sola.services.ejb.source.businesslogic.SourceEJBLocal;
 import org.sola.services.ejb.source.repository.entities.Source;
@@ -1339,7 +1334,7 @@ public class ApplicationEJB extends AbstractEJB implements ApplicationEJBLocal {
 
     @RolesAllowed(RolesConstants.REPORTS_VIEW)
     @Override
-    public List<StatisticalView> getStatisticsSummary(Date fromDate, Date toDate) {
+    public List<StatisticalView> getStatisticalView(Date fromDate, Date toDate) {
 
         List<StatisticalView> result;
         Map queryParams = new HashMap<String, Object>();

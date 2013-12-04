@@ -298,8 +298,8 @@ public interface ApplicationEJBLocal extends AbstractEJBLocal {
     List<WorkSummary> getWorkSummary(Date fromDate, Date toDate);
     
         /**
-     * See {@linkplain ApplicationEJB#getStatisticsSummary(java.util.Date, java.util.Date)
-     * ApplicationEJB.getStatisticsSummary}.
+     * See {@linkplain ApplicationEJB#getStatisticalView(java.util.Date, java.util.Date)
+     * ApplicationEJB.getStatisticalView}.
      */
-    List<StatisticalView> getStatisticsSummary(Date fromDate, Date toDate);
+    List<StatisticalView> getStatisticalView(Date fromDate, Date toDate);
 }
