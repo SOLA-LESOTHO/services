@@ -39,12 +39,19 @@ import org.sola.services.common.repository.entities.AbstractReadOnlyEntity;
 public class LodgementViewParams extends AbstractReadOnlyEntity {
     private Date fromDate;
     private Date toDate;
+    private String requestCategoryCode;
     
     public LodgementViewParams(){
     }
-    
-    
-    
+
+    public String getRequestCategoryCode() {
+        return requestCategoryCode;
+    }
+
+    public void setRequestCategoryCode(String requestCategoryCode) {
+        this.requestCategoryCode = requestCategoryCode;
+    }
+        
     public Date getFromDate() {
         return fromDate;
     }

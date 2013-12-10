@@ -1292,6 +1292,8 @@ public class ApplicationEJB extends AbstractEJB implements ApplicationEJBLocal {
                 params.getFromDate() == null ? new GregorianCalendar(1, 1, 1).getTime() : params.getFromDate());
         queryParams.put(ResponseView.PARAMETER_TO, 
                 params.getToDate() == null ? new GregorianCalendar(1, 1, 1).getTime() : params.getToDate());
+        queryParams.put(ResponseView.PARAMETER_CATEGORY_CODE, 
+                params.getRequestCategoryCode() == null ? new String() : params.getRequestCategoryCode());
         return getRepository().executeFunction(queryParams, ResponseView.class);
     }
     

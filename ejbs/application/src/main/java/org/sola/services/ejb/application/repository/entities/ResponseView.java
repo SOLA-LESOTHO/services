@@ -41,9 +41,12 @@ public class ResponseView  extends AbstractReadOnlyEntity{
     
     public static final String PARAMETER_TO = "toDate";  
     
+    public static final String PARAMETER_CATEGORY_CODE = "requestCategoryCode";
+    
     public static final String QUERY_GET_RESPONSE = 
                         "select * from application.getResponseTime(#{" + PARAMETER_FROM + "},"
-                    + " #{" + PARAMETER_TO + "})"
+                    + " #{" + PARAMETER_TO + "},"
+                    + " #{" + PARAMETER_CATEGORY_CODE + "})"
                     + " AS ResponseTimeReport(request_type varchar, service_count integer, "
                     + "total_time integer, average_time float)";
     
