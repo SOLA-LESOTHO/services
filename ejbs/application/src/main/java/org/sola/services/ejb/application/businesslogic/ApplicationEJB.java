@@ -1287,13 +1287,24 @@ public class ApplicationEJB extends AbstractEJB implements ApplicationEJBLocal {
     @Override
     public List<ResponseView> getResponseView(LodgementViewParams params) {
         Map<String, Object> queryParams = new HashMap<String, Object>();
-		queryParams.put(CommonSqlProvider.PARAM_QUERY, ResponseView.QUERY_GET_RESPONSE);
-        queryParams.put(ResponseView.PARAMETER_FROM,
-                params.getFromDate() == null ? new GregorianCalendar(1, 1, 1).getTime() : params.getFromDate());
-        queryParams.put(ResponseView.PARAMETER_TO, 
-                params.getToDate() == null ? new GregorianCalendar(1, 1, 1).getTime() : params.getToDate());
-        queryParams.put(ResponseView.PARAMETER_CATEGORY_CODE, 
-                params.getRequestCategoryCode() == null ? new String() : params.getRequestCategoryCode());
+        
+        if( params.getRequestCategoryCode() != null){
+            queryParams.put(CommonSqlProvider.PARAM_QUERY, ResponseView.QUERY_GET_RESPONSE);
+            queryParams.put(ResponseView.PARAMETER_FROM,
+                    params.getFromDate() == null ? new GregorianCalendar(1, 1, 1).getTime() : params.getFromDate());
+            queryParams.put(ResponseView.PARAMETER_TO, 
+                    params.getToDate() == null ? new GregorianCalendar(1, 1, 1).getTime() : params.getToDate());
+            queryParams.put(ResponseView.PARAMETER_CATEGORY_CODE, 
+                    params.getRequestCategoryCode() == null ? new String() : params.getRequestCategoryCode());
+            
+        }
+        else{
+            queryParams.put(CommonSqlProvider.PARAM_QUERY, ResponseView.QUERY_GET_RESPONSE2);
+            queryParams.put(ResponseView.PARAMETER_FROM,
+                    params.getFromDate() == null ? new GregorianCalendar(1, 1, 1).getTime() : params.getFromDate());
+            queryParams.put(ResponseView.PARAMETER_TO, 
+                    params.getToDate() == null ? new GregorianCalendar(1, 1, 1).getTime() : params.getToDate());
+        }
         return getRepository().executeFunction(queryParams, ResponseView.class);
     }
     

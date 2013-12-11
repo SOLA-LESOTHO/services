@@ -50,6 +50,12 @@ public class ResponseView  extends AbstractReadOnlyEntity{
                     + " AS ResponseTimeReport(request_type varchar, service_count integer, "
                     + "total_time integer, average_time float)";
     
+    public static final String QUERY_GET_RESPONSE2 = 
+                        "select * from application.getResponseTime(#{" + PARAMETER_FROM + "},"
+                    + " #{" + PARAMETER_TO + "})"                   
+                    + " AS ResponseTimeReport(request_type varchar, service_count integer, "
+                    + "total_time integer, average_time float)";
+    
     @Column(name="request_type")
     private String requestType;
     @Column(name="service_count")
