@@ -1282,32 +1282,7 @@ public class ApplicationEJB extends AbstractEJB implements ApplicationEJBLocal {
     @Override
     public ApplicationFormWithBinary getApplicationFormWithBinary(String code, String lang) {
         return getRepository().getCode(ApplicationFormWithBinary.class, code, lang);
-    }
-    
-    @Override
-    public List<ResponseView> getResponseView(LodgementViewParams params) {
-        Map<String, Object> queryParams = new HashMap<String, Object>();
-        
-        if( params.getRequestCategoryCode() != null){
-            queryParams.put(CommonSqlProvider.PARAM_QUERY, ResponseView.QUERY_GET_RESPONSE);
-            queryParams.put(ResponseView.PARAMETER_FROM,
-                    params.getFromDate() == null ? new GregorianCalendar(1, 1, 1).getTime() : params.getFromDate());
-            queryParams.put(ResponseView.PARAMETER_TO, 
-                    params.getToDate() == null ? new GregorianCalendar(1, 1, 1).getTime() : params.getToDate());
-            queryParams.put(ResponseView.PARAMETER_CATEGORY_CODE, 
-                    params.getRequestCategoryCode() == null ? new String() : params.getRequestCategoryCode());
-            
-        }
-        else{
-            queryParams.put(CommonSqlProvider.PARAM_QUERY, ResponseView.QUERY_GET_RESPONSE2);
-            queryParams.put(ResponseView.PARAMETER_FROM,
-                    params.getFromDate() == null ? new GregorianCalendar(1, 1, 1).getTime() : params.getFromDate());
-            queryParams.put(ResponseView.PARAMETER_TO, 
-                    params.getToDate() == null ? new GregorianCalendar(1, 1, 1).getTime() : params.getToDate());
-        }
-        return getRepository().executeFunction(queryParams, ResponseView.class);
-    }
-    
+    }    
     /**
      * Retrieves a summary of the work performed during the specified reporting period.
      *
@@ -1344,19 +1319,49 @@ public class ApplicationEJB extends AbstractEJB implements ApplicationEJBLocal {
                 params.getToDate() == null ? new GregorianCalendar(1, 1, 1).getTime() : params.getToDate());
         return getRepository().executeFunction(queryParams, MortgageStatsView.class);
     }
+     
+    @Override
+    public List<ResponseView> getResponseView(LodgementViewParams params) {
+        Map<String, Object> queryParams = new HashMap<String, Object>();
+        
+        if( params.getRequestCategoryCode() != null){
+            queryParams.put(CommonSqlProvider.PARAM_QUERY, ResponseView.QUERY_GET_RESPONSE);
+            queryParams.put(ResponseView.PARAMETER_FROM,
+                    params.getFromDate() == null ? new GregorianCalendar(1, 1, 1).getTime() : params.getFromDate());
+            queryParams.put(ResponseView.PARAMETER_TO, 
+                    params.getToDate() == null ? new GregorianCalendar(1, 1, 1).getTime() : params.getToDate());
+            queryParams.put(ResponseView.PARAMETER_CATEGORY_CODE, 
+                    params.getRequestCategoryCode() == null ? new String() : params.getRequestCategoryCode());
+            
+        }
+        else{
+            queryParams.put(CommonSqlProvider.PARAM_QUERY, ResponseView.QUERY_GET_RESPONSE2);
+            queryParams.put(ResponseView.PARAMETER_FROM,
+                    params.getFromDate() == null ? new GregorianCalendar(1, 1, 1).getTime() : params.getFromDate());
+            queryParams.put(ResponseView.PARAMETER_TO, 
+                    params.getToDate() == null ? new GregorianCalendar(1, 1, 1).getTime() : params.getToDate());
+        }
+        return getRepository().executeFunction(queryParams, ResponseView.class);
+    }
 
     @RolesAllowed(RolesConstants.REPORTS_VIEW)
     @Override
-    public List<StatisticalView> getStatisticalView(Date fromDate, Date toDate) {
+    public List<StatisticalView> getStatisticalView(LodgementViewParams params) {
 
-        List<StatisticalView> result;
         Map queryParams = new HashMap<String, Object>();
-        queryParams.put(CommonSqlProvider.PARAM_FROM_PART, StatisticalView.QUERY_GETSTATISTICS);
-        queryParams.put(StatisticalView.PARAMETER_FROM, fromDate);
-        queryParams.put(StatisticalView.PARAMETER_TO, toDate);
-
-        result = getRepository().getEntityList(StatisticalView.class, queryParams);
-        return result;
+        
+        if( params.getRequestCategoryCode() != null){
+            queryParams.put(CommonSqlProvider.PARAM_FROM_PART, StatisticalView.QUERY_GETSTATISTICS2);
+            queryParams.put(StatisticalView.PARAMETER_FROM, params.getFromDate());
+            queryParams.put(StatisticalView.PARAMETER_TO, params.getToDate());
+            queryParams.put(StatisticalView.PARAMETER_CATEGORY_CODE, params.getRequestCategoryCode());
+        }else{
+            queryParams.put(CommonSqlProvider.PARAM_FROM_PART, StatisticalView.QUERY_GETSTATISTICS);
+            queryParams.put(StatisticalView.PARAMETER_FROM, params.getFromDate());
+            queryParams.put(StatisticalView.PARAMETER_TO, params.getToDate());
+        }
+        
+        return getRepository().getEntityList(StatisticalView.class, queryParams);
     }
 
 

@@ -39,8 +39,13 @@ public class StatisticalView extends AbstractReadOnlyEntity{
     
     public static final String PARAMETER_FROM = "fromDate";
     public static final String PARAMETER_TO = "toDate";
+    public static final String PARAMETER_CATEGORY_CODE = "requestCategoryCode";
+    
     public static final String QUERY_GETSTATISTICS = 
             "application.get_work_statistics(#{" + PARAMETER_FROM + "}, #{" + PARAMETER_TO + "}) ";
+    
+    public static final String QUERY_GETSTATISTICS2 = 
+            "application.get_work_statistics(#{" + PARAMETER_FROM + "}, #{" + PARAMETER_TO + "}, #{" + PARAMETER_CATEGORY_CODE + "}) ";
    
     @Column(name = "req_type")
     private String requestType;

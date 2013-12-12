@@ -301,5 +301,5 @@ public interface ApplicationEJBLocal extends AbstractEJBLocal {
      * See {@linkplain ApplicationEJB#getStatisticalView(java.util.Date, java.util.Date)
      * ApplicationEJB.getStatisticalView}.
      */
-    List<StatisticalView> getStatisticalView(Date fromDate, Date toDate);
+    List<StatisticalView> getStatisticalView(LodgementViewParams params);
 }
