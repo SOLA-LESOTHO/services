@@ -1282,27 +1282,7 @@ public class ApplicationEJB extends AbstractEJB implements ApplicationEJBLocal {
     @Override
     public ApplicationFormWithBinary getApplicationFormWithBinary(String code, String lang) {
         return getRepository().getCode(ApplicationFormWithBinary.class, code, lang);
-    }    
-    /**
-     * Retrieves a summary of the work performed during the specified reporting period.
-     *
-     * @param fromDate The start of the reporting period
-     * @param toDate The end of the reporting period
-     */
-    @Override
-    @RolesAllowed(RolesConstants.REPORTS_VIEW)
-    public List<WorkSummary> getWorkSummary(Date fromDate, Date toDate) {
-
-        List<WorkSummary> result;
-        Map queryParams = new HashMap<String, Object>();
-        queryParams.put(CommonSqlProvider.PARAM_FROM_PART, WorkSummary.QUERY_FROM_WORK_SUMMARY);
-        queryParams.put(WorkSummary.PARAMETER_FROM, fromDate);
-        queryParams.put(WorkSummary.PARAMETER_TO, toDate);
-
-        result = getRepository().getEntityList(WorkSummary.class, queryParams);
-        return result;
-    }
-    
+    }        
     /**
      * Retrieves statistics of mortgages completed, their number, their total amount of money and computed average amount.
      *
@@ -1344,6 +1324,33 @@ public class ApplicationEJB extends AbstractEJB implements ApplicationEJBLocal {
         return getRepository().executeFunction(queryParams, ResponseView.class);
     }
 
+    /**
+     * Retrieves a summary of the work performed during the specified reporting period.
+     *
+     * @param fromDate The start of the reporting period
+     * @param toDate The end of the reporting period
+     */
+    @Override
+    @RolesAllowed(RolesConstants.REPORTS_VIEW)
+    public List<WorkSummary> getWorkSummary(LodgementViewParams params) {
+
+        Map queryParams = new HashMap<String, Object>();
+        
+        if( params.getRequestCategoryCode() != null){
+            queryParams.put(CommonSqlProvider.PARAM_FROM_PART, WorkSummary.QUERY_FROM_WORK_SUMMARY2);
+            queryParams.put(WorkSummary.PARAMETER_FROM, params.getFromDate());
+            queryParams.put(WorkSummary.PARAMETER_TO, params.getToDate()); 
+            queryParams.put(WorkSummary.PARAMETER_CATEGORY_CODE, params.getRequestCategoryCode()); 
+        }
+        else{
+            queryParams.put(CommonSqlProvider.PARAM_FROM_PART, WorkSummary.QUERY_FROM_WORK_SUMMARY);
+            queryParams.put(WorkSummary.PARAMETER_FROM, params.getFromDate());
+            queryParams.put(WorkSummary.PARAMETER_TO, params.getToDate());            
+        }
+      
+        return getRepository().getEntityList(WorkSummary.class, queryParams);
+    }
+    
     @RolesAllowed(RolesConstants.REPORTS_VIEW)
     @Override
     public List<StatisticalView> getStatisticalView(LodgementViewParams params) {

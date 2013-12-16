@@ -295,7 +295,7 @@ public interface ApplicationEJBLocal extends AbstractEJBLocal {
      * See {@linkplain ApplicationEJB#getWorkSummary(java.util.Date, java.util.Date)
      * ApplicationEJB.getWorkSummary}.
      */
-    List<WorkSummary> getWorkSummary(Date fromDate, Date toDate);
+    List<WorkSummary> getWorkSummary(LodgementViewParams params);
     
         /**
      * See {@linkplain ApplicationEJB#getStatisticalView(java.util.Date, java.util.Date)
