@@ -44,17 +44,19 @@ public class ResponseView  extends AbstractReadOnlyEntity{
     public static final String PARAMETER_CATEGORY_CODE = "requestCategoryCode";
     
     public static final String QUERY_GET_RESPONSE = 
-                        "select * from application.getResponseTime(#{" + PARAMETER_FROM + "},"
-                    + " #{" + PARAMETER_TO + "},"
-                    + " #{" + PARAMETER_CATEGORY_CODE + "})"
-                    + " AS ResponseTimeReport(request_type varchar, service_count integer, "
-                    + "total_time integer, average_time float)";
+            "select * from application.getResponseTime(#{" + PARAMETER_FROM + "},"
+            + " #{" + PARAMETER_TO + "},"
+            + " #{" + PARAMETER_CATEGORY_CODE + "})"
+            + " AS ResponseTimeReport(request_type varchar, service_count integer, "
+            + "total_time integer, average_time float, frequent_day integer, std_deviation integer "
+	    + ",min_days integer, max_days integer, range integer)";
     
     public static final String QUERY_GET_RESPONSE2 = 
-                        "select * from application.getResponseTime(#{" + PARAMETER_FROM + "},"
-                    + " #{" + PARAMETER_TO + "})"                   
-                    + " AS ResponseTimeReport(request_type varchar, service_count integer, "
-                    + "total_time integer, average_time float)";
+            "select * from application.getResponseTime(#{" + PARAMETER_FROM + "},"
+            + " #{" + PARAMETER_TO + "})"                   
+            + " AS ResponseTimeReport(request_type varchar, service_count integer, "
+            + "total_time integer, average_time float, frequent_day integer, std_deviation integer "
+	    + ",min_days integer, max_days integer, range integer)";
     
     @Column(name="request_type")
     private String requestType;
@@ -63,13 +65,63 @@ public class ResponseView  extends AbstractReadOnlyEntity{
     @Column(name="total_time")
     private Integer totalTime;
     @Column(name="average_time")
-    private double averageTime;
+    private Integer averageTime;
+    @Column(name="frequent_day")
+    private Integer frequentDay;
+    @Column(name="std_deviation")
+    private Integer stdDeviation;
+    @Column(name="min_days")
+    private Integer minDays;
+    @Column(name="max_days")
+    private Integer maxDays;
+    @Column(name="range")
+    private Integer range;
 
-    public double getAverageTime() {
+    public Integer getAverageTime() {
         return averageTime;
     }
 
-    public void setAverageTime(double averageTime) {
+    public Integer getFrequentDay() {
+        return frequentDay;
+    }
+
+    public void setFrequentDay(Integer frequentDay) {
+        this.frequentDay = frequentDay;
+    }
+
+    public Integer getMaxDays() {
+        return maxDays;
+    }
+
+    public void setMaxDays(Integer maxDays) {
+        this.maxDays = maxDays;
+    }
+
+    public Integer getMinDays() {
+        return minDays;
+    }
+
+    public void setMinDays(Integer minDays) {
+        this.minDays = minDays;
+    }
+
+    public Integer getRange() {
+        return range;
+    }
+
+    public void setRange(Integer range) {
+        this.range = range;
+    }
+
+    public Integer getStdDeviation() {
+        return stdDeviation;
+    }
+
+    public void setStdDeviation(Integer stdDeviation) {
+        this.stdDeviation = stdDeviation;
+    }
+
+    public void setAverageTime(Integer averageTime) {
         this.averageTime = averageTime;
     }
 
