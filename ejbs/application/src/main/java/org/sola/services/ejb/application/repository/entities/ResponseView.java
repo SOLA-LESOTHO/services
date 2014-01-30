@@ -65,7 +65,7 @@ public class ResponseView  extends AbstractReadOnlyEntity{
     @Column(name="total_time")
     private Integer totalTime;
     @Column(name="average_time")
-    private Integer averageTime;
+    private double averageTime;
     @Column(name="frequent_day")
     private Integer frequentDay;
     @Column(name="std_deviation")
@@ -77,7 +77,7 @@ public class ResponseView  extends AbstractReadOnlyEntity{
     @Column(name="range")
     private Integer range;
 
-    public Integer getAverageTime() {
+    public double getAverageTime() {
         return averageTime;
     }
 
@@ -121,7 +121,7 @@ public class ResponseView  extends AbstractReadOnlyEntity{
         this.stdDeviation = stdDeviation;
     }
 
-    public void setAverageTime(Integer averageTime) {
+    public void setAverageTime(double averageTime) {
         this.averageTime = averageTime;
     }
 
