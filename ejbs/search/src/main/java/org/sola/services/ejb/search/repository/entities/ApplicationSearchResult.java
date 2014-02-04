@@ -60,6 +60,7 @@ public class ApplicationSearchResult extends AbstractReadOnlyEntity {
     public static final String QUERY_PARAM_LEASE_NUMBER = "leaseNumber";
     public static final String QUERY_FROM =
             "(application.application a LEFT JOIN application.application_status_type ast on a.status_code = ast.code) "
+            + "LEFT JOIN application.application_stage_type app_st ON a.stage_code = app_st.code "
             + "LEFT JOIN system.appuser u ON a.assignee_id = u.id "
             + "LEFT JOIN party.party p ON a.contact_person_id = p.id "
             + "LEFT JOIN party.party p2 ON a.agent_id = p2.id ";
@@ -155,6 +156,9 @@ public class ApplicationSearchResult extends AbstractReadOnlyEntity {
     @AccessFunctions(onSelect = "get_translation(ast.display_value, #{" + CommonSqlProvider.PARAM_LANGUAGE_CODE + "})")
     @Column(name = "status")
     private String status;
+    @AccessFunctions(onSelect = "get_translation(app_st.display_value, #{" + CommonSqlProvider.PARAM_LANGUAGE_CODE + "})")
+    @Column(name = "stage")
+    private String stage;
     @Column(name = "lodging_datetime")
     private Date lodgingDatetime;
     @Column(name = "expected_completion_date")
@@ -323,6 +327,14 @@ public class ApplicationSearchResult extends AbstractReadOnlyEntity {
 
     public void setStatus(String status) {
         this.status = status;
+    }
+
+    public String getStage() {
+        return stage;
+    }
+
+    public void setStage(String stage) {
+        this.stage = stage;
     }
 
     public String getChangeUser() {

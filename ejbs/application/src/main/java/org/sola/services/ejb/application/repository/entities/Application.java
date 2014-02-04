@@ -87,6 +87,8 @@ public class Application extends AbstractVersionedEntity {
     private String contactPersonId; 
     @Column(name = "agent_id")
     private String agentId;
+    @Column (name = "stage_code", insertable = false, updatable = false)
+    private String stageCode = null;
     @Column(name = "status_code", insertable = false, updatable = false)
     private String statusCode = null;
     @AccessFunctions(onSelect = "st_asewkb(location)",
@@ -330,6 +332,14 @@ public class Application extends AbstractVersionedEntity {
         if (contactPerson != null) {
             this.setContactPersonId(contactPerson.getId());
         }
+    }
+
+    public String getStageCode() {
+        return stageCode;
+    }
+
+    public void setStageCode(String stageCode) {
+        this.stageCode = stageCode;
     }
 
     public List<BaUnitSearchResult> getPropertyList() {
