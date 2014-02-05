@@ -1295,7 +1295,7 @@ public class ApplicationEJB extends AbstractEJB implements ApplicationEJBLocal {
 		queryParams.put(CommonSqlProvider.PARAM_QUERY, MortgageStatsView.QUERY_GET_MORTGAGE_STATS);
         queryParams.put(MortgageStatsView.PARAMETER_FROM,
                 params.getFromDate() == null ? new GregorianCalendar(1, 1, 1).getTime() : params.getFromDate());
-        queryParams.put(ResponseView.PARAMETER_TO, 
+        queryParams.put(MortgageStatsView.PARAMETER_TO, 
                 params.getToDate() == null ? new GregorianCalendar(1, 1, 1).getTime() : params.getToDate());
         return getRepository().executeFunction(queryParams, MortgageStatsView.class);
     }
@@ -1370,6 +1370,22 @@ public class ApplicationEJB extends AbstractEJB implements ApplicationEJBLocal {
         
         return getRepository().getEntityList(StatisticalView.class, queryParams);
     }
-
+ 
+    /**
+     * Retrieves a summary of the transferred leases during the specified reporting period.
+     *
+     * @param fromDate The start of the reporting period
+     * @param toDate The end of the reporting period
+     */
+    @Override
+    public List<TransferLeaseView> getTransferLeaseView(LodgementViewParams params) {
+        Map<String, Object> queryParams = new HashMap<String, Object>();
+		queryParams.put(CommonSqlProvider.PARAM_QUERY, TransferLeaseView.QUERY_GET_TRANSFERRED_LEASES);
+        queryParams.put(TransferLeaseView.PARAMETER_FROM,
+                params.getFromDate() == null ? new GregorianCalendar(1, 1, 1).getTime() : params.getFromDate());
+        queryParams.put(TransferLeaseView.PARAMETER_TO, 
+                params.getToDate() == null ? new GregorianCalendar(1, 1, 1).getTime() : params.getToDate());
+        return getRepository().executeFunction(queryParams, TransferLeaseView.class);
+    }
 
 }

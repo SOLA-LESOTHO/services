@@ -302,4 +302,10 @@ public interface ApplicationEJBLocal extends AbstractEJBLocal {
      * ApplicationEJB.getStatisticalView}.
      */
     List<StatisticalView> getStatisticalView(LodgementViewParams params);
+       
+    /**
+     * See {@linkplain ApplicationEJB#getTransferLeaseView(LodgementViewParams params)
+     * ApplicationEJB.getTransferLeaseView}.
+     */
+    List<TransferLeaseView> getTransferLeaseView(LodgementViewParams params);
 }
