@@ -1378,14 +1378,14 @@ public class ApplicationEJB extends AbstractEJB implements ApplicationEJBLocal {
      * @param toDate The end of the reporting period
      */
     @Override
-    public List<TransferLeaseView> getTransferLeaseView(LodgementViewParams params) {
+    public List<LeaseTransfers> getLeaseTransfers(LodgementViewParams params) {
         Map<String, Object> queryParams = new HashMap<String, Object>();
-		queryParams.put(CommonSqlProvider.PARAM_QUERY, TransferLeaseView.QUERY_GET_TRANSFERRED_LEASES);
-        queryParams.put(TransferLeaseView.PARAMETER_FROM,
+		queryParams.put(CommonSqlProvider.PARAM_QUERY, LeaseTransfers.QUERY_GET_TRANSFERRED_LEASES);
+        queryParams.put(LeaseTransfers.PARAMETER_FROM,
                 params.getFromDate() == null ? new GregorianCalendar(1, 1, 1).getTime() : params.getFromDate());
-        queryParams.put(TransferLeaseView.PARAMETER_TO, 
+        queryParams.put(LeaseTransfers.PARAMETER_TO, 
                 params.getToDate() == null ? new GregorianCalendar(1, 1, 1).getTime() : params.getToDate());
-        return getRepository().executeFunction(queryParams, TransferLeaseView.class);
+        return getRepository().executeFunction(queryParams, LeaseTransfers.class);
     }
 
 }

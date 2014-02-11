@@ -11,19 +11,18 @@ package org.sola.services.ejb.application.repository.entities;
 
 import javax.persistence.Column;
 import org.sola.services.common.repository.entities.AbstractReadOnlyEntity;
-public class TransferLeaseView extends AbstractReadOnlyEntity{
+public class LeaseTransfers extends AbstractReadOnlyEntity{
     
     public static final String PARAMETER_FROM = "fromDate";
     
     public static final String PARAMETER_TO = "toDate";
   
     public static final String QUERY_GET_TRANSFERRED_LEASES = 
-                    "select * from administrative.transfer_lease_report(#{" + PARAMETER_FROM + "},"
-                    + " #{" + PARAMETER_TO + "}) "
-                    + "AS TransferReport(service_name varchar, service_count integer, male_count integer, female_count integer, "
-                    + "entity_count integer, total_amount float, stamp_duty float, transfer_duty float, registration_fee float)";
+                    "select * from administrative.final_mortransfer_report(#{" + PARAMETER_FROM + "},"
+                    + " #{" + PARAMETER_TO + "}) order by service_name ";
+                    
 
-    public TransferLeaseView() {
+    public LeaseTransfers() {
         super();
     }
     
@@ -33,14 +32,25 @@ public class TransferLeaseView extends AbstractReadOnlyEntity{
     @Column(name="service_count")
     private Integer serviceCount;
     
-    @Column(name="male_count")
+    @Column(name="males")
     private Integer maleCount;
     
-    @Column(name="female_count")
+    @Column(name="females")
     private Integer femaleCount;
     
-    @Column(name="entity_count")
+    @Column(name="entities")
     private Integer entityCount;
+    
+    @Column(name="joint")
+    private Integer jointCount;
+
+    public Integer getJointCount() {
+        return jointCount;
+    }
+
+    public void setJointCount(Integer jointCount) {
+        this.jointCount = jointCount;
+    }
     
     @Column(name="total_amount")
     private double totalAmount;
