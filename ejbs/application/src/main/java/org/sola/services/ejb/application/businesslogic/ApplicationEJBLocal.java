@@ -129,6 +129,12 @@ public interface ApplicationEJBLocal extends AbstractEJBLocal {
      * ApplicationEJB.getApplicationStatusTypes}.
      */
     List<ApplicationStatusType> getApplicationStatusTypes(String languageCode);
+    
+    /**
+     * See {@linkplain ApplicationEJB#getApplicationStatusTypes(java.lang.String)
+     * ApplicationEJB.getApplicationStatusTypes}.
+     */
+    List<ApplicationStageType> getApplicationStageTypes(String languageCode);
 
     /**
      * See {@linkplain ApplicationEJB#getApplicationActionTypes(java.lang.String)
