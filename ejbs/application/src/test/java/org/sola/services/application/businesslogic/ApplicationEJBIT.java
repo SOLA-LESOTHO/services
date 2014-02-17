@@ -423,7 +423,7 @@ public class ApplicationEJBIT extends AbstractEJBTest {
         UserTransaction tx = getUserTransaction();
         try {
             tx.begin();
-            instance.applicationActionAssign(applicationId, "test-id", "en", appRowVersion);
+            instance.applicationActionAssign(applicationId, "test-id", "en", appRowVersion, "");
             tx.commit();
 
         } finally {

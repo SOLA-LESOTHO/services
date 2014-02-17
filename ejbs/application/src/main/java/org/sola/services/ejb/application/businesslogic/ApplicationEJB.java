@@ -630,7 +630,7 @@ public class ApplicationEJB extends AbstractEJB implements ApplicationEJBLocal {
     public List<ValidationResult> applicationActionWithdraw(
             String applicationId, String languageCode, int rowVersion) {
         return this.takeActionAgainstApplication(
-                applicationId, ApplicationActionType.WITHDRAW, languageCode, rowVersion);
+                applicationId, ApplicationActionType.WITHDRAW, languageCode, rowVersion, "");
     }
 
     /**
@@ -656,7 +656,7 @@ public class ApplicationEJB extends AbstractEJB implements ApplicationEJBLocal {
     public List<ValidationResult> applicationActionCancel(
             String applicationId, String languageCode, int rowVersion) {
         return this.takeActionAgainstApplication(
-                applicationId, ApplicationActionType.CANCEL, languageCode, rowVersion);
+                applicationId, ApplicationActionType.CANCEL, languageCode, rowVersion, "");
     }
 
     /**
@@ -680,7 +680,7 @@ public class ApplicationEJB extends AbstractEJB implements ApplicationEJBLocal {
     public List<ValidationResult> applicationActionRequisition(
             String applicationId, String languageCode, int rowVersion) {
         return this.takeActionAgainstApplication(
-                applicationId, ApplicationActionType.REQUISITION, languageCode, rowVersion);
+                applicationId, ApplicationActionType.REQUISITION, languageCode, rowVersion, "");
     }
 
     /**
@@ -702,7 +702,7 @@ public class ApplicationEJB extends AbstractEJB implements ApplicationEJBLocal {
     public List<ValidationResult> applicationActionValidate(
             String applicationId, String languageCode, int rowVersion) {
         return this.takeActionAgainstApplication(
-                applicationId, ApplicationActionType.VALIDATE, languageCode, rowVersion);
+                applicationId, ApplicationActionType.VALIDATE, languageCode, rowVersion, "");
     }
 
     /**
@@ -728,7 +728,7 @@ public class ApplicationEJB extends AbstractEJB implements ApplicationEJBLocal {
     public List<ValidationResult> applicationActionApprove(
             String applicationId, String languageCode, int rowVersion) {
         return this.takeActionAgainstApplication(
-                applicationId, ApplicationActionType.APPROVE, languageCode, rowVersion);
+                applicationId, ApplicationActionType.APPROVE, languageCode, rowVersion, "");
     }
 
     /**
@@ -752,7 +752,7 @@ public class ApplicationEJB extends AbstractEJB implements ApplicationEJBLocal {
     public List<ValidationResult> applicationActionArchive(
             String applicationId, String languageCode, int rowVersion) {
         return this.takeActionAgainstApplication(
-                applicationId, ApplicationActionType.ARCHIVE, languageCode, rowVersion);
+                applicationId, ApplicationActionType.ARCHIVE, languageCode, rowVersion, "");
     }
 
     /**
@@ -774,7 +774,7 @@ public class ApplicationEJB extends AbstractEJB implements ApplicationEJBLocal {
     public List<ValidationResult> applicationActionDespatch(
             String applicationId, String languageCode, int rowVersion) {
         return this.takeActionAgainstApplication(
-                applicationId, ApplicationActionType.DISPATCH, languageCode, rowVersion);
+                applicationId, ApplicationActionType.DISPATCH, languageCode, rowVersion, "");
     }
 
     /**
@@ -800,7 +800,7 @@ public class ApplicationEJB extends AbstractEJB implements ApplicationEJBLocal {
     public List<ValidationResult> applicationActionLapse(
             String applicationId, String languageCode, int rowVersion) {
         return this.takeActionAgainstApplication(
-                applicationId, ApplicationActionType.LAPSE, languageCode, rowVersion);
+                applicationId, ApplicationActionType.LAPSE, languageCode, rowVersion, "");
     }
 
     /**
@@ -824,16 +824,17 @@ public class ApplicationEJB extends AbstractEJB implements ApplicationEJBLocal {
     @Override
     @RolesAllowed({RolesConstants.APPLICATION_ASSIGN_TO_OTHERS, RolesConstants.APPLICATION_ASSIGN_TO_YOURSELF})
     public List<ValidationResult> applicationActionAssign(
-            String applicationId, String userId, String languageCode, int rowVersion) {
+            String applicationId, String userId, String languageCode, int rowVersion, String stageCode) {
         ApplicationActionTaker application =
                 getRepository().getEntity(ApplicationActionTaker.class, applicationId);
         if (application == null) {
             throw new SOLAException(ServiceMessage.EJB_APPLICATION_APPLICATION_NOT_FOUND);
         }
         application.setAssigneeId(userId);
+        application.setStageCode(stageCode);
         application.setAssignedDatetime(Calendar.getInstance().getTime());
         return this.takeActionAgainstApplication(
-                application, ApplicationActionType.ASSIGN, languageCode, rowVersion);
+                application, ApplicationActionType.ASSIGN, languageCode, rowVersion, stageCode);
     }
 
     /**
@@ -865,7 +866,7 @@ public class ApplicationEJB extends AbstractEJB implements ApplicationEJBLocal {
         application.setAssigneeId(null);
         application.setAssignedDatetime(null);
         return this.takeActionAgainstApplication(
-                application, ApplicationActionType.UNASSIGN, languageCode, rowVersion);
+                application, ApplicationActionType.UNASSIGN, languageCode, rowVersion, "");
     }
 
     /**
@@ -889,7 +890,7 @@ public class ApplicationEJB extends AbstractEJB implements ApplicationEJBLocal {
     public List<ValidationResult> applicationActionResubmit(
             String applicationId, String languageCode, int rowVersion) {
         return this.takeActionAgainstApplication(
-                applicationId, ApplicationActionType.RESUBMIT, languageCode, rowVersion);
+                applicationId, ApplicationActionType.RESUBMIT, languageCode, rowVersion, "");
     }
 
     /**
@@ -1028,13 +1029,13 @@ public class ApplicationEJB extends AbstractEJB implements ApplicationEJBLocal {
      * action.
      */
     private List<ValidationResult> takeActionAgainstApplication(
-            String applicationId, String actionCode, String languageCode, int rowVersion) {
+            String applicationId, String actionCode, String languageCode, int rowVersion, String stageCode) {
         ApplicationActionTaker application =
                 getRepository().getEntity(ApplicationActionTaker.class, applicationId);
         if (application == null) {
             throw new SOLAException(ServiceMessage.EJB_APPLICATION_APPLICATION_NOT_FOUND);
         }
-        return this.takeActionAgainstApplication(application, actionCode, languageCode, rowVersion);
+        return this.takeActionAgainstApplication(application, actionCode, languageCode, rowVersion, stageCode);
     }
 
     /**
@@ -1062,7 +1063,7 @@ public class ApplicationEJB extends AbstractEJB implements ApplicationEJBLocal {
      */
     private List<ValidationResult> takeActionAgainstApplication(
             ApplicationActionTaker application, String actionCode,
-            String languageCode, int rowVersion) {
+            String languageCode, int rowVersion, String stageCode) {
 
         List<BrValidation> brValidationList =
                 this.systemEJB.getBrForValidatingApplication(actionCode);
