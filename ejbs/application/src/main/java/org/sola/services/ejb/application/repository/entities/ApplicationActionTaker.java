@@ -51,6 +51,8 @@ public class ApplicationActionTaker extends AbstractVersionedEntity {
     private String id;
     @Column(name = "status_code")
     private String statusCode;
+    @Column(name = "stage_code")
+    private String stageCode;
     @Column(name = "action_code")
     private String actionCode;
     @Column(name = "assigned_datetime")
@@ -85,6 +87,14 @@ public class ApplicationActionTaker extends AbstractVersionedEntity {
 
     public void setStatusCode(String statusCode) {
         this.statusCode = statusCode;
+    }
+
+    public String getStageCode() {
+        return stageCode;
+    }
+
+    public void setStageCode(String stageCode) {
+        this.stageCode = stageCode;
     }
 
     public Date getAssignedDatetime() {
