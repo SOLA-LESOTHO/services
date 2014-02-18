@@ -18,7 +18,7 @@ public class LeaseTransfers extends AbstractReadOnlyEntity{
     public static final String PARAMETER_TO = "toDate";
   
     public static final String QUERY_GET_TRANSFERRED_LEASES = 
-                    "select * from administrative.final_mortransfer_report(#{" + PARAMETER_FROM + "},"
+                    "select * from administrative.registration_report(#{" + PARAMETER_FROM + "},"
                     + " #{" + PARAMETER_TO + "}) order by service_name ";
                     
 
