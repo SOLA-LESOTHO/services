@@ -80,7 +80,7 @@ public class SearchSqlProvider {
         SELECT("app1.nr AS nr");
         SELECT("CASE WHEN COALESCE(prev.action_code, 'null') = app1.action_code "
                 + " THEN '" + CHANGE_ACTION + "' ELSE app1.action_code END AS action_code");
-        SELECT("NULL::text AS notation");
+        SELECT("app1.stage_code::text AS notation");
         SELECT("app1.change_time");
         SELECT("(SELECT (appuser.first_name::text || ' '::text) || appuser.last_name::text"
                 + " FROM system.appuser"
@@ -104,7 +104,7 @@ public class SearchSqlProvider {
         SELECT("app_hist.nr AS nr");
         SELECT("CASE WHEN COALESCE(prev.action_code, 'null') = app_hist.action_code "
                 + " THEN '" + CHANGE_ACTION + "' ELSE app_hist.action_code END AS action_code");
-        SELECT("NULL::text AS notation");
+        SELECT("app_hist.stage_code::text AS notation");
         SELECT("app_hist.change_time");
         SELECT("(SELECT (appuser.first_name::text || ' '::text) || appuser.last_name::text"
                 + " FROM system.appuser"
