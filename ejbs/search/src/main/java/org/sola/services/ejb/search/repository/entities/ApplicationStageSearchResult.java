@@ -35,6 +35,72 @@ import javax.persistence.Table;
 import org.sola.services.common.repository.entities.AbstractReadOnlyEntity;
 
 @Table(name = "application_stage_type", schema = "application")
-public class ApplicationStageSearchResults {
+public class ApplicationStageSearchResult extends AbstractReadOnlyEntity {
     
+    protected static final String SELECT_QUERY = 
+            "SELECT DISTINCT s.code, s.display_value, s.description, "
+            + "(SELECT string_agg(tmp.appgroup_id, ', ') FROM "
+            + "(SELECT appgroup_id FROM system.appstage_appgroup ag INNER JOIN application.application_stage_type st "
+            + "ON st.code = ag.appstage_code WHERE st.code = s.code) tmp "
+            + ") AS groups_list "
+            + "FROM application.application_stage_type s "
+            + "LEFT JOIN system.appstage_appgroup ag1 "
+            + "ON s.code = ag1.appstage_code ";
+    
+    public static final String QUERY_ADVANCED_STAGE_SEARCH = ApplicationStageSearchResult.SELECT_QUERY
+            //+ "WHERE s.code = #{code}";
+            + "WHERE EXISTS ( "
+            + "SELECT st.appstage_code "
+            + "FROM system.appstage_appgroup st "
+            + "WHERE st.appgroup_id = #{groupId} "
+            + "AND st.appstage_code = s.code) ";
+    
+    public static final String QUERY_ALL_STAGES_SEARCH = ApplicationStageSearchResult.SELECT_QUERY
+            + "WHERE TRUE";
+    
+    @Column(name="code")
+    String code;
+    @Column(name="display_value")
+    String displayValue;
+    @Column(name="description")
+    String description;
+    @Column(name="groups_list")
+    String groupsList;
+    
+    public ApplicationStageSearchResult() {
+        super();
+    }
+
+    public String getCode() {
+        return code;
+    }
+
+    public void setCode(String code) {
+        this.code = code;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    public String getDisplayValue() {
+        return displayValue;
+    }
+
+    public void setDisplayValue(String displayValue) {
+        this.displayValue = displayValue;
+    }
+
+    public String getGroupsList() {
+        return groupsList;
+    }
+
+    public void setGroupsList(String groupsList) {
+        this.groupsList = groupsList;
+    }               
+        
 }
