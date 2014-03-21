@@ -1400,4 +1400,26 @@ public class ApplicationEJB extends AbstractEJB implements ApplicationEJBLocal {
         return getRepository().executeFunction(queryParams, LeaseTransfers.class);
     }
 
+    @Override
+    public List<LeaseServicesView> getLeaseServicesView(LodgementViewParams params) {
+        Map<String, Object> queryParams = new HashMap<String, Object>();
+		queryParams.put(CommonSqlProvider.PARAM_QUERY, LeaseServicesView.QUERY_GET_LEASE_SERVICES_REPORT);
+        queryParams.put(LeaseServicesView.PARAMETER_FROM,
+                params.getFromDate() == null ? new GregorianCalendar(1, 1, 1).getTime() : params.getFromDate());
+        queryParams.put(LeaseServicesView.PARAMETER_TO, 
+                params.getToDate() == null ? new GregorianCalendar(1, 1, 1).getTime() : params.getToDate());
+        return getRepository().executeFunction(queryParams, LeaseServicesView.class);
+    }
+
+    @Override
+    public List<CustomerServicesView> getCustomerServicesView(LodgementViewParams params) {
+         Map<String, Object> queryParams = new HashMap<String, Object>();
+		queryParams.put(CommonSqlProvider.PARAM_QUERY, CustomerServicesView.QUERY_GET_CUSTOMER_SERVICES_REPORT);
+        queryParams.put(CustomerServicesView.PARAMETER_FROM,
+                params.getFromDate() == null ? new GregorianCalendar(1, 1, 1).getTime() : params.getFromDate());
+        queryParams.put(CustomerServicesView.PARAMETER_TO, 
+                params.getToDate() == null ? new GregorianCalendar(1, 1, 1).getTime() : params.getToDate());
+        return getRepository().executeFunction(queryParams, CustomerServicesView.class);
+    }
+
 }

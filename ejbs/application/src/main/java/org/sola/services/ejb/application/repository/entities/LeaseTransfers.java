@@ -26,10 +26,10 @@ public class LeaseTransfers extends AbstractReadOnlyEntity{
         super();
     }
     
-    @Column(name="service_name")
+    @Column(name="servicename")
     private String serviceName;
     
-    @Column(name="service_count")
+    @Column(name="servicecount")
     private Integer serviceCount;
     
     @Column(name="males")
@@ -52,16 +52,16 @@ public class LeaseTransfers extends AbstractReadOnlyEntity{
         this.jointCount = jointCount;
     }
     
-    @Column(name="total_amount")
+    @Column(name="totalamount")
     private double totalAmount;
     
-    @Column(name="stamp_duty")
+    @Column(name="stampduty")
     private double stampDuty;
     
-    @Column(name="transfer_duty")
+    @Column(name="transferduty")
     private double transferDuty;
     
-    @Column(name="registration_fee")
+    @Column(name="registrationfee")
     private double registrationFee;
 
     public Integer getEntityCount() {
