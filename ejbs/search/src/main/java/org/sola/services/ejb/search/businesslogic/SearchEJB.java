@@ -956,4 +956,31 @@ public class SearchEJB extends AbstractEJB implements SearchEJBLocal {
         params.put(CadastreObjectSearchResult.PARAM_ADDRESS, searchParams.getAddress());
         return getRepository().getEntityList(CadastreObjectSearchResult.class, params);
     }
+    
+    @Override
+    public List<ApplicationStageSearchResult> getApplicationStages(ApplicationStageSearchParams searchParams) {
+        if (searchParams == null) {
+            return null;
+        }
+        
+        if (searchParams.getCode() == null) {
+            searchParams.setCode("");           
+        }
+        if (searchParams.getDisplayValue() == null) {
+            searchParams.setDisplayValue("");
+        }
+        if (searchParams.getGroupId() == null) {
+            searchParams.setGroupId("");
+            
+            Map params = new HashMap<String, Object>();
+            params.put(CommonSqlProvider.PARAM_QUERY, ApplicationStageSearchResult.QUERY_ALL_STAGES_SEARCH);
+            params.put("", searchParams.getGroupId());
+            return getRepository().getEntityList(ApplicationStageSearchResult.class, params);            
+        }
+        
+        Map params = new HashMap<String, Object>();
+        params.put(CommonSqlProvider.PARAM_QUERY, ApplicationStageSearchResult.QUERY_ADVANCED_STAGE_SEARCH);
+        params.put("groupId", searchParams.getGroupId());
+        return getRepository().getEntityList(ApplicationStageSearchResult.class, params);
+    }
 }

@@ -149,6 +149,12 @@ public interface SearchEJBLocal extends AbstractEJBLocal {
     List<UserSearchResult> searchUsers(UserSearchParams searchParams);
 
     /**
+     * See (@linkplain ApplicationStageEJB#getApplicationStages(org.sola.services.ejb.search.repository.entities.ApplicationStageSearchParams)
+     * ApplicationStageSearchEJB.getApplicationStages). 
+     */
+    List<ApplicationStageSearchResult> getApplicationStages(ApplicationStageSearchParams searchParams);
+    
+    /**
      * See {@linkplain SearchEJB#getApplicationLog(java.lang.String)
      * SearchEJB.getApplicationLog}.
      */
