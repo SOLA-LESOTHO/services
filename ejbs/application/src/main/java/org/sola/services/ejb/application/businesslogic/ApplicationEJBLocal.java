@@ -314,4 +314,16 @@ public interface ApplicationEJBLocal extends AbstractEJBLocal {
      * ApplicationEJB.getTransferLeaseView}.
      */
     List<LeaseTransfers> getLeaseTransfers(LodgementViewParams params);
+    
+    /**
+     * See {@linkplain ApplicationEJB#getLeaseServicesView(LodgementViewParams params)
+     * ApplicationEJB.getLeaseServicesView}.
+     */
+    List<LeaseServicesView> getLeaseServicesView(LodgementViewParams params);
+    
+    /**
+     * See {@linkplain ApplicationEJB#getCustomerServicesView(LodgementViewParams params)
+     * ApplicationEJB.getCustomerServicesView}.
+     */
+    List<CustomerServicesView> getCustomerServicesView(LodgementViewParams params);
 }
