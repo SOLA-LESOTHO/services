@@ -15,12 +15,12 @@ public class LeaseServicesView extends AbstractReadOnlyEntity{
     
     public static final String PARAMETER_FROM = "fromDate";
     
-    public static final String PARAMETER_TO = "toDate";  
+    public static final String PARAMETER_TO = "toDate"; 
     
     public static final String QUERY_GET_LEASE_SERVICES_REPORT = 
                     "select * from application.lease_services_report(#{" + PARAMETER_FROM + "},"
                     + " #{" + PARAMETER_TO + "})";
-    
+                    
     
     @Column(name="application")
     private String application;
