@@ -326,4 +326,10 @@ public interface ApplicationEJBLocal extends AbstractEJBLocal {
      * ApplicationEJB.getCustomerServicesView}.
      */
     List<CustomerServicesView> getCustomerServicesView(LodgementViewParams params);
+    
+    /**
+     * See {@linkplain ApplicationEJB#getApplicationStagesView(LodgementViewParams params)
+     * ApplicationEJB.getApplicationStagesView}.
+     */
+    List<ApplicationStagesView> getApplicationStagesView(LodgementViewParams params);
 }

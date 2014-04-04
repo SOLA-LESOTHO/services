@@ -1422,4 +1422,16 @@ public class ApplicationEJB extends AbstractEJB implements ApplicationEJBLocal {
         return getRepository().executeFunction(queryParams, CustomerServicesView.class);
     }
 
+    @Override
+    public List<ApplicationStagesView> getApplicationStagesView(LodgementViewParams params) {
+        Map queryParams = new HashMap<String, Object>();
+       
+        queryParams.put(CommonSqlProvider.PARAM_QUERY, ApplicationStagesView.QUERY_GET_APPLICATION_STAGES_REPORT);
+        queryParams.put(ApplicationStagesView.PARAMETER_FROM, params.getFromDate());
+        queryParams.put(ApplicationStagesView.PARAMETER_TO, params.getToDate());
+        queryParams.put(ApplicationStagesView.PARAMETER_CATEGORY_CODE, params.getRequestCategoryCode());
+      
+        return getRepository().executeFunction(queryParams, ApplicationStagesView.class);
+    }
+
 }
