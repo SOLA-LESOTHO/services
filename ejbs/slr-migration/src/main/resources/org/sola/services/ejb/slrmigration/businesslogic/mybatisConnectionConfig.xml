@@ -34,6 +34,12 @@
                 <property name='data_source' value='jdbc/sqlserver'/>
             </dataSource>
         </environment> 
+        <environment id='sqlServerDataSource'>
+            <transactionManager type='MANAGED'/>
+            <dataSource type='JNDI'>
+                <property name='data_source' value='jdbc/sqlserver_document'/>
+            </dataSource>
+        </environment> 
     </environments>
 
 </configuration>
