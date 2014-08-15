@@ -237,7 +237,7 @@ public class LeaseFeeUtility extends AbstractEJB {
         int groundRentDivident;
         int stampDutyFactor;
 
-         BigDecimal groundRentValue = roundDecimalValue(groundRent, 0, RoundingMode.UP);
+        BigDecimal groundRentValue = roundDecimalValue(groundRent, 0, RoundingMode.UP);
         
         groundRentDivident = groundRentValue.intValue();
 
