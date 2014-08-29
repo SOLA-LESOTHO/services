@@ -109,11 +109,11 @@ public class SlrMigrationSqlProvider {
         SELECT("CAST(df.[FileVersion] AS VARCHAR(40)) AS version");
         SELECT("d.[Class] AS document_type");
         SELECT("d.[DocumentDescription] AS description");
-        SELECT("dbo.GetState('SAR1LeaseRegisteredByLAA', d_sar1.[WorkflowState]) AS registered");
-        SELECT("dbo.StripAdjudicationParcelNumber(d.[AdjudicationParcelNumberSuffix]) AS adjudication_parcel_number");
-        FROM("dbo.mfDocuments d");
-        FROM("dbo.mfDocumentFiles df");
-        FROM("dbo.mfDocuments d_sar1");
+        SELECT("Lesotho.dbo.GetState('SAR1LeaseRegisteredByLAA', d_sar1.[WorkflowState]) AS registered");
+        SELECT("Lesotho.dbo.StripAdjudicationParcelNumber(d.[AdjudicationParcelNumberSuffix]) AS adjudication_parcel_number");
+        FROM("Lesotho.dbo.mfDocuments d");
+        FROM("Lesotho.dbo.mfDocumentFiles df");
+        FROM("Lesotho.dbo.mfDocuments d_sar1");
         WHERE("df.[Id] = d.[Id]");
         WHERE("df.[Version] = d.[Version]");
         // If the FileId and FileVersion is 0, it means this is an old version of the document, so exclude it
@@ -124,10 +124,10 @@ public class SlrMigrationSqlProvider {
         WHERE("d_sar1.[Class] = 5");
         if (registeredOnly) {
             // Only process the documents for leases that have been registered by LAA
-            WHERE("dbo.GetState('SAR1LeaseRegisteredByLAA', d_sar1.[WorkflowState]) = 1");
+            WHERE("Lesotho.dbo.GetState('SAR1LeaseRegisteredByLAA', d_sar1.[WorkflowState]) = 1");
         } else {
             // Pull through all documents that are ready for LAA to review
-            WHERE("dbo.GetState('SAR1AdjudicationRecordDeliveredToLAA', d_sar1.[WorkflowState]) = 1");
+            WHERE("Lesotho.dbo.GetState('SAR1AdjudicationRecordDeliveredToLAA', d_sar1.[WorkflowState]) = 1");
         }
         if (fromDate != null && toDate != null) {
             // Try to limit the records returned by using the LastModified date for the SAR1 document
@@ -214,17 +214,17 @@ public class SlrMigrationSqlProvider {
                 + "  WHEN d.[AdjudicationAreaDescription] LIKE '31-%' THEN 'HLOTSE URBAN AREA' "
                 + "  WHEN d.[AdjudicationAreaDescription] LIKE '32-%' THEN 'MAPUTSOE URBAN AREA' "
                 + "  ELSE 'MASERU URBAN AREA' END AS area_desc");
-        SELECT("dbo.GetGroundRentZone(p.[Geom]) AS ground_rent_zone");
+        SELECT("Lesotho.dbo.GetGroundRentZone(p.[Geom]) AS ground_rent_zone");
         SELECT("p.[AdjudicationParcelNumber] AS adjudication_parcel_number");
-        FROM("dbo.mfDocuments d");
-        FROM("dbo.PublishedParcels p");
-        WHERE("dbo.StripAdjudicationParcelNumber(d.[AdjudicationParcelNumberSuffix]) = p.[AdjudicationParcelNumber]");
+        FROM("Lesotho.dbo.mfDocuments d");
+        FROM("Lesotho.dbo.PublishedParcels p");
+        WHERE("Lesotho.dbo.StripAdjudicationParcelNumber(d.[AdjudicationParcelNumberSuffix]) = p.[AdjudicationParcelNumber]");
         // Class 5 is the SAR1 form that is the primary form for each lease
         WHERE("d.[Class] = 5");
         WHERE("d.[LeaseNumberFinal] IS NOT NULL");
         WHERE("d.[LeaseNumberFinal] LIKE '%-%'");
         // Exclude any cancelled SAR1 forms
-        WHERE("dbo.GetState(N'SAR1Cancelled', d.[WorkflowState]) <> 1");
+        WHERE("Lesotho.dbo.GetState(N'SAR1Cancelled', d.[WorkflowState]) <> 1");
         if (fromDate != null && toDate != null) {
             // Try to limit the records returned by using the LastModified date for the SAR1 document
             WHERE("d.[LastModified] BETWEEN #{" + QUERY_PARAM_FROM_DATE
@@ -493,18 +493,18 @@ public class SlrMigrationSqlProvider {
         SELECT("CASE WHEN LOWER(d.[PostalAddress1]) = 'n/a' THEN NULL ELSE LEFT(d.[PostalAddress1], 255) END AS addr");
         SELECT("d.[LeaseNumberFinal] AS lease_number");
         SELECT("1 AS account_holder");
-        SELECT("'p1:' + dbo.StripAdjudicationParcelNumber(d.[AdjudicationParcelNumberSuffix]) AS slr_reference");
-        FROM("dbo.mfDocuments d");
+        SELECT("'p1:' + Lesotho.dbo.StripAdjudicationParcelNumber(d.[AdjudicationParcelNumberSuffix]) AS slr_reference");
+        FROM("Lesotho.dbo.mfDocuments d");
         WHERE("d.[Class] = 5");
         WHERE("d.[LeaseNumberFinal] IS NOT NULL");
         WHERE("ISNULL(LOWER(d.[FamilyName1]), 'n/a') != 'n/a'");
         WHERE("d.[AdjudicationRole1Description] IS NOT NULL");
         if (registeredOnly) {
             // Only process the records for leases that have been registered by LAA
-            WHERE("dbo.GetState('SAR1LeaseRegisteredByLAA', d.[WorkflowState]) = 1");
+            WHERE("Lesotho.dbo.GetState('SAR1LeaseRegisteredByLAA', d.[WorkflowState]) = 1");
         } else {
             // Pull through all records that are ready for LAA to review
-            WHERE("dbo.GetState('SAR1AdjudicationRecordDeliveredToLAA', d.[WorkflowState]) = 1");
+            WHERE("Lesotho.dbo.GetState('SAR1AdjudicationRecordDeliveredToLAA', d.[WorkflowState]) = 1");
         }
         if (fromDate != null && toDate != null) {
             // Try to limit the records returned by using the LastModified date for the SAR1 document
@@ -532,18 +532,18 @@ public class SlrMigrationSqlProvider {
         SELECT("CASE WHEN LOWER(d.[PostalAddress2]) = 'n/a' THEN NULL ELSE LEFT(d.[PostalAddress2], 255) END AS addr");
         SELECT("d.[LeaseNumberFinal] AS lease_number");
         SELECT("CASE WHEN d.[AdjudicationRole1Description] IS NULL THEN 1 ELSE 0 END AS account_holder");
-        SELECT("'p2:' + dbo.StripAdjudicationParcelNumber(d.[AdjudicationParcelNumberSuffix]) AS slr_reference");
-        FROM("dbo.mfDocuments d");
+        SELECT("'p2:' + Lesotho.dbo.StripAdjudicationParcelNumber(d.[AdjudicationParcelNumberSuffix]) AS slr_reference");
+        FROM("Lesotho.dbo.mfDocuments d");
         WHERE("d.[Class] = 5");
         WHERE("d.[LeaseNumberFinal] IS NOT NULL");
         WHERE("ISNULL(LOWER(d.[FamilyName2]), 'n/a') != 'n/a'");
         WHERE("d.[AdjudicationRole2Description] IS NOT NULL");
         if (registeredOnly) {
             // Only process the records for leases that have been registered by LAA
-            WHERE("dbo.GetState('SAR1LeaseRegisteredByLAA', d.[WorkflowState]) = 1");
+            WHERE("Lesotho.dbo.GetState('SAR1LeaseRegisteredByLAA', d.[WorkflowState]) = 1");
         } else {
             // Pull through all records that are ready for LAA to review
-            WHERE("dbo.GetState('SAR1AdjudicationRecordDeliveredToLAA', d.[WorkflowState]) = 1");
+            WHERE("Lesotho.dbo.GetState('SAR1AdjudicationRecordDeliveredToLAA', d.[WorkflowState]) = 1");
         }
         if (fromDate != null && toDate != null) {
             // Try to limit the records returned by using the LastModified date for the SAR1 document
@@ -572,18 +572,18 @@ public class SlrMigrationSqlProvider {
         SELECT("d.[LeaseNumberFinal] AS lease_number");
         SELECT("CASE WHEN d.[AdjudicationRole1Description] IS NULL AND d.[AdjudicationRole2Description] IS NULL "
                 + "THEN 1 ELSE 0 END AS account_holder");
-        SELECT("'p3:' + dbo.StripAdjudicationParcelNumber(d.[AdjudicationParcelNumberSuffix]) AS slr_reference");
-        FROM("dbo.mfDocuments d");
+        SELECT("'p3:' + Lesotho.dbo.StripAdjudicationParcelNumber(d.[AdjudicationParcelNumberSuffix]) AS slr_reference");
+        FROM("Lesotho.dbo.mfDocuments d");
         WHERE("d.[Class] = 5");
         WHERE("d.[LeaseNumberFinal] IS NOT NULL");
         WHERE("ISNULL(LOWER(d.[FamilyName3]), 'n/a') != 'n/a'");
         WHERE("d.[AdjudicationRole3Description] IS NOT NULL");
         if (registeredOnly) {
             // Only process the records for leases that have been registered by LAA
-            WHERE("dbo.GetState('SAR1LeaseRegisteredByLAA', d.[WorkflowState]) = 1");
+            WHERE("Lesotho.dbo.GetState('SAR1LeaseRegisteredByLAA', d.[WorkflowState]) = 1");
         } else {
             // Pull through all records that are ready for LAA to review
-            WHERE("dbo.GetState('SAR1AdjudicationRecordDeliveredToLAA', d.[WorkflowState]) = 1");
+            WHERE("Lesotho.dbo.GetState('SAR1AdjudicationRecordDeliveredToLAA', d.[WorkflowState]) = 1");
         }
         if (fromDate != null && toDate != null) {
             // Try to limit the records returned by using the LastModified date for the SAR1 document
@@ -612,18 +612,18 @@ public class SlrMigrationSqlProvider {
         SELECT("d.[LeaseNumberFinal] AS lease_number");
         SELECT("CASE WHEN d.[AdjudicationRole1Description] IS NULL AND d.[AdjudicationRole2Description] IS NULL AND "
                 + "d.[AdjudicationRole3Description] IS NULL THEN 1 ELSE 0 END AS account_holder");
-        SELECT("'p4:' + dbo.StripAdjudicationParcelNumber(d.[AdjudicationParcelNumberSuffix]) AS slr_reference");
-        FROM("dbo.mfDocuments d");
+        SELECT("'p4:' + Lesotho.dbo.StripAdjudicationParcelNumber(d.[AdjudicationParcelNumberSuffix]) AS slr_reference");
+        FROM("Lesotho.dbo.mfDocuments d");
         WHERE("d.[Class] = 5");
         WHERE("d.[LeaseNumberFinal] IS NOT NULL");
         WHERE("ISNULL(LOWER(d.[FamilyName4]), 'n/a') != 'n/a'");
         WHERE("d.[AdjudicationRole4Description] IS NOT NULL");
         if (registeredOnly) {
             // Only process the records for leases that have been registered by LAA
-            WHERE("dbo.GetState('SAR1LeaseRegisteredByLAA', d.[WorkflowState]) = 1");
+            WHERE("Lesotho.dbo.GetState('SAR1LeaseRegisteredByLAA', d.[WorkflowState]) = 1");
         } else {
             // Pull through all records that are ready for LAA to review
-            WHERE("dbo.GetState('SAR1AdjudicationRecordDeliveredToLAA', d.[WorkflowState]) = 1");
+            WHERE("Lesotho.dbo.GetState('SAR1AdjudicationRecordDeliveredToLAA', d.[WorkflowState]) = 1");
         }
         if (fromDate != null && toDate != null) {
             // Try to limit the records returned by using the LastModified date for the SAR1 document
@@ -664,8 +664,8 @@ public class SlrMigrationSqlProvider {
         BEGIN();
         SELECT("p.[Id] AS pId");
         SELECT("MIN(lz.GroundRentZone) AS min_zone");
-        FROM("dbo.PublishedParcels p");
-        FROM("dbo.LandUseZones lz");
+        FROM("Lesotho.dbo.PublishedParcels p");
+        FROM("Lesotho.dbo.LandUseZones lz");
         WHERE("lz.SP_GEOMETRY.STContains(p.[Geom].STCentroid()) = 1");
         WHERE("p.[Geom] IS NOT NULL");
         GROUP_BY("p.[Id]");
@@ -677,17 +677,17 @@ public class SlrMigrationSqlProvider {
         SELECT("d.id AS docId");
         SELECT("ISNULL((SELECT min_zone FROM grz WHERE pId = p.Id), 4) AS zone");
         SELECT("CAST(ROUND(p.[Geom].STArea(), 0, 1) AS INTEGER) AS area");
-        FROM("dbo.[PublishedParcels] p");
-        FROM("dbo.[mfDocuments] d");
+        FROM("Lesotho.dbo.[PublishedParcels] p");
+        FROM("Lesotho.dbo.[mfDocuments] d");
         WHERE("p.[Geom] IS NOT NULL");
         WHERE("d.[LeaseNumberFinal] IS NOT NULL");
-        WHERE("dbo.StripAdjudicationParcelNumber(d.[AdjudicationParcelNumberSuffix]) = p.[AdjudicationParcelNumber]");
+        WHERE("Lesotho.dbo.StripAdjudicationParcelNumber(d.[AdjudicationParcelNumberSuffix]) = p.[AdjudicationParcelNumber]");
         if (registeredOnly) {
             // Only process the documents for leases that have been registered by LAA
-            WHERE("dbo.GetState('SAR1LeaseRegisteredByLAA', d.[WorkflowState]) = 1");
+            WHERE("Lesotho.dbo.GetState('SAR1LeaseRegisteredByLAA', d.[WorkflowState]) = 1");
         } else {
             // Pull through all documents that are ready for LAA to review
-            WHERE("dbo.GetState('SAR1AdjudicationRecordDeliveredToLAA', d.[WorkflowState]) = 1");
+            WHERE("Lesotho.dbo.GetState('SAR1AdjudicationRecordDeliveredToLAA', d.[WorkflowState]) = 1");
         }
         if (numAreas > 0) {
             WHERE(buildAreasClause(numAreas, "d"));
@@ -698,14 +698,14 @@ public class SlrMigrationSqlProvider {
         BEGIN();
         SELECT("d.[LeaseNumberFinal] AS lease_number");
         SELECT("d.[LandUseTypeActualDescription] AS land_use");
-        SELECT("[dbo].[GetLeaseData](d.[LandUseTypeActualDescription], s.zone, s.area, d.[PropertyType], d.[RequestExemptGroundRent], N'StampDuty') AS stamp_duty");
-        SELECT("[dbo].[GetLeaseData](d.[LandUseTypeActualDescription], s.zone, s.area, d.[PropertyType], d.[RequestExemptGroundRent], N'GroundRent') AS ground_rent");
-        SELECT("[dbo].[GetLeaseData](d.[LandUseTypeActualDescription], s.zone, s.area, d.[PropertyType], d.[RequestExemptGroundRent], N'RegistrationFee') AS reg_fee");
-        SELECT("[dbo].[GetLeaseData](d.[LandUseTypeActualDescription], s.zone, s.area, d.[PropertyType], d.[RequestExemptGroundRent], N'LeaseDuration') AS term");
-        SELECT("CASE WHEN dbo.GetState('SAR1LeaseRegisteredByLAA', d.[WorkflowState]) = 1 THEN 'current' ELSE 'pending' END AS status");
-        SELECT("dbo.StripAdjudicationParcelNumber(d.[AdjudicationParcelNumberSuffix]) AS adjudication_parcel_number");
+        SELECT("Lesotho.[dbo].[GetLeaseData](d.[LandUseTypeActualDescription], s.zone, s.area, d.[PropertyType], d.[RequestExemptGroundRent], N'StampDuty') AS stamp_duty");
+        SELECT("Lesotho.[dbo].[GetLeaseData](d.[LandUseTypeActualDescription], s.zone, s.area, d.[PropertyType], d.[RequestExemptGroundRent], N'GroundRent') AS ground_rent");
+        SELECT("Lesotho.[dbo].[GetLeaseData](d.[LandUseTypeActualDescription], s.zone, s.area, d.[PropertyType], d.[RequestExemptGroundRent], N'RegistrationFee') AS reg_fee");
+        SELECT("Lesotho.[dbo].[GetLeaseData](d.[LandUseTypeActualDescription], s.zone, s.area, d.[PropertyType], d.[RequestExemptGroundRent], N'LeaseDuration') AS term");
+        SELECT("CASE WHEN Lesotho.dbo.GetState('SAR1LeaseRegisteredByLAA', d.[WorkflowState]) = 1 THEN 'current' ELSE 'pending' END AS status");
+        SELECT("Lesotho.dbo.StripAdjudicationParcelNumber(d.[AdjudicationParcelNumberSuffix]) AS adjudication_parcel_number");
         SELECT("s.[area] AS area");
-        FROM("dbo.[mfDocuments] d");
+        FROM("Lesotho.dbo.[mfDocuments] d");
         FROM("summary s");
         WHERE("s.[docId] = d.[Id]");
         if (fromDate != null && toDate != null) {
