@@ -26,6 +26,7 @@
  * EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  * *********************************************************************************************
  */
+
 package org.sola.services.ejb.cadastre.repository.entities;
 
 import javax.persistence.Table;
@@ -33,29 +34,20 @@ import org.sola.services.common.repository.DefaultSorter;
 import org.sola.services.common.repository.entities.AbstractCodeEntity;
 
 /**
- * Entity representing cadastre.land_use_type code table.
+ * Entity representing the cadastre.parcel_jurisdiction_type code table. This code
+ * entity includes some additional field beyond the standard code, description,
+ * display_value and status used for most code entities.
  *
  * @author soladev
  */
-@Table(name = "land_use_type", schema = "cadastre")
+@Table(name = "parcel_jurisdiction_type", schema = "cadastre")
 @DefaultSorter(sortString = "display_value")
-public class LandUseType extends AbstractCodeEntity {
-
-    public static final String CODE_HOSPITAL = "hospital";
-    public static final String CODE_CHARITABLE = "charitable";
-    public static final String CODE_RECREATIONAL = "recreational";
-    public static final String CODE_EDUCATIONAL = "educational";
-    public static final String CODE_INSTITUTIONAL = "institutional";
-    public static final String CODE_RELIGIOUS = "religious";
-    public static final String CODE_BENOVOLENT = "benovelent";
-    public static final String CODE_DEVOTIONAL = "devotional";
-    public static final String CODE_AGRIC_IRRIGATED = "agricIrrigated";
-    public static final String CODE_AGRIC_NON_IRRIGATED = "agricNonIrrigated";
-    public static final String CODE_AGRIC_RANGE_GRAZING = "agricRangeGrazing";
-    public static final String CODE_AGRIC_OTHER = "agricOther";
-    public static final String CODE_AGRIC_LIVESTOCK = "agricIntensive";
+public class ParcelJurisdictionType extends AbstractCodeEntity {
     
-    public LandUseType() {
+ 
+
+    public ParcelJurisdictionType() {
         super();
     }
+
 }

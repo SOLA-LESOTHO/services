@@ -62,8 +62,8 @@ public class Rrr extends AbstractVersionedEntity {
     public static final String QUERY_WHERE_BYTRANSACTIONID = "transaction_id = "
             + "#{" + QUERY_PARAMETER_TRANSACTIONID + "}";
     public static final String QUERY_ORDER_BY = " status_code, nr ";
-    public static final String QUERY_UPDATE_SLR_MIGRATION_TRANSACTION =
-            "UPDATE administrative.rrr "
+    public static final String QUERY_UPDATE_SLR_MIGRATION_TRANSACTION
+            = "UPDATE administrative.rrr "
             + "SET transaction_id = #{" + QUERY_PARAMETER_TRANSACTIONID + "} "
             + "WHERE ba_unit_id = #{" + QUERY_PARAMETER_BA_UNIT_ID + "} "
             + "AND status_code = 'pending' "
@@ -144,6 +144,14 @@ public class Rrr extends AbstractVersionedEntity {
     private BigDecimal personalLevy;
     @Column(name = "service_fee")
     private BigDecimal serviceFee;
+    @Column(name = "is_exempt")
+    private boolean exempt;
+    @Column(name = "is_sporadic")
+    private boolean sporadic;
+    @Column(name = "is_lspp_transaction")
+    private boolean lsppTransaction;
+    @Column(name = "application_date")
+    private Date applicationDate;
     // Other fields
     private Boolean locked = null;
 
@@ -465,6 +473,39 @@ public class Rrr extends AbstractVersionedEntity {
     public void setServiceFee(BigDecimal serviceFee) {
         this.serviceFee = serviceFee;
     }
+    
+    public boolean isExempt() {
+        return exempt;
+    }
+
+    public void setExempt(boolean exempt) {
+        this.exempt = exempt;
+    }
+
+    public boolean isSporadic() {
+        return sporadic;
+    }
+
+    public void setSporadic(boolean sporadic) {
+        this.sporadic = sporadic;
+    }
+
+    public boolean isLsppTransaction() {
+        return lsppTransaction;
+    }
+
+    public void setLsppTransaction(boolean lsppTransaction) {
+        this.lsppTransaction = lsppTransaction;
+    }
+
+    public Date getApplicationDate() {
+        return applicationDate;
+    }
+
+    public void setApplicationDate(Date applicationDate) {
+        this.applicationDate = applicationDate;
+    }
+    
 
     @Override
     public void preSave() {

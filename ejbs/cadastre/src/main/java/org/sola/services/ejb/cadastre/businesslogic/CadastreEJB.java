@@ -598,4 +598,16 @@ public class CadastreEJB extends AbstractEJB implements CadastreEJBLocal {
             return false;
         }
     }
+    
+    /**
+     * Retrieves all cadastre.parcel_jurisdiction_type code values.
+     *
+     * @param languageCode The language code to use for localization of display
+     * values.
+     */
+    @Override
+    public List<ParcelJurisdictionType> getParcelJurisdictionTypes(String languageCode) {
+        return getRepository().getCodeList(ParcelJurisdictionType.class, languageCode);
+    }
+    
 }
