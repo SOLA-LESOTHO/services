@@ -68,7 +68,7 @@ public abstract class AbstractEJBTest {
     /**
      * The container application name
      */
-    protected static String CONTAINER_APP_NAME = "solatest";
+    protected static String CONTAINER_APP_NAME = "sola";
     /**
      * The Glassfish resource name in the TestUtilities Jar
      */

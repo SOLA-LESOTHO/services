@@ -61,4 +61,6 @@ public class ServiceConstants {
     public final static String TRANSACTION_TO_NAMESPACE = "http://webservices.sola.org/transferobjects/transaction/";
     public final static String FILE_STREAMING_WS_NAMESPACE = "http://webservices.sola.org/filestreaming";
     public final static String BULK_OPERATIONS_WS_NAMESPACE = "http://webservices.sola.org/bulkoperations";
+    public final static String BILLING_WS_NAMESPACE = "http://webservices.sola.org/billing";
+    public final static String BILLING_TO_NAMESPACE = "http://webservices.sola.org/transferobjects/billing";
 }

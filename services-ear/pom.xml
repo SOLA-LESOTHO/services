@@ -4,12 +4,12 @@
     <parent>
         <artifactId>sola-services</artifactId>
         <groupId>org.sola</groupId>
-        <version>2.2-20150825</version>
+        <version>2.2-20151104</version>
     </parent>
     <groupId>org.sola.services</groupId>
     <artifactId>sola-services-ear</artifactId>
     <packaging>ear</packaging>
-    <version>2.2-20150825</version>
+    <version>2.2-20151104</version>
     <name>Services EAR</name>
     <build>
         <finalName>${project.artifactId}</finalName>
@@ -69,6 +69,10 @@
                         <ejbModule>
                             <groupId>${project.groupId}.ejbs</groupId>
                             <artifactId>sola-slr-migration</artifactId>
+                        </ejbModule>
+                        <ejbModule>
+                            <groupId>${project.groupId}.ejbs</groupId>
+                            <artifactId>sola-billing</artifactId>
                         </ejbModule>
                         <webModule>
                             <groupId>${project.groupId}.boundary</groupId>
@@ -212,6 +216,12 @@
         <dependency>
             <groupId>${project.groupId}.ejbs</groupId>
             <artifactId>sola-slr-migration</artifactId>
+            <version>${project.version}</version>
+            <type>ejb</type>
+        </dependency>
+        <dependency>
+            <groupId>${project.groupId}.ejbs</groupId>
+            <artifactId>sola-billing</artifactId>
             <version>${project.version}</version>
             <type>ejb</type>
         </dependency>
