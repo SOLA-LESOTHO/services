@@ -1,29 +1,31 @@
 /**
  * ******************************************************************************************
- * Copyright (c) 2013 Food and Agriculture Organization of the United Nations (FAO)
- * and the Lesotho Land Administration Authority (LAA). All rights reserved.
+ * Copyright (c) 2013 Food and Agriculture Organization of the United Nations
+ * (FAO) and the Lesotho Land Administration Authority (LAA). All rights
+ * reserved.
  *
- * Redistribution and use in source and binary forms, with or without modification,
- * are permitted provided that the following conditions are met:
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
  *
- *    1. Redistributions of source code must retain the above copyright notice,this list
- *       of conditions and the following disclaimer.
- *    2. Redistributions in binary form must reproduce the above copyright notice,this list
- *       of conditions and the following disclaimer in the documentation and/or other
- *       materials provided with the distribution.
- *    3. Neither the names of FAO, the LAA nor the names of its contributors may be used to
- *       endorse or promote products derived from this software without specific prior
- * 	  written permission.
+ * 1. Redistributions of source code must retain the above copyright notice,this
+ * list of conditions and the following disclaimer. 2. Redistributions in binary
+ * form must reproduce the above copyright notice,this list of conditions and
+ * the following disclaimer in the documentation and/or other materials provided
+ * with the distribution. 3. Neither the names of FAO, the LAA nor the names of
+ * its contributors may be used to endorse or promote products derived from this
+ * software without specific prior written permission.
  *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY
- * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES
- * OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT
- * SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
- * SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,PROCUREMENT
- * OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
- * HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT,STRICT LIABILITY,OR TORT
- * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
- * EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
+ * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+ * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,PROCUREMENT OF
+ * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+ * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+ * CONTRACT,STRICT LIABILITY,OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING
+ * IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+ * POSSIBILITY OF SUCH DAMAGE.
  * *********************************************************************************************
  */
 package org.sola.services.ejb.cadastre.businesslogic;
@@ -239,16 +241,16 @@ public class CadastreEJB extends AbstractEJB implements CadastreEJBLocal {
     @RolesAllowed({RolesConstants.APPLICATION_APPROVE, RolesConstants.APPLICATION_SERVICE_COMPLETE})
     public void ChangeStatusOfCadastreObjects(
             String transactionId, String filter, String statusCode) {
-        
+
         if (!this.isInRole(RolesConstants.CADASTRE_PARCEL_SAVE)) {
             // The user must be able to save parcels before they can complete this method
             throw new SOLAException(ServiceMessage.EXCEPTION_INSUFFICIENT_RIGHTS);
         }
-        
+
         HashMap params = new HashMap();
         params.put("transaction_id", transactionId);
-        List<CadastreObjectStatusChanger> involvedCoList =
-                getRepository().getEntityList(CadastreObjectStatusChanger.class, filter, params);
+        List<CadastreObjectStatusChanger> involvedCoList
+                = getRepository().getEntityList(CadastreObjectStatusChanger.class, filter, params);
         for (CadastreObjectStatusChanger involvedCo : involvedCoList) {
             involvedCo.setStatusCode(statusCode);
             getRepository().saveEntity(involvedCo);
@@ -257,10 +259,12 @@ public class CadastreEJB extends AbstractEJB implements CadastreEJBLocal {
 
     /**
      * Retrieves the list of Cadastre Object Targets associated with the
-     * transaction. <p>Cadastre Object Targets are used to link the cadastre
-     * object to new transactions that may occur on the cadastre object after it
-     * has been initially created - for example the transaction to extinguish
-     * the cadastre object.</p>
+     * transaction.
+     * <p>
+     * Cadastre Object Targets are used to link the cadastre object to new
+     * transactions that may occur on the cadastre object after it has been
+     * initially created - for example the transaction to extinguish the
+     * cadastre object.</p>
      *
      * @param transactionId The identifier of the transaction
      */
@@ -392,8 +396,9 @@ public class CadastreEJB extends AbstractEJB implements CadastreEJBLocal {
 
     /**
      * Retrieves all Cadastre Object Node Targets associated to the transaction.
-     * <p>A Cadastre Object Node Target</p> is used to identify the nodes that
-     * have been added, moved or removed as part of a redefinition transaction.
+     * <p>
+     * A Cadastre Object Node Target</p> is used to identify the nodes that have
+     * been added, moved or removed as part of a redefinition transaction.
      * </p>
      *
      * @param transactionId The identifier of the transaction
@@ -441,12 +446,12 @@ public class CadastreEJB extends AbstractEJB implements CadastreEJBLocal {
             throw new SOLAException(ServiceMessage.EXCEPTION_INSUFFICIENT_RIGHTS);
         }
 
-        List<CadastreObjectTargetRedefinition> targetObjectList =
-                this.getCadastreObjectRedefinitionTargetsByTransaction(transactionId);
+        List<CadastreObjectTargetRedefinition> targetObjectList
+                = this.getCadastreObjectRedefinitionTargetsByTransaction(transactionId);
         for (CadastreObjectTargetRedefinition targetObject : targetObjectList) {
-            CadastreObjectStatusChanger cadastreObject =
-                    this.getRepository().getEntity(CadastreObjectStatusChanger.class,
-                    targetObject.getCadastreObjectId());
+            CadastreObjectStatusChanger cadastreObject
+                    = this.getRepository().getEntity(CadastreObjectStatusChanger.class,
+                            targetObject.getCadastreObjectId());
             cadastreObject.setGeomPolygon(targetObject.getGeomPolygon());
             cadastreObject.setTransactionId(transactionId);
             cadastreObject.setApprovalDatetime(null);
@@ -588,17 +593,13 @@ public class CadastreEJB extends AbstractEJB implements CadastreEJBLocal {
 
     @Override
     public boolean isCalculationPerHectare(String landUseCode) {
-        if ((landUseCode.equals(LandUseType.CODE_AGRIC_IRRIGATED))
-                || (landUseCode.equals(LandUseType.CODE_AGRIC_NON_IRRIGATED))
-                || (landUseCode.equals(LandUseType.CODE_AGRIC_RANGE_GRAZING))
-                || (landUseCode.equals(LandUseType.CODE_AGRIC_OTHER))
-                || (landUseCode.equals(LandUseType.CODE_AGRIC_LIVESTOCK))) {
+        if (isAgriculturalLease(landUseCode)) {
             return true;
         } else {
             return false;
         }
     }
-    
+
     /**
      * Retrieves all cadastre.parcel_jurisdiction_type code values.
      *
@@ -609,5 +610,18 @@ public class CadastreEJB extends AbstractEJB implements CadastreEJBLocal {
     public List<ParcelJurisdictionType> getParcelJurisdictionTypes(String languageCode) {
         return getRepository().getCodeList(ParcelJurisdictionType.class, languageCode);
     }
-    
+
+    private boolean isAgriculturalLease(String landUseCode) {
+        if ((landUseCode.equals(LandUseType.CODE_AGRIC_IRRIGATED))
+                || (landUseCode.equals(LandUseType.CODE_AGRIC_NON_IRRIGATED))
+                || (landUseCode.equals(LandUseType.CODE_AGRIC_RANGE_GRAZING))
+                || (landUseCode.equals(LandUseType.CODE_AGRIC))
+                || (landUseCode.equals(LandUseType.CODE_AGRIC_OTHER))
+                || (landUseCode.equals(LandUseType.CODE_AGRIC_LIVESTOCK))) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
 }

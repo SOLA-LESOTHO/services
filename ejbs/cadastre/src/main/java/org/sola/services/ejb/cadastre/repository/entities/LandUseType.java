@@ -54,6 +54,7 @@ public class LandUseType extends AbstractCodeEntity {
     public static final String CODE_AGRIC_RANGE_GRAZING = "agricRangeGrazing";
     public static final String CODE_AGRIC_OTHER = "agricOther";
     public static final String CODE_AGRIC_LIVESTOCK = "agricIntensive";
+     public static final String CODE_AGRIC = "agricultural";
     
     public LandUseType() {
         super();
