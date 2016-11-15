@@ -1,29 +1,31 @@
 /**
  * ******************************************************************************************
- * Copyright (c) 2013 Food and Agriculture Organization of the United Nations (FAO)
- * and the Lesotho Land Administration Authority (LAA). All rights reserved.
+ * Copyright (c) 2013 Food and Agriculture Organization of the United Nations
+ * (FAO) and the Lesotho Land Administration Authority (LAA). All rights
+ * reserved.
  *
- * Redistribution and use in source and binary forms, with or without modification,
- * are permitted provided that the following conditions are met:
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
  *
- *    1. Redistributions of source code must retain the above copyright notice,this list
- *       of conditions and the following disclaimer.
- *    2. Redistributions in binary form must reproduce the above copyright notice,this list
- *       of conditions and the following disclaimer in the documentation and/or other
- *       materials provided with the distribution.
- *    3. Neither the names of FAO, the LAA nor the names of its contributors may be used to
- *       endorse or promote products derived from this software without specific prior
- * 	  written permission.
+ * 1. Redistributions of source code must retain the above copyright notice,this
+ * list of conditions and the following disclaimer. 2. Redistributions in binary
+ * form must reproduce the above copyright notice,this list of conditions and
+ * the following disclaimer in the documentation and/or other materials provided
+ * with the distribution. 3. Neither the names of FAO, the LAA nor the names of
+ * its contributors may be used to endorse or promote products derived from this
+ * software without specific prior written permission.
  *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY
- * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES
- * OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT
- * SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
- * SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,PROCUREMENT
- * OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
- * HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT,STRICT LIABILITY,OR TORT
- * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
- * EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
+ * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+ * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,PROCUREMENT OF
+ * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+ * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+ * CONTRACT,STRICT LIABILITY,OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING
+ * IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+ * POSSIBILITY OF SUCH DAMAGE.
  * *********************************************************************************************
  */
 package org.sola.services.ejb.administrative.businesslogic;
@@ -166,31 +168,31 @@ public interface AdministrativeEJBLocal extends AbstractSolaTransactionEJBLocal 
      * THORISO - LEGAL
      *
      */
-    
-    
     /**
      * See {@linkplain AdministrativeEJB#getDisputeById(java.lang.String)
      * AdministrativeEJB.getDisputeById}.
      */
     Dispute getDisputeById(String id);
-   
-      /**
+
+    /**
      * See {@linkplain AdministrativeEJB#getDisputeByNr(java.lang.String)
      * AdministrativeEJB.getDisputeByNr}.
      */
     Dispute getDisputeByNr(String nr);
+
     /**
      * See {@linkplain AdministrativeEJB#getDispute(java.lang.String)
      * AdministrativeEJB.getDispute}.
      */
-    
+
     Dispute getDispute(String id);
-    
+
     /**
      * See {@linkplain AdministrativeEJB#getDisputeByUser(java.lang.String)
      * AdministrativeEJB.getDisputeByUser}.
      */
-     Dispute getDisputeByUser(String userId);
+    Dispute getDisputeByUser(String userId);
+
     /**
      * see {@linkplain AdministrativeEJB#getDisputeAction(java.lang.String)
      * AdministrativeEJB.getDisputeAction}
@@ -202,8 +204,8 @@ public interface AdministrativeEJBLocal extends AbstractSolaTransactionEJBLocal 
      * AdministrativeEJB.getDisputeCategory}
      */
     List<DisputeCategory> getDisputeCategory(String languageCode);
-    
-       /**
+
+    /**
      * see {@linkplain AdministrativeEJB#getDisputeType(java.lang.String)
      * AdministrativeEJB.getDisputeType}
      */
@@ -220,6 +222,7 @@ public interface AdministrativeEJBLocal extends AbstractSolaTransactionEJBLocal 
      * AdministrativeEJB.getOtherAuthorities}
      */
     List<OtherAuthorities> getOtherAuthorities(String languageCode);
+
     /**
      * see {@linkplain AdministrativeEJB#getDisputeReports(java.lang.String)
      * AdministrativeEJB.getDisputeReports}
@@ -231,7 +234,6 @@ public interface AdministrativeEJBLocal extends AbstractSolaTransactionEJBLocal 
      * AdministrativeEJB.getDisputeCommentsById}
      */
     DisputeComments getDisputeCommentsById(String id);
-    
 
     /**
      * see {@linkplain AdministrativeEJB#createDispute(java.lang.String,
@@ -253,48 +255,55 @@ public interface AdministrativeEJBLocal extends AbstractSolaTransactionEJBLocal 
      * AdministrativeEJB.saveDispute}
      */
     DisputeComments saveDisputeComments(DisputeComments disputeComments);
+
     /**
      * see {@linkplain AdministrativeEJB#getDisputePartyById(java.lang.String)
      * AdministrativeEJB.getDisputePartyById}
      */
     DisputeParty getDisputePartyById(String id);
+
     /**
      * See {@linkplain AdministrativeEJB#saveDisputeParty(java.lang.String,
      * org.sola.services.ejb.administrative.repository.entities.DisputeParty)
      * AdministrativeEJB.saveDisputeParty}
      */
     DisputeParty saveDisputeParty(DisputeParty disputeParty);
-    
-     /**
+
+    /**
      * See {@linkplain AdministrativeEJB#getBaUnitRelTypes(java.lang.String)
      * AdministrativeEJB.getBaUnitRelTypes}
      */
     List<DeedType> getDeedTypes(String languageCode);
 
-    
-    LeaseFee  calculateLeaseFees(CadastreObject co, Rrr leaseRight);
-    
+    LeaseFee calculateLeaseFees(CadastreObject co, Rrr leaseRight);
+
     /**
      * see {@linkplain AdministrativeEJB#getTransactionTypes(java.lang.String)
      * AdministrativeEJB.getTransactionTypes}
      */
     List<TransactionType> getTransactionTypes(String languageCode);
-    
+
     /**
      * see {@linkplain AdministrativeEJB#getConsentByTransaction(java.lang.String)
      * AdministrativeEJB.getConsentByTransaction}
      */
     Consent getConsentByTransaction(String transactionId);
-    
+
     /**
      * see {@linkplain AdministrativeEJB#getConsentById(java.lang.String)
      * AdministrativeEJB.getConsentById}
      */
     Consent getConsentById(String id);
-    
+
     /**
      * see {@linkplain AdministrativeEJB#saveConsent(org.sola.services.ejb.administrative.repository.entities.Consent)
      * AdministrativeEJB.saveConsent}
      */
     Consent saveConsent(Consent consent, String serviceId);
+
+    /**
+     * see {@linkplain AdministrativeEJB#getLeaseTypes(java.lang.String)
+     * AdministrativeEJB.getLeaseTypes}
+     */
+    List<LeaseType> getLeaseTypes(String languageCode);
 }

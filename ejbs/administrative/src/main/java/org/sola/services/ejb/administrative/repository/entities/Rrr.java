@@ -152,6 +152,8 @@ public class Rrr extends AbstractVersionedEntity {
     private boolean lsppTransaction;
     @Column(name = "application_date")
     private Date applicationDate;
+    @Column(name = "lease_code")
+    private String leaseCode;
     // Other fields
     private Boolean locked = null;
 
@@ -473,7 +475,7 @@ public class Rrr extends AbstractVersionedEntity {
     public void setServiceFee(BigDecimal serviceFee) {
         this.serviceFee = serviceFee;
     }
-    
+
     public boolean isExempt() {
         return exempt;
     }
@@ -505,8 +507,15 @@ public class Rrr extends AbstractVersionedEntity {
     public void setApplicationDate(Date applicationDate) {
         this.applicationDate = applicationDate;
     }
-    
 
+    public String getLeaseCode() {
+        return leaseCode;
+    }
+
+    public void setLeaseCode(String leaseCode) {
+        this.leaseCode = leaseCode;
+    }
+    
     @Override
     public void preSave() {
         if (this.isNew()) {

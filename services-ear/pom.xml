@@ -4,12 +4,12 @@
     <parent>
         <artifactId>sola-services</artifactId>
         <groupId>org.sola</groupId>
-        <version>2.2-20160518</version>
+        <version>2.2-20161014</version>
     </parent>
     <groupId>org.sola.services</groupId>
     <artifactId>sola-services-ear</artifactId>
     <packaging>ear</packaging>
-    <version>2.2-20160518</version>
+    <version>2.2-20161014</version>
     <name>Services EAR</name>
     <build>
         <finalName>${project.artifactId}</finalName>
@@ -74,6 +74,10 @@
                             <groupId>${project.groupId}.ejbs</groupId>
                             <artifactId>sola-billing</artifactId>
                         </ejbModule>
+                        <ejbModule>
+                            <groupId>${project.groupId}.ejbs</groupId>
+                            <artifactId>sola-land-identification</artifactId>
+                        </ejbModule>
                         <webModule>
                             <groupId>${project.groupId}.boundary</groupId>
                             <artifactId>sola-web-services</artifactId>
@@ -131,7 +135,7 @@
         <pluginRepository>
             <id>maven.java.net</id>
             <name>Java.net Maven2 Repository</name>
-            <url>http://download.java.net/maven/2</url>
+            <url>https://maven.java.net/content/groups/public/</url>
         </pluginRepository>
     </pluginRepositories>
     <dependencies>
@@ -222,6 +226,12 @@
         <dependency>
             <groupId>${project.groupId}.ejbs</groupId>
             <artifactId>sola-billing</artifactId>
+            <version>${project.version}</version>
+            <type>ejb</type>
+        </dependency>
+        <dependency>
+            <groupId>${project.groupId}.ejbs</groupId>
+            <artifactId>sola-land-identification</artifactId>
             <version>${project.version}</version>
             <type>ejb</type>
         </dependency>
